@@ -9,7 +9,6 @@ var tokenize = require('glsl-tokenizer/string');
 
 function transform (src) {
 	console.log(src);
-
 	var tokens = tokenize(src);
 	var node = parse(tokens);
 	var result = '';
@@ -18,6 +17,27 @@ function transform (src) {
 
 	// console.log(generate(esAst));
 };
+
+
+//glsl types
+var types = [
+'bool',
+'int',
+'float',
+'vec2',
+'vec3',
+'vec4',
+'bvec2',
+'bvec3',
+'bvec4',
+'ivec2',
+'ivec3',
+'ivec4',
+'mat2',
+'mat3',
+'mat4',
+'sampler2D'
+];
 
 
 /**
@@ -52,9 +72,13 @@ var transforms = {
 	stmt: function (node) {
 		var result = '';
 
-		result += node.children.map(nodeToJs).join('');
+		// if (types.indexOf(node.token.data) >= 0) {
+		// 	result += 'var ' + node.children.map(nodeToJs).join('');
+		// }
 
-		if (result) result += '';
+		// else {
+			result += node.children.map(nodeToJs).join('');
+		// }
 
 		return result;
 	},
@@ -102,6 +126,9 @@ var transforms = {
 		else if (node.token.data === 'uniform') {
 			result += 'var ';
 		}
+		else if (types.indexOf(node.token.data) >= 0) {
+			result += 'var ';
+		}
 
 		result += node.children.map(nodeToJs).join('');
 
@@ -127,6 +154,21 @@ var transforms = {
 	// whileloop: null,
 	// if: null,
 
+	//access operators - expand to arrays
+	operator: function (node) {
+		console.log(node);
+
+		var result = '';
+
+		result += nodeToJs(node.children[0]);
+
+		//expand swizzles, if any
+		var prop = node.children[1].data;
+		result += unswizzle(prop);
+
+		return result;
+	},
+
 	//simple expressions are mapped 1:1
 	//but unswizzling, multiplying etc takes part
 	expr: function (node) {
@@ -141,7 +183,8 @@ var transforms = {
 		}
 		else {
 			// console.log(node);
-			result = '???';
+			result += node.children.map(nodeToJs).join('');
+			// result = '???';
 		}
 
 		return result;
@@ -167,10 +210,39 @@ var transforms = {
 	// break: null,
 	// discard: null,
 	// 'do-while': null,
-	// binary: null,
+
+	//simple binary expressions
+	binary: function (node) {
+		var result = '';
+		result += nodeToJs(node.children[0]);
+		result += ' ' + node.data + ' ';
+		result += nodeToJs(node.children[1]);
+		return result;
+	},
+
 	// ternary: null,
 	// unary: null
 }
 
+
+/**
+ * Transform swizzle to array access
+ */
+function unswizzle (prop) {
+	if (prop === 'x' || prop === 's' || prop === 'r') {
+		return '[0]';
+	}
+	if (prop === 'y') {
+		return '[1]';
+	}
+	if (prop === 'z') {
+		return '[2]';
+	}
+	if (prop === 'w') {
+		return '[3]';
+	}
+
+	return '.' + prop;
+}
 
 module.exports = transform;
