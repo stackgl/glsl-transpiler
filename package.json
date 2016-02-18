@@ -1,5 +1,5 @@
 {
-  "name": "glsl-to-js",
+  "name": "glsl-js",
   "version": "1.0.0",
   "description": "Transform glsl to js",
   "main": "index.js",
@@ -16,18 +16,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dfcreative/glsl-to-js.git"
+    "url": "git+https://github.com/dfcreative/glsl-js.git"
   },
   "keywords": [
     "glsl",
     "stackgl",
     "js",
-    "fake-gl"
+    "fake-gl",
+    "opengl",
+    "shaders",
+    "webgl",
+    "gpu"
   ],
   "author": "Deema Yvanow <dfcreative@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dfcreative/glsl-to-js/issues"
+    "url": "https://github.com/dfcreative/glsl-js/issues"
   },
-  "homepage": "https://github.com/dfcreative/glsl-to-js#readme"
+  "homepage": "https://github.com/dfcreative/glsl-js#readme"
 }

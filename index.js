@@ -1,56 +1,58 @@
 /**
  * Transform from glsl to js.
  *
- * @module  glsl-to-js
+ * @module  glsl-js
  */
 
-var parse = require('glsl-parser/direct');
-var tokenize = require('glsl-tokenizer/string');
 
-function transform (src) {
-	console.log(src);
-	var tokens = tokenize(src);
-	var node = parse(tokens);
-	var result = '';
+/**
+ * Create GLSL codegen instance
+ *
+ * @constructor
+ */
+function GLSL (stdlib) {
+	if (!(this instanceof GLSL)) return new GLSL(stdlib);
 
-	console.log(stringify(node));
-
-	// console.log(generate(esAst));
+	if (stdlib) {
+		this.stdlib = stdlib;
+	}
 };
 
 
-//glsl types
-var types = [
-'bool',
-'int',
-'float',
-'vec2',
-'vec3',
-'vec4',
-'bvec2',
-'bvec3',
-'bvec4',
-'ivec2',
-'ivec3',
-'ivec4',
-'mat2',
-'mat3',
-'mat4',
-'sampler2D'
-];
+/**
+ * Minimal webgl types. Replace with other stdlib, if required.
+ */
+GLSL.prototype.stdlib = {
+	bool: true,
+	int: true,
+	float: true,
+	vec2: true,
+	vec3: true,
+	vec4: true,
+	bvec2: true,
+	bvec3: true,
+	bvec4: true,
+	ivec2: true,
+	ivec3: true,
+	ivec4: true,
+	mat2: true,
+	mat3: true,
+	mat4: true,
+	sampler2D: true
+};
 
 
 /**
  * Transform any glsl ast node to js
  */
-function stringify (node) {
-	var t = transforms[node.type];
+GLSL.prototype.stringify = function stringify (node) {
+	var t = this.transforms[node.type];
 
 	if (t === undefined) return '?' + node.type + '?';
 	if (!t) return '';
 	if (typeof t !== 'function') return t;
 
-	var result = t(node);
+	var result = t.call(this, node);
 	return result === undefined ? '' : result;
 }
 
@@ -58,16 +60,18 @@ function stringify (node) {
 /**
  * List of transforms
  */
-var transforms = {
+GLSL.prototype.transforms = {
 	//To keep lines consistency, should be rendered with regarding line numbers
 	stmtlist: function (node) {
+		if (!node.children.length) return '';
+
 		var firstLine = node.children[0].token.line;
 		var lastLine = node.children[node.children.length - 1].token.line;
 
 		var lines = Array(lastLine - firstLine).fill('');
 		node.children.forEach(function (child) {
-			lines[child.token.line - firstLine] = stringify(child);
-		});
+			lines[child.token.line - firstLine] = this.stringify(child);
+		}, this);
 
 		return lines.join('\n');
 	},
@@ -77,11 +81,11 @@ var transforms = {
 		var result = '';
 
 		// if (types.indexOf(node.token.data) >= 0) {
-		// 	result += 'var ' + node.children.map(stringify).join('');
+		// 	result += 'var ' + node.children.map(this.stringify, this).join('');
 		// }
 
 		// else {
-			result += node.children.map(stringify).join('');
+			result += node.children.map(this.stringify, this).join('');
 		// }
 
 		return result;
@@ -95,16 +99,16 @@ var transforms = {
 
 		//add function name - just render ident node
 		if (node.children[0].type !== 'ident') throw 'Function has no identifier';
-		result += stringify(node.children[0]);
+		result += this.stringify(node.children[0]);
 
 		//add args
 		if (node.children[1].type !== 'functionargs') throw 'Function has no args';
-		result += ' (' + stringify(node.children[1]) + ') ';
+		result += ' (' + this.stringify(node.children[1]) + ') ';
 
 		//add body
 		if (node.children[2].type !== 'stmtlist') throw 'Function has no body';
 		result += '{\n';
-		result += stringify(node.children[2]);
+		result += this.stringify(node.children[2]);
 		result = result.replace(/\n/g, '\n\t').slice(0,-1);
 		result += '\n}';
 
@@ -114,7 +118,7 @@ var transforms = {
 
 	//function arguments are just shown as a list of ids
 	functionargs: function (node) {
-		return node.children.map(stringify).join(', ');
+		return node.children.map(this.stringify, this).join(', ');
 	},
 
 	//declarations are mapped to var a = n, b = m;
@@ -130,11 +134,11 @@ var transforms = {
 		else if (node.token.data === 'uniform') {
 			result += 'var ';
 		}
-		else if (types.indexOf(node.token.data) >= 0) {
+		else if (this.stdlib[node.token.data]) {
 			result += 'var ';
 		}
 
-		result += node.children.map(stringify).join('');
+		result += node.children.map(this.stringify, this).join('');
 
 		result += ';';
 
@@ -152,11 +156,11 @@ var transforms = {
 		var result = '';
 
 		node.children.forEach(function (child, i) {
-			var str = stringify(child);
+			var str = this.stringify(child);
 			if (!str) return;
 			if (child.type === 'expr') result += ' = ' + str;
-			else result += (i > 0 ? ', ' : '') + stringify(child);
-		});
+			else result += (i > 0 ? ', ' : '') + this.stringify(child);
+		}, this);
 
 		return result;
 	},
@@ -169,7 +173,7 @@ var transforms = {
 	operator: function (node) {
 		var result = '';
 
-		result += stringify(node.children[0]);
+		result += this.stringify(node.children[0]);
 
 		//expand swizzles, if any
 		var prop = node.children[1].data;
@@ -185,13 +189,13 @@ var transforms = {
 
 		if (node.children[0].assignment) {
 			var assignment = node.children[0];
-			result += stringify(assignment.children[0]);
+			result += this.stringify(assignment.children[0]);
 			result += ' = ';
-			result += stringify(assignment.children[1]);
+			result += this.stringify(assignment.children[1]);
 			result += ';';
 		}
 		else {
-			result += node.children.map(stringify).join('');
+			result += node.children.map(this.stringify, this).join('');
 			// result = '???';
 		}
 
@@ -224,16 +228,16 @@ var transforms = {
 	//simple binary expressions
 	binary: function (node) {
 		var result = '';
-		result += stringify(node.children[0]);
+		result += this.stringify(node.children[0]);
 		result += ' ' + node.data + ' ';
-		result += stringify(node.children[1]);
+		result += this.stringify(node.children[1]);
 		return result;
 	},
 
 	// ternary: null,
 
 	unary: function (node) {
-		return node.data + stringify(node.children[0]);
+		return node.data + this.stringify(node.children[0]);
 	},
 
 	//gl_Position, gl_FragColor, gl_FragPosition etc
@@ -248,7 +252,7 @@ var transforms = {
 		var args = node.children.slice(1);
 
 		result += node.children[0].data + '(';
-		result += args.map(stringify).join(', ');
+		result += args.map(this.stringify, this).join(', ');
 		result += ')';
 
 		return result;
@@ -280,4 +284,5 @@ function unswizzle (prop) {
 	return '.' + prop;
 }
 
-module.exports = transform;
+
+module.exports = GLSL;

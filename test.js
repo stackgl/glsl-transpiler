@@ -1,36 +1,53 @@
-var compile = require('./');
+var stringify = require('./');
 var test = require('tst');
+var tokenize = require('glsl-tokenizer/string');
+var parse = require('glsl-parser/direct');
+var compile = require('./string');
+var compileStream = require('./stream');
+var assert = require('assert');
 
-test.only('Basic', function () {
-	var source = `
-	precision mediump float;
-	attribute vec2 uv;
-	attribute vec4 color;
-	varying vec4 fColor;
-	uniform vec2 uScreenSize;
 
-	void main (void) {
-		fColor = color;
-		vec2 position = vec2(uv.x, -uv.y) * 1.0;
-		position.x *= uScreenSize.y / uScreenSize.x;
-		gl_Position = vec4(position, 0, 1);
-	}
-	`;
+var source = `
+precision mediump float;
+attribute vec2 uv;
+attribute vec4 color;
+varying vec4 fColor;
+uniform vec2 uScreenSize;
+
+void main (void) {
+	fColor = color;
+	vec2 position = vec2(uv.x, -uv.y) * 1.0;
+	position.x *= uScreenSize.y / uScreenSize.x;
+	gl_Position = vec4(position, 0, 1);
+}
+`;
+
+var result = `
+var uv;
+var color;
+var fColor;
+var uScreenSize;
+
+function main () {
+	fColor = color;
+	var position = vec2(uv[0], -uv[1]) * 1.0;
+	position[0] = uScreenSize[1] / uScreenSize[0];
+	gl_Position = vec4(position, 0, 1)
+};`;
+
+
+
+test.only('Direct', function () {
+	assert.equal(compile(source), result);
+});
+
+test('Stream', function () {
+	compileStream()
+});
+
+test('Basic', function () {
+
 	compile(source);
-
-	var result = `
-	var uv;
-	var color;
-	var fColor;
-	var uScreenSize;
-
-	function main () {
-		fColor = color;
-		var position = [uv.x * 1.0, -uv.y * 1.0];
-		position.x *= uScreenSize.y / uScreenSize.x;
-		gl_Position = [position[0], position[1], 0, 1];
-	}
-	`;
 });
 
 
@@ -143,15 +160,18 @@ test.skip('primative variable initializers', function() {
 
 
 test.skip('Structures', function () {
+	`
 	struct light {
 	float intensity;
 	vec3 position;
 	};
 	light lightVar = light(3.0, vec3(1.0, 2.0, 3.0));
+	`
 });
 
 
 test.skip('Components access', function () {
+	`
 	const float c[3] = float[3](5.0, 7.2, 1.1);
 	const float d[3] = float[](5.0, 7.2, 1.1);
 	float g;
@@ -209,10 +229,12 @@ test.skip('Components access', function () {
 	m[2][3] = 2.0; // sets the 4th element of the third column to 2.0
 	mat3x4 v;
 	const int L = v.length();
+	`
 });
 
 
 test.skip('Vec/matrix operators', function () {
+	`
 	vec3 v, u;
 	float f;
 	v = u + f;
@@ -254,9 +276,11 @@ test.skip('Vec/matrix operators', function () {
 	r[0].z = m[0].z * n[0].x + m[1].z * n[0].y + m[2].z * n[0].z;
 	r[1].z = m[0].z * n[1].x + m[1].z * n[1].y + m[2].z * n[1].z;
 	r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
+	`
 });
 
 test.skip('Functions', function () {
+	`
 	vec4 f(in vec4 x, out vec4 y); // (A)
 	vec4 f(in vec4 x, out uvec4 y); // (B) okay, different argument type
 	vec4 f(in ivec4 x, out dvec4 y); // (C) okay, different argument type
@@ -274,15 +298,18 @@ test.skip('Functions', function () {
 	// conversion. (C) is better than (A) and (B)
 	// on the first argument. (A) is better than
 	// (B) and (C).
-
+	`
 });
 
 test.skip('Discard (fragment shader)', function () {
+	`
 	if (intensity < 0.0)
 	 discard;
+	`
 });
 
 test.skip('Builtin vars', function () {
+	`
 	// In the vertex language, the built-ins are intrinsically declared as:
 	in int gl_VertexID;
 	in int gl_InstanceID;
@@ -399,4 +426,5 @@ test.skip('Builtin vars', function () {
 	const int gl_MaxProgramTexelOffset = 7;
 	const int gl_MaxTransformFeedbackBuffers = 4;
 	const int gl_MaxTransformFeedbackInterleavedComponents = 64;
+	`
 });
