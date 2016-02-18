@@ -13,7 +13,7 @@ function transform (src) {
 	var node = parse(tokens);
 	var result = '';
 
-	console.log(nodeToJs(node));
+	console.log(stringify(node));
 
 	// console.log(generate(esAst));
 };
@@ -43,7 +43,7 @@ var types = [
 /**
  * Transform any glsl ast node to js
  */
-function nodeToJs (node) {
+function stringify (node) {
 	var t = transforms[node.type];
 
 	if (t === undefined) return '?' + node.type + '?';
@@ -59,13 +59,17 @@ function nodeToJs (node) {
  * List of transforms
  */
 var transforms = {
-	//statement list
+	//To keep lines consistency, should be rendered with regarding line numbers
 	stmtlist: function (node) {
-		var result = '';
+		var firstLine = node.children[0].token.line;
+		var lastLine = node.children[node.children.length - 1].token.line;
 
-		result += node.children.map(nodeToJs).join('');
+		var lines = Array(lastLine - firstLine).fill('');
+		node.children.forEach(function (child) {
+			lines[child.token.line - firstLine] = stringify(child);
+		});
 
-		return result;
+		return lines.join('\n');
 	},
 
 	//statement should just map children per-line
@@ -73,11 +77,11 @@ var transforms = {
 		var result = '';
 
 		// if (types.indexOf(node.token.data) >= 0) {
-		// 	result += 'var ' + node.children.map(nodeToJs).join('');
+		// 	result += 'var ' + node.children.map(stringify).join('');
 		// }
 
 		// else {
-			result += node.children.map(nodeToJs).join('');
+			result += node.children.map(stringify).join('');
 		// }
 
 		return result;
@@ -91,17 +95,17 @@ var transforms = {
 
 		//add function name - just render ident node
 		if (node.children[0].type !== 'ident') throw 'Function has no identifier';
-		result += nodeToJs(node.children[0]);
+		result += stringify(node.children[0]);
 
 		//add args
 		if (node.children[1].type !== 'functionargs') throw 'Function has no args';
-		result += ' (' + nodeToJs(node.children[1]) + ') ';
+		result += ' (' + stringify(node.children[1]) + ') ';
 
 		//add body
 		if (node.children[2].type !== 'stmtlist') throw 'Function has no body';
 		result += '{\n';
-		result += nodeToJs(node.children[2]);
-		result = result.replace(/\n/g, '\n\t');
+		result += stringify(node.children[2]);
+		result = result.replace(/\n/g, '\n\t').slice(0,-1);
 		result += '\n}';
 
 
@@ -110,7 +114,7 @@ var transforms = {
 
 	//function arguments are just shown as a list of ids
 	functionargs: function (node) {
-		return node.children.map(nodeToJs).join(', ');
+		return node.children.map(stringify).join(', ');
 	},
 
 	//declarations are mapped to var a = n, b = m;
@@ -130,22 +134,29 @@ var transforms = {
 			result += 'var ';
 		}
 
-		result += node.children.map(nodeToJs).join('');
+		result += node.children.map(stringify).join('');
 
-		result += ';\n';
+		result += ';';
 
 		return result;
 	},
 
 	//placeholders are empty objects - ignore them
-	placeholder: null,
+	placeholder: function (node) {
+		return node.token.data;
+	},
 
 	//decl list is the same as in js, so just merge identifiers, that's it
 	//FIXME: except for maybe there is a variable names conflicts
 	decllist: function (node) {
 		var result = '';
 
-		result += node.children.map(nodeToJs);
+		node.children.forEach(function (child, i) {
+			var str = stringify(child);
+			if (!str) return;
+			if (child.type === 'expr') result += ' = ' + str;
+			else result += (i > 0 ? ', ' : '') + stringify(child);
+		});
 
 		return result;
 	},
@@ -156,11 +167,9 @@ var transforms = {
 
 	//access operators - expand to arrays
 	operator: function (node) {
-		console.log(node);
-
 		var result = '';
 
-		result += nodeToJs(node.children[0]);
+		result += stringify(node.children[0]);
 
 		//expand swizzles, if any
 		var prop = node.children[1].data;
@@ -176,14 +185,13 @@ var transforms = {
 
 		if (node.children[0].assignment) {
 			var assignment = node.children[0];
-			result += nodeToJs(assignment.children[0]);
+			result += stringify(assignment.children[0]);
 			result += ' = ';
-			result += nodeToJs(assignment.children[1]);
-			result += ';\n';
+			result += stringify(assignment.children[1]);
+			result += ';';
 		}
 		else {
-			// console.log(node);
-			result += node.children.map(nodeToJs).join('');
+			result += node.children.map(stringify).join('');
 			// result = '???';
 		}
 
@@ -214,14 +222,39 @@ var transforms = {
 	//simple binary expressions
 	binary: function (node) {
 		var result = '';
-		result += nodeToJs(node.children[0]);
+		result += stringify(node.children[0]);
 		result += ' ' + node.data + ' ';
-		result += nodeToJs(node.children[1]);
+		result += stringify(node.children[1]);
 		return result;
 	},
 
 	// ternary: null,
-	// unary: null
+
+	unary: function (node) {
+		return node.data + stringify(node.children[0]);
+	},
+
+	//gl_Position, gl_FragColor, gl_FragPosition etc
+	builtin: function (node) {
+		return node.token.data;
+	},
+
+	//whether a function call - then just make a call
+	//or data type - then emulate structure via arrays
+	call: function (node) {
+		var result = '';
+		var args = node.children.slice(1);
+
+		result += node.children[0].data + '(';
+		result += args.map(stringify).join(', ');
+		result += ')';
+
+		return result;
+	},
+
+	literal: function (node) {
+		return node.data;
+	}
 }
 
 
