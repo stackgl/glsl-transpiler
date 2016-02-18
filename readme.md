@@ -3,9 +3,12 @@
 [![npm install glsl-to-js](https://nodei.co/npm/glsl-to-js.png?mini=true)](https://npmjs.org/package/glsl-to-js/)
 
 ```js
-var compile = require('glsl-to-js');
+var parse = require('glsl-parse/stream');
+var tokenize = require('glsl-tokenize/stream')
+var compile = require('glsl-js/stream');
+var stdlib = require('glsl-stdlib/webgl');
 
-compile(`
+tokenize(`
 	precision mediump float;
 	attribute vec2 uv;
 	attribute vec4 color;
@@ -18,7 +21,9 @@ compile(`
 		position.x *= uScreenSize.y / uScreenSize.x;
 		gl_Position = vec4(position, 0, 1);
 	}
-`);
+`)
+.pipe(parse())
+.pipe(compile(stdlib));
 
 //==>
 `
@@ -36,10 +41,9 @@ compile(`
 `
 ```
 
-_GLSL_ types like _vectors_ and _matrices_ are converted to typed arrays or to simple arrays. Swizzlings are expanded to member assignments. Stdlib methods are replaced with according js analogs. _GLSL_-specific methods, like _normalize_, _smoothstep_ etc are provided as separate functions, if they are detected in code.
-
 
 ## Related
 
-> [glsl.js](https://npmjs.org/package/glsl) — glsl to asm.js compiler built with [jison](https://npmjs.org/package/jison). Project is abandoned.</br>
-> [fake-gl](https://npmjs.org/package/fake-gl) — webgl for node.</br>
+> [tiny-gl](https://npmjs.org/package/fake-gl) — webgl implementation in node.</br>
+> [glsl-stdlib](https://npmjs.org/package/fake-gl) — webgl/opengl stdlib for node.</br>
+> [glsl.js](https://npmjs.org/package/glsl) — glsl to asm.js by [@who]() compiler built with [jison](https://npmjs.org/package/jison). Project is abandoned :(.</br>

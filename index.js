@@ -199,7 +199,9 @@ var transforms = {
 	},
 
 	//precisions are just ignored
-	precision: null,
+	precision: function () {
+		return '';
+	},
 
 	// comment: null,
 	// preprocessor: null,
