@@ -1,12 +1,19 @@
-var stringify = require('./');
-var test = require('tst');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
-var compile = require('./string');
-var compileStream = require('./stream');
+var compile = require('../string');
+var GLSL = require('../');
+var TokenStream = require('glsl-tokenizer/stream');
+var ParseStream = require('glsl-parser/stream');
+var CompileStream = require('../stream');
+var test = require('tst');
 var assert = require('assert');
+var fs = require('fs');
+var isBrowser = require('is-browser');
+var StringStream = require('stream-array');
+var Sink = require('stream').Writable;
 
 
+//examplary source
 var source = `
 precision mediump float;
 attribute vec2 uv;
@@ -27,7 +34,6 @@ var uv;
 var color;
 var fColor;
 var uScreenSize;
-
 function main () {
 	fColor = color;
 	var position = vec2(uv[0], -uv[1]) * 1.0;
@@ -35,21 +41,38 @@ function main () {
 	gl_Position = vec4(position, 0, 1)
 };`;
 
+//clean empty strings
+function clean (str) {
+	return str.trim().replace(/^\s*\n/gm, '')
+}
 
 
-test.only('Direct', function () {
-	assert.equal(compile(source), result);
+
+test('Direct', function () {
+	assert.equal(clean(compile(source)), clean(result));
 });
 
-test('Stream', function () {
-	compileStream()
+test.only('Stream', function (done) {
+	var res = '';
+
+	StringStream(source.split('\n'))
+	.pipe(TokenStream())
+	.pipe(ParseStream())
+	.pipe(CompileStream())
+	.on('end', function() {
+		assert.equal(clean(res), clean(result))
+		done();
+	})
+
+	//to release data
+	.pipe(Sink({
+		objectMode: true,
+		write: function (data, enc, cb) {
+			res += data + '\n';
+			cb();
+		}
+	}))
 });
-
-test('Basic', function () {
-
-	compile(source);
-});
-
 
 test.skip('main function', function() {
 	it('should throw an error without a main function', function() {

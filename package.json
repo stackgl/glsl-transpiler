@@ -5,14 +5,21 @@
   "main": "index.js",
   "dependencies": {
     "glsl-parser": "^2.0.0",
-    "glsl-tokenizer": "^2.0.2"
+    "glsl-tokenizer": "^2.0.2",
+    "inherits": "^2.0.1"
   },
   "devDependencies": {
+    "is-browser": "^2.0.1",
+    "stream-array": "^1.1.1",
+    "string-to-stream": "^1.0.1",
     "tst": "^1.2.1"
   },
-  "files": ["index.js"],
+  "files": [
+    "index.js"
+  ],
   "scripts": {
-    "test": "node test.js"
+    "test": "node test/index.js",
+    "test:browser": "budo test/index.js"
   },
   "repository": {
     "type": "git",

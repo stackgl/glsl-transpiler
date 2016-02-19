@@ -4,6 +4,9 @@
  * @module  glsl-js
  */
 
+var Emitter = require('events');
+var inherits = require('inherits');
+
 
 /**
  * Create GLSL codegen instance
@@ -17,6 +20,8 @@ function GLSL (stdlib) {
 		this.stdlib = stdlib;
 	}
 };
+
+inherits(GLSL, Emitter);
 
 
 /**
@@ -53,12 +58,16 @@ GLSL.prototype.stringify = function stringify (node) {
 	if (typeof t !== 'function') return t;
 
 	var result = t.call(this, node);
+
+	//notify that handle has passed
+	this.emit(node.type);
+
 	return result === undefined ? '' : result;
 }
 
 
 /**
- * List of transforms
+ * List of transforms for various token types
  */
 GLSL.prototype.transforms = {
 	//To keep lines consistency, should be rendered with regarding line numbers
@@ -69,8 +78,12 @@ GLSL.prototype.transforms = {
 		var lastLine = node.children[node.children.length - 1].token.line;
 
 		var lines = Array(lastLine - firstLine).fill('');
+		var count = 0;
+
 		node.children.forEach(function (child) {
-			lines[child.token.line - firstLine] = this.stringify(child);
+			var result = this.stringify(child);
+			lines[Math.max(child.token.line - firstLine, count)] = result;
+			count += result.split('\n').length;
 		}, this);
 
 		return lines.join('\n');
@@ -80,13 +93,7 @@ GLSL.prototype.transforms = {
 	stmt: function (node) {
 		var result = '';
 
-		// if (types.indexOf(node.token.data) >= 0) {
-		// 	result += 'var ' + node.children.map(this.stringify, this).join('');
-		// }
-
-		// else {
-			result += node.children.map(this.stringify, this).join('');
-		// }
+		result += node.children.map(this.stringify, this).join('');
 
 		return result;
 	},
@@ -111,7 +118,6 @@ GLSL.prototype.transforms = {
 		result += this.stringify(node.children[2]);
 		result = result.replace(/\n/g, '\n\t').slice(0,-1);
 		result += '\n}';
-
 
 		return result;
 	},
