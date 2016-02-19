@@ -41,34 +41,63 @@ function main () {
 
 ## API
 
-_glsl-js_ can be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return a js-chunk.
+### glsl-js/string
+
+To use _glsl-js_ directly, just pass source as the argument and it will return compiled string:
 
 ```js
-var parse = require('glsl-parser/stream');
-var tokenize = require('glsl-tokenizer/stream')
-var compile = require('glsl-js/stream');
+var compile = require('glsl-js/string');
 var glslify = require('glslify');
 
-tokenize(glslify('./source.glsl'))
+compile(glslify('./source.glsl'), stdlib);
+```
+
+### glsl-js/stream
+
+_glsl-js_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk.
+
+```js
+var compile = require('glsl-js/stream');
+var parse = require('glsl-parser/stream');
+var tokenize = require('glsl-tokenizer/stream')
+var glslify = require('glslify');
+
+fs.createReadStream('./source.glsl')
+.pipe(tokenize())
 .pipe(parse())
-.pipe(compile(stdlib));
+.pipe(compile(stdlib))
+.once('end', function () {
+	//this.source contains the actual version of the compiled code
+	//and gets updated on each input chunk of data.
+	console.log(this.source);
+});
 ```
 
-, directly:
+### glsl-js
+
+To apply compilation straight to glsl AST, use main `glsl-js`:
 
 ```js
+var GLSL = require('glsl-js');
+var tokenize = require('glsl-tokenizer/string');
+var parse = require('glsl-parser/direct');
+
+var source = glslify('./source.js');
+var tokens = tokenize(source);
+var tree = parse(tokens);
+var result = GLSL(stdlib).stringify(tree);
 ```
 
-, or as a compiler:
+### stdlib
 
-```js
-```
+`stdlib` is an optional argument, which is an object with basic OpenGL types. By default minimal WebGL types stub is used, but the more complete [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) can be used instead in this regard.
+
 
 ## Related
 
 > [fake-gl](https://npmjs.org/package/fake-gl) — webgl implementation in node.</br>
-> [glsl-stdlib](https://npmjs.org/package/fake-gl) — webgl/opengl stdlib for node.</br>
-> [glsl.js](https://npmjs.org/package/glsl) — glsl to asm.js by [@devongovett](https://github.com/devongovett) compiler built with [jison](https://npmjs.org/package/jison). Project is abandoned :(.</br>
+> [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) — webgl/opengl stdlib for node.</br>
 > [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.
 > [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
+> [glsl.js](https://npmjs.org/package/glsl) — glsl to asm.js by [@devongovett](https://github.com/devongovett) compiler built with [jison](https://npmjs.org/package/jison). Project is abandoned :(.</br>
