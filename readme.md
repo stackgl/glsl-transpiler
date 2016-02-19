@@ -43,7 +43,7 @@ function main () {
 
 ### glsl-js/string
 
-To use _glsl-js_ directly, just pass source as the argument and it will return compiled string:
+To compile glsl source code to js directly, just pass string as the argument and it will return compiled string:
 
 ```js
 var compile = require('glsl-js/string');
@@ -54,7 +54,7 @@ compile(glslify('./source.glsl'), stdlib);
 
 ### glsl-js/stream
 
-_glsl-js_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk.
+_glsl-js_ can also be used as stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk.
 
 ```js
 var compile = require('glsl-js/stream');
