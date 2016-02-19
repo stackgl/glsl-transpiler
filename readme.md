@@ -100,6 +100,14 @@ var parse = require('glsl-parser/direct');
 GLSL(stdlib).stringify(parse(tokenize(glslify('./source.glsl'))));
 ```
 
+### events
+
+_GLSL_ instance emits events during processing chunks:
+
+* `start` — invoked when `glsl.stringify` is called.
+* `<nodeType>` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list.
+* `end` — invoked right before the end of `glsl.stringify()`.
+
 
 ## Related
 

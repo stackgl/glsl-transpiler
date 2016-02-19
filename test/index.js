@@ -13,47 +13,75 @@ var StringStream = require('stream-array');
 var Sink = require('stream').Writable;
 
 
-//examplary source
-var source = `
-precision mediump float;
-attribute vec2 uv;
-attribute vec4 color;
-varying vec4 fColor;
-uniform vec2 uScreenSize;
-
-void main (void) {
-	fColor = color;
-	vec2 position = vec2(uv.x, -uv.y) * 1.0;
-	position.x *= uScreenSize.y / uScreenSize.x;
-	gl_Position = vec4(position, 0, 1);
-}
-`;
-
-var result = `
-var uv;
-var color;
-var fColor;
-var uScreenSize;
-function main () {
-	fColor = color;
-	var position = vec2(uv[0], -uv[1]) * 1.0;
-	position[0] = uScreenSize[1] / uScreenSize[0];
-	gl_Position = vec4(position, 0, 1)
-};`;
 
 //clean empty strings
 function clean (str) {
-	return str.trim().replace(/^\s*\n/gm, '')
+	return str.trim().replace(/^\s*\n/gm, '').replace(/^\s*/gm, '');
 }
 
 
-
 test('Direct', function () {
+	//examplary source
+	var source = `
+	precision mediump float;
+	attribute vec2 uv;
+	attribute vec4 color;
+	varying vec4 fColor;
+	uniform vec2 uScreenSize;
+
+	void main (void) {
+		fColor = color;
+		vec2 position = vec2(uv.x, -uv.y) * 1.0;
+		position.x *= uScreenSize.y / uScreenSize.x;
+		gl_Position = vec4(position, 0, 1);
+	}
+	`;
+
+	var result = `
+	var uv;
+	var color;
+	var fColor;
+	var uScreenSize;
+	function main () {
+		fColor = color;
+		var position = vec2(uv[0], -uv[1]) * 1.0;
+		position[0] = uScreenSize[1] / uScreenSize[0];
+		gl_Position = vec4(position, 0, 1)
+	};`;
+
 	assert.equal(clean(compile(source)), clean(result));
 });
 
 test('Stream', function (done) {
 	var res = '';
+
+	//examplary source
+	var source = `
+	precision mediump float;
+	attribute vec2 uv;
+	attribute vec4 color;
+	varying vec4 fColor;
+	uniform vec2 uScreenSize;
+
+	void main (void) {
+		fColor = color;
+		vec2 position = vec2(uv.x, -uv.y) * 1.0;
+		position.x *= uScreenSize.y / uScreenSize.x;
+		gl_Position = vec4(position, 0, 1);
+	}
+	`;
+
+	var result = `
+	var uv;
+	var color;
+	var fColor;
+	var uScreenSize;
+	function main () {
+		fColor = color;
+		var position = vec2(uv[0], -uv[1]) * 1.0;
+		position[0] = uScreenSize[1] / uScreenSize[0];
+		gl_Position = vec4(position, 0, 1)
+	};`;
 
 	StringStream(source.split('\n'))
 	.pipe(TokenStream())
@@ -75,24 +103,26 @@ test('Stream', function (done) {
 });
 
 test.skip('main function', function() {
-	it('should throw an error without a main function', function() {
-	throws('', /Parse error/);
+	test('should throw an error without a main function', function() {
+		assert.throws(function () {
+			compile('');
+		}, /Parse error/);
 	});
 
-	it('should throw an error if main function returns incorrect type', function() {
-	throws('int main() {}', /main function must return void/);
+	test('should throw an error if main function returns incorrect type', function() {
+		assert.throws('int main() {}', /main function must return void/);
 	});
 
-	it('should throw an error if main function accepts arguments', function() {
-	throws('void main(int a) {}', /No main function found/);
+	test('should throw an error if main function accepts arguments', function() {
+		assert.throws('void main(int a) {}', /No main function found/);
 	});
 
-	it('should throw an error if main function doesn\'t have a body', function() {
-	throws('void main();', /No main function found/);
+	test('should throw an error if main function doesn\'t have a body', function() {
+		assert.throws('void main();', /No main function found/);
 	});
 
-	it('should generate asm.js boilerplate', function() {
-	compare(glsl.compile('void main() {}'), BOILERPLATE);
+	test('should generate asm.js boilerplate', function() {
+		compare(glsl.compile('void main() {}'), BOILERPLATE);
 	});
 });
 
@@ -143,53 +173,69 @@ test.skip('primative variable initializers', function() {
 	});
 
 	it('should throw on invalid int initializations', function() {
-		throws('void main() { int test = 1.0; }',    /Left and right arguments are of differing types/);
-		throws('void main() { int test = .04; }',    /Left and right arguments are of differing types/);
-		throws('void main() { int test = 0.50; }',   /Left and right arguments are of differing types/);
-		throws('void main() { int test = 55.23; }',  /Left and right arguments are of differing types/);
-		throws('void main() { int test = 5e3; }',    /Left and right arguments are of differing types/);
-		throws('void main() { int test = 5.5e3; }',  /Left and right arguments are of differing types/);
-		throws('void main() { int test = 5.5e-3; }', /Left and right arguments are of differing types/);
-		throws('void main() { int test = .5e3; }',   /Left and right arguments are of differing types/);
-		throws('void main() { int test = true; }',   /Left and right arguments are of differing types/);
-		throws('void main() { int test = false; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = 1.0; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = .04; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = 0.50; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = 55.23; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = 5e3; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = 5.5e3; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = 5.5e-3; }', /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = .5e3; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = true; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { int test = false; }',  /Left and right arguments are of differing types/);
 	});
 
 
 	it('should throw on invalid float initializations', function() {
-		throws('void main() { float test = 1; }',     /Left and right arguments are of differing types/);
-		throws('void main() { float test = 55; }',    /Left and right arguments are of differing types/);
-		throws('void main() { float test = 0x23; }',  /Left and right arguments are of differing types/);
-		throws('void main() { float test = 023; }',   /Left and right arguments are of differing types/);
-		throws('void main() { float test = true; }',  /Left and right arguments are of differing types/);
-		throws('void main() { float test = false; }', /Left and right arguments are of differing types/);
+		assert.throws('void main() { float test = 1; }',     /Left and right arguments are of differing types/);
+		assert.throws('void main() { float test = 55; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { float test = 0x23; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { float test = 023; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { float test = true; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { float test = false; }', /Left and right arguments are of differing types/);
 	});
 
 	it('should throw on invalid bool initializations', function() {
-		throws('void main() { bool test = 1; }',      /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 55; }',     /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 0x23; }',   /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 023; }',    /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 1.0; }',    /Left and right arguments are of differing types/);
-		throws('void main() { bool test = .04; }',    /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 0.50; }',   /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 55.23; }',  /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 5e3; }',    /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 5.5e3; }',  /Left and right arguments are of differing types/);
-		throws('void main() { bool test = 5.5e-3; }', /Left and right arguments are of differing types/);
-		throws('void main() { bool test = .5e3; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 1; }',      /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 55; }',     /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 0x23; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 023; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 1.0; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = .04; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 0.50; }',   /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 55.23; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 5e3; }',    /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 5.5e3; }',  /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = 5.5e-3; }', /Left and right arguments are of differing types/);
+		assert.throws('void main() { bool test = .5e3; }',   /Left and right arguments are of differing types/);
 	});
 });
 
 
-test.skip('Structures', function () {
-	`
+test('Structures', function () {
+	var glsl = GLSL();
+
+	var src = `
 	struct light {
-	float intensity;
-	vec3 position;
+		float intensity, range;
+		vec3 position;
 	};
-	light lightVar = light(3.0, vec3(1.0, 2.0, 3.0));
-	`
+
+	light lightVar = light(3.0, 5.0, vec3(1.0, 2.0, 3.0));
+	`;
+
+	var res = `
+	function light (intensity, range, position) {
+		if (!(this instanceof light)) return new light(intensity, range, position);
+
+		this.intensity = intensity;
+		this.range = range;
+		this.position = position;
+	};
+	var lightVar = light(3.0, 5.0, vec3(1.0, 2.0, 3.0));
+	`;
+
+	assert.equal(clean(glsl.compile(src)), clean(res));
 });
 
 
