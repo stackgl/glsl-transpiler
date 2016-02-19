@@ -82,7 +82,7 @@ var GLSL = require('glsl-js');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
 
-var source = glslify('./source.js');
+var source = glslify('./source.glsl');
 var tokens = tokenize(source);
 var tree = parse(tokens);
 var result = GLSL(stdlib).stringify(tree);
@@ -90,7 +90,16 @@ var result = GLSL(stdlib).stringify(tree);
 
 ### stdlib
 
-`stdlib` is an optional argument, which is an object with basic OpenGL types. By default minimal WebGL types stub is used, but the more complete [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) can be used instead in this regard.
+`stdlib` is an optional argument, which is an object with basic OpenGL types. By default minimal WebGL types stub is used, but the more complete [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) can be used instead in this regard. Each type detected in glsl source will be polyfilled by the source of a function from the stdlib.
+
+```js
+var GLSL = require('glsl-js');
+var stdlib = require('glsl-stdlib/opengl');
+var tokenize = require('glsl-tokenizer/string');
+var parse = require('glsl-parser/direct');
+
+GLSL(stdlib).stringify(parse(tokenize(glslify('./source.glsl'))));
+```
 
 
 ## Related
