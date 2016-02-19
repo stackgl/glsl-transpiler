@@ -31,10 +31,10 @@ var uScreenSize;
 
 function main () {
 	fColor = color;
-	var position = [uv.x * 1.0, -uv.y * 1.0];
-	position.x *= uScreenSize.y / uScreenSize.x;
-	gl_Position = [position[0], position[1], 0, 1];
-}
+	var position = vec2(uv[0], -uv[1]) * 1.0;
+	position[0] = uScreenSize[1] / uScreenSize[0];
+	gl_Position = vec4(position, 0, 1)
+};
 `
 ```
 
