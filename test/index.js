@@ -52,7 +52,7 @@ test('Direct', function () {
 	assert.equal(clean(compile(source)), clean(result));
 });
 
-test.only('Stream', function (done) {
+test('Stream', function (done) {
 	var res = '';
 
 	StringStream(source.split('\n'))

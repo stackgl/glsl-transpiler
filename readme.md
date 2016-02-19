@@ -54,13 +54,12 @@ compile(glslify('./source.glsl'), stdlib?);
 
 ### glsl-js/stream
 
-_glsl-js_ can also be used as stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk.
+_glsl-js_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
 
 ```js
 var compile = require('glsl-js/stream');
 var parse = require('glsl-parser/stream');
-var tokenize = require('glsl-tokenizer/stream')
-var glslify = require('glslify');
+var tokenize = require('glsl-tokenizer/stream');
 
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
