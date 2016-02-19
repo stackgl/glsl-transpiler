@@ -115,7 +115,7 @@ _GLSL_ instance emits events during processing chunks:
 
 > [fake-gl](https://npmjs.org/package/fake-gl) — webgl implementation in node.</br>
 > [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) — webgl/opengl stdlib for node.</br>
-> [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.
+> [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
 > [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
 > [glsl.js](https://npmjs.org/package/glsl) — glsl to asm.js by [@devongovett](https://github.com/devongovett) compiler built with [jison](https://npmjs.org/package/jison). Project is abandoned :(.</br>
