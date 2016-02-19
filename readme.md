@@ -49,7 +49,7 @@ To compile glsl source code to js directly, just pass string as the argument and
 var compile = require('glsl-js/string');
 var glslify = require('glslify');
 
-compile(glslify('./source.glsl'), stdlib);
+compile(glslify('./source.glsl'), stdlib?);
 ```
 
 ### glsl-js/stream
@@ -65,7 +65,7 @@ var glslify = require('glslify');
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
 .pipe(parse())
-.pipe(compile(stdlib))
+.pipe(compile(stdlib?))
 .once('end', function () {
 	//this.source contains the actual version of the compiled code
 	//and gets updated on each input chunk of data.
@@ -85,7 +85,7 @@ var parse = require('glsl-parser/direct');
 var source = glslify('./source.glsl');
 var tokens = tokenize(source);
 var tree = parse(tokens);
-var result = GLSL(stdlib).stringify(tree);
+var result = GLSL(stdlib?).stringify(tree);
 ```
 
 ### stdlib
