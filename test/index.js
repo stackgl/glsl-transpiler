@@ -24,30 +24,36 @@ test('Interface', function () {
 	//examplary source
 	var source = `
 	precision mediump float;
-	attribute vec2 uv, xy;
+	attribute vec2 uv, xy = vec2(0);
 	attribute vec4 color;
 	varying vec4 fColor;
 	uniform vec2 uScreenSize;
+	float coeff = 1.0, coeff2;
 
 	void main (void) {
 		fColor = color;
-		vec2 position = vec2(uv.x, -uv.y) * 1.0;
+		vec2 position = vec2(uv.x, -uv.y) * coeff;
 		position.x *= uScreenSize.y / uScreenSize.x;
-		gl_Position = vec4(position, 0, 1);
+		xy.xy *= uv.yx;
+		gl_Position = vec4(position.yx, 0, 1);
 	}
 	`;
 
 	var result = `
-	var uv = [0, 0], xy = [0, 0];
-	var color = [0, 0, 0, 0];
-	var fColor = [0, 0, 0, 0];
-	var uScreenSize = [0, 0];
+	var uv = vec2(), xy = vec2(0);
+	var color = vec4();
+	var fColor = vec4();
+	var uScreenSize = vec2();
+	var coeff = float(1.0), coeff2 = float();
+
 	function main () {
 		fColor = color;
-		var position = vec2(uv[0], -uv[1]) * 1.0;
-		position[0] = uScreenSize[1] / uScreenSize[0];
-		gl_Position = vec4(position, 0, 1)
-	};`;
+		var position = vec2(uv.x, -uv.y).mult(coeff);
+		position.x = position.x.mult(uScreenSize.y.div(uScreenSize.x));
+		xy.xy = xy.xy.mult(uv.yx);
+		gl_Position = vec4(position.yx, 0, 1);
+	};
+	`;
 
 	test('Direct', function () {
 		assert.equal(clean(compile(source)), clean(result));
@@ -229,23 +235,38 @@ test('Components access', function () {
 		`;
 
 		var res = `
-		var c = [5.0, 7.2, 1.1], x = 0, y = 1;
-		var g = 0, x = 0;
-		var a = [g, 1, g, 2.3, g];
+		var c = [float(5.0), float(7.2), float(1.1)], x = float(), y = float(1);
+		var g = float(), x = float(0);
+		var a = [g, float(1), g, float(2.3), g];
 		var b = [];
-		b = [g, g + 1.0, g + 2.0];
+		b = [g, g.add(float(1.0)), g.add(float(2.0))];
 		`;
 
 		assert.equal(clean(glsl.compile(src)), clean(res));
 	});
+
+	test.skip('Arrays of arrays', function () {
+		var src = `
+		vec4 b[2];
+		vec4 c[3][2] = vec4[3](b, b, b);
+		vec4 d[4][3][2] = vec4[3][2](c, c, c, c);
+		// vec4[3][2](b, b, b); // constructor
+		// vec4[][2](b, b, b); // constructor, valid, size deduced
+		// vec4[3][](b, b, b); // constructor, valid, size deduced
+		// vec4[][](b, b, b); // constructor, valid, both sizes deduced
+		`;
+
+		var res = `
+		var b = [[0, 0, 0, 0], [0, 0, 0, 0]];
+		[b, b, b];
+		[]
+		`;
+
+		// assert.equal(clean(glsl.compile(src)), clean(res));
+	});
+
+
 	`
-	vec4 b[2] = ...;
-	vec4[3][2](b, b, b); // constructor
-	vec4[][2](b, b, b); // constructor, valid, size deduced
-	vec4[3][](b, b, b); // constructor, valid, size deduced
-	vec4[][](b, b, b); // constructor, valid, both sizes deduced
-
-
 	vec2 pos;
 	float height;
 	pos.x // is legal
@@ -292,50 +313,107 @@ test('Components access', function () {
 });
 
 
-test.skip('Vec/matrix operators', function () {
-	`
-	vec3 v, u;
-	float f;
-	v = u + f;
-	will be equivalent to
-	v.x = u.x + f;
-	v.y = u.y + f;
-	v.z = u.z + f;
+test('Vec/matrix operators', function () {
+	test('vec + number', function () {
+	var src = `
+		vec3 v, u;
+		float f;
+		v = u + f;
+	`;
 
-	vec3 v, u, w;
-	w = v + u;
-	will be equivalent to
-	w.x = v.x + u.x;
-	w.y = v.y + u.y;
-	w.z = v.z + u.z;
+	var equiv = `
+		v.x = u.x + f;
+		v.y = u.y + f;
+		v.z = u.z + f;
+	`;
 
-	vec3 v, u;
-	mat3 m;
-	u = v * m;
-	is equivalent to
-	u.x = dot(v, m[0]); // m[0] is the left column of m
-	u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
-	u.z = dot(v, m[2]);
+	var res = `
+		var v = vec3(), u = vec3();
+		var f = float();
+		v = u.add(f);
+	`;
+	});
 
-	u = m * v;
-	is equivalent to
-	u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
-	u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
-	u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
+	test('vec + vec', function () {
+		var src = `
+			vec3 v, u, w;
+			w = v + u;
+		`;
 
-	mat3 m, n, r;
-	r = m * n;
-	is equivalent to
-	r[0].x = m[0].x * n[0].x + m[1].x * n[0].y + m[2].x * n[0].z;
-	r[1].x = m[0].x * n[1].x + m[1].x * n[1].y + m[2].x * n[1].z;
-	r[2].x = m[0].x * n[2].x + m[1].x * n[2].y + m[2].x * n[2].z;
-	r[0].y = m[0].y * n[0].x + m[1].y * n[0].y + m[2].y * n[0].z;
-	r[1].y = m[0].y * n[1].x + m[1].y * n[1].y + m[2].y * n[1].z;
-	r[2].y = m[0].y * n[2].x + m[1].y * n[2].y + m[2].y * n[2].z;
-	r[0].z = m[0].z * n[0].x + m[1].z * n[0].y + m[2].z * n[0].z;
-	r[1].z = m[0].z * n[1].x + m[1].z * n[1].y + m[2].z * n[1].z;
-	r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
-	`
+		var equiv = `
+			w.x = v.x + u.x;
+			w.y = v.y + u.y;
+			w.z = v.z + u.z;
+		`;
+
+		var res = `
+			var v = vec3, u = vec3, w = vec3;
+			w = v.add(u);
+		`;
+	});
+
+	test('vec * mat', function () {
+		var src = `
+			vec3 v, u;
+			mat3 m;
+			u = v * m;
+		`;
+
+		var equiv = `
+			u.x = dot(v, m[0]); // m[0] is the left column of m
+			u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
+			u.z = dot(v, m[2]);
+		`;
+
+		var res = `
+			var v = vec3(), u = vec3();
+			var m = mat3();
+			u = v.mult(m);
+		`;
+	});
+
+	test('mat * vec', function () {
+		var src = `
+		u = m * v;
+		`;
+
+		var equiv = `
+		u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
+		u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
+		u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
+		`;
+
+		var res = `
+		var u = m.mult(v);
+		`;
+	});
+
+
+	test('Matrix multiplication', function () {
+		var src = `
+		mat3 m, n, r;
+		r = m * n;
+		`;
+
+		var res = `
+		var m = mat3(), n = mat3(), r = mat3();
+		r = m.mult(n);
+		`;
+
+		var equiv = `
+		r[0].x = m[0].x * n[0].x + m[1].x * n[0].y + m[2].x * n[0].z;
+		r[1].x = m[0].x * n[1].x + m[1].x * n[1].y + m[2].x * n[1].z;
+		r[2].x = m[0].x * n[2].x + m[1].x * n[2].y + m[2].x * n[2].z;
+		r[0].y = m[0].y * n[0].x + m[1].y * n[0].y + m[2].y * n[0].z;
+		r[1].y = m[0].y * n[1].x + m[1].y * n[1].y + m[2].y * n[1].z;
+		r[2].y = m[0].y * n[2].x + m[1].y * n[2].y + m[2].y * n[2].z;
+		r[0].z = m[0].z * n[0].x + m[1].z * n[0].y + m[2].z * n[0].z;
+		r[1].z = m[0].z * n[1].x + m[1].z * n[1].y + m[2].z * n[1].z;
+		r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
+		`;
+
+		compile(src);
+	});
 });
 
 test.skip('Functions', function () {

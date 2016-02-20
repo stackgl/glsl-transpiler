@@ -10,6 +10,7 @@ var assert = require('assert');
 var flatten = require('array-flatten');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
+var stdlib = require('../glsl-stdlib');
 
 
 /**
@@ -31,23 +32,20 @@ inherits(GLSL, Emitter);
 /**
  * Minimal webgl default types values. Replace with other stdlib, if required.
  */
-GLSL.prototype.stdlib = {
-	bool: 0,
-	int: 0,
-	float: 0,
-	vec2: [0, 0],
-	vec3: [0, 0, 0],
-	vec4: [0, 0, 0, 0],
-	bvec2: [0, 0],
-	bvec3: [0, 0, 0],
-	bvec4: [0, 0, 0, 0],
-	ivec2: [0, 0],
-	ivec3: [0, 0, 0],
-	ivec4: [0, 0, 0, 0],
-	mat2: [0, 0, 0, 0],
-	mat3: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-	mat4: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	sampler2D: []
+GLSL.prototype.stdlib = stdlib;
+
+
+/**
+ * Operator names
+ */
+GLSL.prototype.operators = {
+	'*': 'mult',
+	'+': 'add',
+	'-': 'sub',
+	'/': 'div',
+	'%': 'mod',
+	'<<': 'lshift',
+	'>>': 'rshift'
 };
 
 
@@ -117,6 +115,8 @@ GLSL.prototype.transforms = {
 
 		result += node.children.map(this.stringify, this).join('');
 
+		if (result) result += ';';
+
 		return result;
 	},
 
@@ -171,7 +171,7 @@ GLSL.prototype.transforms = {
 		assert.equal(node.children[2].type, 'stmtlist', 'Function should have a body.');
 		result += '{\n';
 		result += this.stringify(node.children[2]);
-		result = result.replace(/\n/g, '\n\t').slice(0,-1);
+		result = result.replace(/\n/g, '\n\t');
 		result += '\n}';
 
 		return result;
@@ -187,6 +187,22 @@ GLSL.prototype.transforms = {
 	decl: function (node) {
 		var result = '';
 
+
+		var typeNode = node.children[node.children.length - 2];
+		var decllist = node.children[node.children.length - 1];
+
+		assert(
+			decllist.type === 'decllist' ||
+			decllist.type === 'function' ||
+			decllist.type === 'struct',
+		'Decl structure is malicious');
+
+		//declare function as hoisting one
+		if (decllist.type === 'function') {
+			return this.stringify(decllist);
+		}
+
+		//define variables
 		if (node.token.data === 'attribute') {
 			result += 'var ';
 		}
@@ -203,21 +219,11 @@ GLSL.prototype.transforms = {
 			result += 'var ';
 		}
 
-		var typeNode = node.children[node.children.length - 2];
-
-		var decllist = node.children[node.children.length - 1];
-
-		assert(
-			decllist.type === 'decllist' ||
-			decllist.type === 'function' ||
-			decllist.type === 'struct',
-		'Decl structure is malicious');
 
 		//FIXME: ponder on whether it is a good practice to augment nodes
 		decllist.dataType = typeNode.token.data;
 
 		result += this.stringify(decllist);
-		result += ';';
 
 		return result;
 	},
@@ -226,7 +232,7 @@ GLSL.prototype.transforms = {
 	//decl list is the same as in js, so just merge identifiers, that's it
 	//FIXME: except for maybe there is a variable names conflicts
 	decllist: function (node) {
-		var ids = [];
+		var idTypes = [];
 		var lastId = 0;
 
 		var dataType = node.dataType;
@@ -235,36 +241,29 @@ GLSL.prototype.transforms = {
 			var child = node.children[i];
 
 			if (child.type === 'ident') {
-				var value = 0;
-
-				//detect which should be default value
-				var type = this.stdlib[dataType];
-				if (type != null) {
-					if (Array.isArray(type)) {
-						value = '[' + type.join(', ') + ']';
-					}
-					else if (typeof type === 'function') {
-						unimplemented;
-					}
-					else {
-						value = type;
-					}
-				}
-
-				lastId = ids.push([this.stringify(child), value]);
+				lastId = idTypes.push([this.stringify(child)]);
 			}
 			else if (child.type === 'quantifier') {
-				ids[lastId - 1][1] = '[]';
+				idTypes[lastId - 1][1] = '[]';
 			}
 			else if (child.type === 'expr') {
-				ids[lastId - 1][1] = this.stringify(child);
+				//ignore wrapping literals
+				var value = this.stringify(child);
+				idTypes[lastId - 1][1] = value;
 			}
 			else {
 				throw Error('Undefined type in decllist: ' + child.type);
 			}
 		}
 
-		return ids.map(function (idVal) { return `${idVal[0]} = ${idVal[1]}`;}).join(', ');
+		return idTypes.map(function (idVal) {
+			if (idVal[1] == null) {
+				return `${idVal[0]} = ${dataType}()`;
+			}
+			else {
+				return `${idVal[0]} = ${idVal[1]}`;
+			}
+		}).join(', ');
 	},
 
 	//placeholders are empty objects - ignore them
@@ -284,7 +283,7 @@ GLSL.prototype.transforms = {
 
 		//expand swizzles, if any
 		var prop = node.children[1].data;
-		result += unswizzle(prop);
+		result += '.' + prop;
 
 		return result;
 	},
@@ -294,17 +293,7 @@ GLSL.prototype.transforms = {
 	expr: function (node) {
 		var result = '';
 
-		if (node.children[0].assignment) {
-			var assignment = node.children[0];
-			result += this.stringify(assignment.children[0]);
-			result += ' = ';
-			result += this.stringify(assignment.children[1]);
-			result += ';';
-		}
-		else {
-			result += node.children.map(this.stringify, this).join('');
-			// result = '???';
-		}
+		result += node.children.map(this.stringify, this).join('');
 
 		return result;
 	},
@@ -335,9 +324,39 @@ GLSL.prototype.transforms = {
 	//simple binary expressions
 	binary: function (node) {
 		var result = '';
+
+		var operator = this.operators[node.data];
+
 		result += this.stringify(node.children[0]);
-		result += ' ' + node.data + ' ';
+		result += `.${operator}(`;
 		result += this.stringify(node.children[1]);
+		result += ')';
+
+		return result;
+	},
+
+	//assign - same as binary basically
+	assign: function (node) {
+		var result = '';
+
+		var operator = node.data;
+
+		var assignee = this.stringify(node.children[0]);
+		result += assignee;
+		result += ` = `;
+
+		//operatory assign
+		if (operator.length > 1) {
+			result += this.transforms.binary.call(this, {
+				children: [node.children[0], node.children[1]],
+				data: operator.slice(0, -1)
+			});
+		}
+		//simple assign
+		else {
+			result += this.stringify(node.children[1]);
+		}
+
 		return result;
 	},
 
@@ -352,15 +371,19 @@ GLSL.prototype.transforms = {
 		return node.token.data;
 	},
 
-	//whether a function call - then just make a call
-	//or data type - then emulate structure via arrays
+	//if a function call - then just make a call
+	//or if a data type - then save type as well, avoid wrapping literals
 	call: function (node) {
 		var result = '';
 
+		var callName = node.children[0].data;
+
+		if (this.stdlib[callName]) this.bypassLiterals = true;
+
+		var args = node.children.slice(1);
+
 		//if first child of the call is array call - provide new array
 		if (node.children[0].data === '[') {
-			var args = node.children.slice(1);
-
 			result += '[';
 			result += args.map(this.stringify, this).join(', ');
 			result += ']';
@@ -368,40 +391,21 @@ GLSL.prototype.transforms = {
 
 		//else treat as function/constructor call
 		else {
-			var args = node.children.slice(1);
-
 			result += node.children[0].data + '(';
 			result += args.map(this.stringify, this).join(', ');
 			result += ')';
 		}
 
+		if (this.stdlib[callName]) this.bypassLiterals = false;
+
 		return result;
 	},
 
+	//literal should always be wrapped to a type
 	literal: function (node) {
-		return node.data;
+		if (this.bypassLiterals) return node.data;
+		return 'float(' + node.data + ')';
 	}
-}
-
-
-/**
- * Transform swizzle to array access
- */
-function unswizzle (prop) {
-	if (prop === 'x' || prop === 's' || prop === 'r') {
-		return '[0]';
-	}
-	if (prop === 'y') {
-		return '[1]';
-	}
-	if (prop === 'z') {
-		return '[2]';
-	}
-	if (prop === 'w') {
-		return '[3]';
-	}
-
-	return '.' + prop;
 }
 
 
