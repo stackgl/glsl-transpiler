@@ -29,25 +29,25 @@ inherits(GLSL, Emitter);
 
 
 /**
- * Minimal webgl types. Replace with other stdlib, if required.
+ * Minimal webgl default types values. Replace with other stdlib, if required.
  */
 GLSL.prototype.stdlib = {
-	bool: true,
-	int: true,
-	float: true,
-	vec2: true,
-	vec3: true,
-	vec4: true,
-	bvec2: true,
-	bvec3: true,
-	bvec4: true,
-	ivec2: true,
-	ivec3: true,
-	ivec4: true,
-	mat2: true,
-	mat3: true,
-	mat4: true,
-	sampler2D: true
+	bool: 0,
+	int: 0,
+	float: 0,
+	vec2: [0, 0],
+	vec3: [0, 0, 0],
+	vec4: [0, 0, 0, 0],
+	bvec2: [0, 0],
+	bvec3: [0, 0, 0],
+	bvec4: [0, 0, 0, 0],
+	ivec2: [0, 0],
+	ivec3: [0, 0, 0],
+	ivec4: [0, 0, 0, 0],
+	mat2: [0, 0, 0, 0],
+	mat3: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+	mat4: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	sampler2D: []
 };
 
 
@@ -183,7 +183,7 @@ GLSL.prototype.transforms = {
 	},
 
 	//declarations are mapped to var a = n, b = m;
-	//FIXME: no separation of decl types.
+	//decl defines it’s inner placeholders rigidly
 	decl: function (node) {
 		var result = '';
 
@@ -196,11 +196,27 @@ GLSL.prototype.transforms = {
 		else if (node.token.data === 'uniform') {
 			result += 'var ';
 		}
-		else if (this.stdlib[node.token.data]) {
+		else if (node.token.data === 'const') {
+			result += 'var ';
+		}
+		else if (this.stdlib[node.token.data] != null) {
 			result += 'var ';
 		}
 
-		result += node.children.map(this.stringify, this).join('');
+		var typeNode = node.children[node.children.length - 2];
+
+		var decllist = node.children[node.children.length - 1];
+
+		assert(
+			decllist.type === 'decllist' ||
+			decllist.type === 'function' ||
+			decllist.type === 'struct',
+		'Decl structure is malicious');
+
+		//FIXME: ponder on whether it is a good practice to augment nodes
+		decllist.dataType = typeNode.token.data;
+
+		result += this.stringify(decllist);
 		result += ';';
 
 		return result;
@@ -210,16 +226,45 @@ GLSL.prototype.transforms = {
 	//decl list is the same as in js, so just merge identifiers, that's it
 	//FIXME: except for maybe there is a variable names conflicts
 	decllist: function (node) {
-		var result = '';
+		var ids = [];
+		var lastId = 0;
 
-		node.children.forEach(function (child, i) {
-			var str = this.stringify(child);
-			if (!str) return;
-			if (child.type === 'expr') result += ' = ' + str;
-			else result += (i > 0 ? ', ' : '') + this.stringify(child);
-		}, this);
+		var dataType = node.dataType;
 
-		return result;
+		for (var i = 0, l = node.children.length; i < l; i++) {
+			var child = node.children[i];
+
+			if (child.type === 'ident') {
+				var value = 0;
+
+				//detect which should be default value
+				var type = this.stdlib[dataType];
+				if (type != null) {
+					if (Array.isArray(type)) {
+						value = '[' + type.join(', ') + ']';
+					}
+					else if (typeof type === 'function') {
+						unimplemented;
+					}
+					else {
+						value = type;
+					}
+				}
+
+				lastId = ids.push([this.stringify(child), value]);
+			}
+			else if (child.type === 'quantifier') {
+				ids[lastId - 1][1] = '[]';
+			}
+			else if (child.type === 'expr') {
+				ids[lastId - 1][1] = this.stringify(child);
+			}
+			else {
+				throw Error('Undefined type in decllist: ' + child.type);
+			}
+		}
+
+		return ids.map(function (idVal) { return `${idVal[0]} = ${idVal[1]}`;}).join(', ');
 	},
 
 	//placeholders are empty objects - ignore them
@@ -311,11 +356,24 @@ GLSL.prototype.transforms = {
 	//or data type - then emulate structure via arrays
 	call: function (node) {
 		var result = '';
-		var args = node.children.slice(1);
 
-		result += node.children[0].data + '(';
-		result += args.map(this.stringify, this).join(', ');
-		result += ')';
+		//if first child of the call is array call - provide new array
+		if (node.children[0].data === '[') {
+			var args = node.children.slice(1);
+
+			result += '[';
+			result += args.map(this.stringify, this).join(', ');
+			result += ']';
+		}
+
+		//else treat as function/constructor call
+		else {
+			var args = node.children.slice(1);
+
+			result += node.children[0].data + '(';
+			result += args.map(this.stringify, this).join(', ');
+			result += ')';
+		}
 
 		return result;
 	},

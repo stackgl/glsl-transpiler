@@ -20,11 +20,11 @@ function clean (str) {
 }
 
 
-test('Direct', function () {
+test('Interface', function () {
 	//examplary source
 	var source = `
 	precision mediump float;
-	attribute vec2 uv;
+	attribute vec2 uv, xy;
 	attribute vec4 color;
 	varying vec4 fColor;
 	uniform vec2 uScreenSize;
@@ -38,10 +38,10 @@ test('Direct', function () {
 	`;
 
 	var result = `
-	var uv;
-	var color;
-	var fColor;
-	var uScreenSize;
+	var uv = [0, 0], xy = [0, 0];
+	var color = [0, 0, 0, 0];
+	var fColor = [0, 0, 0, 0];
+	var uScreenSize = [0, 0];
 	function main () {
 		fColor = color;
 		var position = vec2(uv[0], -uv[1]) * 1.0;
@@ -49,58 +49,33 @@ test('Direct', function () {
 		gl_Position = vec4(position, 0, 1)
 	};`;
 
-	assert.equal(clean(compile(source)), clean(result));
+	test('Direct', function () {
+		assert.equal(clean(compile(source)), clean(result));
+	});
+
+	test('Stream', function (done) {
+		var res = '';
+
+		StringStream(source.split('\n'))
+		.pipe(TokenStream())
+		.pipe(ParseStream())
+		.pipe(CompileStream())
+		.on('end', function() {
+			assert.equal(clean(res), clean(result))
+			done();
+		})
+
+		//to release data
+		.pipe(Sink({
+			objectMode: true,
+			write: function (data, enc, cb) {
+				res += data + '\n';
+				cb();
+			}
+		}))
+	});
 });
 
-test('Stream', function (done) {
-	var res = '';
-
-	//examplary source
-	var source = `
-	precision mediump float;
-	attribute vec2 uv;
-	attribute vec4 color;
-	varying vec4 fColor;
-	uniform vec2 uScreenSize;
-
-	void main (void) {
-		fColor = color;
-		vec2 position = vec2(uv.x, -uv.y) * 1.0;
-		position.x *= uScreenSize.y / uScreenSize.x;
-		gl_Position = vec4(position, 0, 1);
-	}
-	`;
-
-	var result = `
-	var uv;
-	var color;
-	var fColor;
-	var uScreenSize;
-	function main () {
-		fColor = color;
-		var position = vec2(uv[0], -uv[1]) * 1.0;
-		position[0] = uScreenSize[1] / uScreenSize[0];
-		gl_Position = vec4(position, 0, 1)
-	};`;
-
-	StringStream(source.split('\n'))
-	.pipe(TokenStream())
-	.pipe(ParseStream())
-	.pipe(CompileStream())
-	.on('end', function() {
-		assert.equal(clean(res), clean(result))
-		done();
-	})
-
-	//to release data
-	.pipe(Sink({
-		objectMode: true,
-		write: function (data, enc, cb) {
-			res += data + '\n';
-			cb();
-		}
-	}))
-});
 
 test.skip('main function', function() {
 	test('should throw an error without a main function', function() {
@@ -239,16 +214,31 @@ test('Structures', function () {
 });
 
 
-test.skip('Components access', function () {
-	`
-	const float c[3] = float[3](5.0, 7.2, 1.1);
-	const float d[3] = float[](5.0, 7.2, 1.1);
-	float g;
-	...
-	float a[5] = float[5](g, 1, g, 2.3, g);
-	float b[3];
-	b = float[3](g, g + 1.0, g + 2.0);
+test('Components access', function () {
+	var glsl = GLSL();
 
+	test('Array constructs', function () {
+		var src = `
+		const float c[3] = float[3](5.0, 7.2, 1.1), x, y = 1;
+		// const float d[3] = float[](5.0, 7.2, 1.1);
+
+		float g, x = 0;
+		float a[5] = float[5](g, 1, g, 2.3, g);
+		float b[3];
+		b = float[3](g, g + 1.0, g + 2.0);
+		`;
+
+		var res = `
+		var c = [5.0, 7.2, 1.1], x = 0, y = 1;
+		var g = 0, x = 0;
+		var a = [g, 1, g, 2.3, g];
+		var b = [];
+		b = [g, g + 1.0, g + 2.0];
+		`;
+
+		assert.equal(clean(glsl.compile(src)), clean(res));
+	});
+	`
 	vec4 b[2] = ...;
 	vec4[3][2](b, b, b); // constructor
 	vec4[][2](b, b, b); // constructor, valid, size deduced
