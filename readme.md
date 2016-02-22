@@ -24,16 +24,16 @@ compile(`
 
 //result:
 `
-var uv;
-var color;
-var fColor;
-var uScreenSize;
+var uv = vec2();
+var color = vec4();
+var fColor = vec4();
+var uScreenSize = vec2();
 
 function main () {
 	fColor = color;
-	var position = vec2(uv[0], -uv[1]) * 1.0;
-	position[0] = uScreenSize[1] / uScreenSize[0];
-	gl_Position = vec4(position, 0, 1)
+	var position = vec2(uv.x, -uv.y).mult(1.0);
+	position.x *= uScreenSize.y / uScreenSize.x;
+	gl_Position = vec4(position, 0, 1);
 };
 `
 ```
@@ -49,7 +49,7 @@ To compile glsl source code to js directly, just pass string as the argument and
 var compile = require('glsl-js/string');
 var glslify = require('glslify');
 
-compile(glslify('./source.glsl'), stdlib?);
+compile(glslify('./source.glsl'));
 ```
 
 ### glsl-js/stream
@@ -64,7 +64,7 @@ var tokenize = require('glsl-tokenizer/stream');
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
 .pipe(parse())
-.pipe(compile(stdlib?))
+.pipe(compile())
 .once('end', function () {
 	//this.source contains the actual version of the compiled code
 	//and gets updated on each input chunk of data.
@@ -84,22 +84,7 @@ var parse = require('glsl-parser/direct');
 var source = glslify('./source.glsl');
 var tokens = tokenize(source);
 var tree = parse(tokens);
-var result = GLSL(stdlib?).stringify(tree);
-```
-
-### stdlib
-
-`stdlib` is an optional argument, which is an object with basic OpenGL types. By default minimal WebGL types stub is used, but the more complete [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) can be used instead in this regard. Each type detected in glsl source will be polyfilled by the source of a function from the stdlib.
-
-```js
-var GLSL = require('glsl-js');
-var stdlib = require('glsl-stdlib/opengl');
-var tokenize = require('glsl-tokenizer/string');
-var parse = require('glsl-parser/direct');
-
-GLSL(stdlib).stringify(parse(tokenize(glslify('./source.glsl'))));
-
-//TODO: demonstrate how it changes the code
+var result = GLSL(options?).stringify(tree);
 ```
 
 ### events
