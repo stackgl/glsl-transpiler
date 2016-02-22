@@ -12,3 +12,9 @@
 	* + From the other POV, who on earth cares about the beauty of compiled code?
 	* ✔ The good compromise is found in extending objects returned from types with swizzles etc. Takes more time on object constructs, but resulting code is pretty: `m = m.mult(n);`
 		* Unfortunately, we have to extend native arrays prototype to keep execution fast enough.
+* Why on earth we need to wrap floats/ints/bools? Need we?
+	* + things like `vec4 a = 2.0 * vec4()`
+		* - but they are better unwrapper as `var a = vec4().mult(1.0)` rather than `var a = float(1.0).mult(vec4())`
+	* + implicit types are difficult to guess: `int a = 1, b = 2, c; c = a + b;` - which plus operator should we use?
+		* - not that difficult, actually. Result of assignment is always typed. Same as each operand. We just have to track map of variables
+	* - we have to mind swizzle types as well then: `a.x = b.y`

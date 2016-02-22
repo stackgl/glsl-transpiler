@@ -11,6 +11,7 @@ var flatten = require('array-flatten');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
 var stdlib = require('../glsl-stdlib');
+var extend = require('xtend/mutable');
 
 
 /**
@@ -24,6 +25,11 @@ function GLSL (stdlib) {
 	if (stdlib) {
 		this.stdlib = stdlib;
 	}
+	this.on('end', function () {
+		// console.log(this.scopes);
+	});
+
+	this.reset();
 };
 
 inherits(GLSL, Emitter);
@@ -46,6 +52,40 @@ GLSL.prototype.operators = {
 	'%': 'mod',
 	'<<': 'lshift',
 	'>>': 'rshift'
+};
+
+
+/**
+ * Simple types, will be expanded to js instead of wrapped to classes
+ */
+GLSL.prototype.primitives = {
+	void: '',
+	bool: false,
+	int: 0,
+	uint: 0,
+	float: 0,
+	double: 0
+};
+
+
+/**
+ * Initialize analysing scopes/vars/types
+ */
+GLSL.prototype.reset = function () {
+	//collection of types used during processing. To polyfill them after.
+	this.usedTypes = {};
+
+	//scopes analysed. Each scope is named by the function they are constained in
+	//_ is a global scope
+	this.scopes = {
+		global: {
+			__name: 'global',
+			__parentScope: null
+		}
+	};
+
+	//current scope of the node processed
+	this.currentScope = 'global';
 };
 
 
@@ -76,7 +116,7 @@ GLSL.prototype.stringify = function stringify (node) {
 	if (!t) return '';
 	if (typeof t !== 'function') return t;
 
-	//invoke start
+	//do start routines on the first call
 	var startCall = false;
 	if (!this.started) {
 		this.emit('start', node);
@@ -99,6 +139,16 @@ GLSL.prototype.stringify = function stringify (node) {
 
 
 /**
+ * Polyfill types — generate string source code for the types detected during compilation
+ */
+GLSL.prototype.polyfill = function polyfill (types) {
+	for (var type in types) {
+		var constr = this.stdlib[type];
+	}
+};
+
+
+/**
  * List of transforms for various token types
  */
 GLSL.prototype.transforms = {
@@ -106,7 +156,9 @@ GLSL.prototype.transforms = {
 	stmtlist: function (node) {
 		if (!node.children.length) return '';
 
-		return node.children.map(this.stringify, this).join('\n');
+		var result = node.children.map(this.stringify, this).join('\n');
+
+		return result;
 	},
 
 	//statement should just map children per-line
@@ -157,28 +209,44 @@ GLSL.prototype.transforms = {
 
 	//functions are mapped as they are
 	function: function (node) {
-		var result = 'function ';
+		var result = '';
 
 		//add function name - just render ident node
 		assert.equal(node.children[0].type, 'ident', 'Function should have an identifier.');
-		result += this.stringify(node.children[0]);
+		var name = this.stringify(node.children[0]);
 
 		//add args
 		assert.equal(node.children[1].type, 'functionargs', 'Function should have arguments.');
-		result += ' (' + this.stringify(node.children[1]) + ') ';
+		var args = this.stringify(node.children[1]);
+
 
 		//add body
 		assert.equal(node.children[2].type, 'stmtlist', 'Function should have a body.');
-		result += '{\n';
+		result += `function ${name} (${args}) {\n`;
 		result += this.stringify(node.children[2]);
 		result = result.replace(/\n/g, '\n\t');
 		result += '\n}';
+
+		//get scope back to global after fn ended
+		this.currentScope = this.scopes[this.currentScope].__parentScope.__name;
 
 		return result;
 	},
 
 	//function arguments are just shown as a list of ids
 	functionargs: function (node) {
+		//create new scope - func args are the unique token stream-style detecting a function entry
+		var lastScope = this.currentScope;
+		var scopeName = (node.parent && node.parent.children[0].data) || 'global';
+		this.currentScope = scopeName;
+
+		if (!this.scopes[scopeName]) {
+			this.scopes[scopeName] = {
+				__parentScope: this.scopes[lastScope],
+				__name: scopeName
+			};
+		}
+
 		return node.children.map(this.stringify, this).join(', ');
 	},
 
@@ -186,7 +254,6 @@ GLSL.prototype.transforms = {
 	//decl defines it’s inner placeholders rigidly
 	decl: function (node) {
 		var result = '';
-
 
 		var typeNode = node.children[node.children.length - 2];
 		var decllist = node.children[node.children.length - 1];
@@ -219,10 +286,6 @@ GLSL.prototype.transforms = {
 			result += 'var ';
 		}
 
-
-		//FIXME: ponder on whether it is a good practice to augment nodes
-		decllist.dataType = typeNode.token.data;
-
 		result += this.stringify(decllist);
 
 		return result;
@@ -232,38 +295,60 @@ GLSL.prototype.transforms = {
 	//decl list is the same as in js, so just merge identifiers, that's it
 	//FIXME: except for maybe there is a variable names conflicts
 	decllist: function (node) {
-		var idTypes = [];
+		var ids = [];
 		var lastId = 0;
 
-		var dataType = node.dataType;
+		//get datatype - it is 4th children of a decl
+		var dataType = node.parent.children[4].token.data;
+
+		//get dimensions - it is from 5th to the len-1 nodes of a decl
+		//that’s in case if dimensions are defined in type like `float[3] c = 1;`
+		//result is [] or [3] or [1, 2] or [4, 5, 5], etc.
+		//that is OpenGL 3.0 feature
+		var dimensions = [];
+		for (var i = 5, l = node.parent.children.length - 1; i < l; i++) {
+			dimensions.push(parseInt(node.parent.children[i].children[0].children[0].data));
+		}
 
 		for (var i = 0, l = node.children.length; i < l; i++) {
 			var child = node.children[i];
 
 			if (child.type === 'ident') {
-				lastId = idTypes.push([this.stringify(child)]);
+				var ident = this.stringify(child);
+				lastId = ids.push(ident);
+
+				//save identifier to the scope
+				this.variable(ident, {
+					type: dataType,
+					node: child,
+					dimensions: []
+				});
 			}
 			else if (child.type === 'quantifier') {
-				idTypes[lastId - 1][1] = '[]';
+				//with non-first-class array like `const float c[3]`
+				//dimensions might be undefined, so we have to specify them here
+				var dimensions = this.variable(ids[lastId - 1]).dimensions;
+				dimensions.push(parseInt(child.children[0].children[0].data));
+				this.variable(ids[lastId - 1], {dimensions: dimensions});
 			}
 			else if (child.type === 'expr') {
+				var ident = ids[lastId - 1];
+
 				//ignore wrapping literals
 				var value = this.stringify(child);
-				idTypes[lastId - 1][1] = value;
+
+				//save identifier initial value
+				this.variable(ident, {value: value});
 			}
 			else {
 				throw Error('Undefined type in decllist: ' + child.type);
 			}
 		}
 
-		return idTypes.map(function (idVal) {
-			if (idVal[1] == null) {
-				return `${idVal[0]} = ${dataType}()`;
-			}
-			else {
-				return `${idVal[0]} = ${idVal[1]}`;
-			}
-		}).join(', ');
+		return ids.map(function (ident) {
+			return `${ident} = ${this.variable(ident).value}`;
+		}, this).join(', ');
+
 	},
 
 	//placeholders are empty objects - ignore them
@@ -325,14 +410,24 @@ GLSL.prototype.transforms = {
 	binary: function (node) {
 		var result = '';
 
+		var typeA = this.getType(node.children[0]);
+		var typeB = this.getType(node.children[1]);
 		var operator = this.operators[node.data];
+		var left = this.stringify(node.children[0]);
+		var right = this.stringify(node.children[1]);
 
-		result += this.stringify(node.children[0]);
-		result += `.${operator}(`;
-		result += this.stringify(node.children[1]);
-		result += ')';
+		//render primitive types with js operators
+		if (this.primitives[typeA] != null && this.primitives[typeB] != null) {
+			return `${left} ${node.data} ${right}`;
+		}
 
-		return result;
+		//if second arg is not primitive but the first is - swap order
+		if (this.primitives[typeA] != null && this.primitives[typeB] == null) {
+			return `${right}.${operator}(${left})`;
+		}
+
+		//otherwise - apply normal order op
+		return `${left}.${operator}(${right})`;
 	},
 
 	//assign - same as binary basically
@@ -341,8 +436,18 @@ GLSL.prototype.transforms = {
 
 		var operator = node.data;
 
-		var assignee = this.stringify(node.children[0]);
-		result += assignee;
+		var left = this.stringify(node.children[0]);
+		var right = this.stringify(node.children[1]);
+		var leftType = this.getType(node.children[0]);
+		var rightType = this.getType(node.children[1]);
+
+		//handle primitive with no doubts as floats
+		if (this.primitives[leftType] != null && this.primitives[rightType] != null) {
+			return `${left} ${operator} ${right}`;
+		}
+
+		//otherwise - expand custom assignments
+		result += left;
 		result += ` = `;
 
 		//operatory assign
@@ -354,7 +459,7 @@ GLSL.prototype.transforms = {
 		}
 		//simple assign
 		else {
-			result += this.stringify(node.children[1]);
+			result += right;
 		}
 
 		return result;
@@ -378,15 +483,31 @@ GLSL.prototype.transforms = {
 
 		var callName = node.children[0].data;
 
-		if (this.stdlib[callName]) this.bypassLiterals = true;
-
 		var args = node.children.slice(1);
 
-		//if first child of the call is array call - provide new array
+
+		//if first child of the call is array call - expand array
+		//FIXME: in cases of anonymously created arrays of arrays, outside of declarations, there might be an issue: `vec4[3][3](0,1)`
 		if (node.children[0].data === '[') {
-			result += '[';
-			result += args.map(this.stringify, this).join(', ');
-			result += ']';
+			var dimensions = [];
+			var keywordNode = node.children[0];
+			while (keywordNode.type != 'keyword') {
+				dimensions.push(parseInt(keywordNode.children[1].data));
+				keywordNode = keywordNode.children[0];
+			}
+
+			//if nested type is primitive - expand literals without wrapping
+			var value = '';
+			if (this.primitives[keywordNode.data] != null) {
+				value += args.map(this.stringify, this).join(', ');
+			} else {
+				value += keywordNode.data + '(';
+				value += args.map(this.stringify, this).join(', ');
+				value += ')';
+			}
+
+			//wrap array init expression
+			result += this.wrapDimensions(value, dimensions.reverse());
 		}
 
 		//else treat as function/constructor call
@@ -396,17 +517,137 @@ GLSL.prototype.transforms = {
 			result += ')';
 		}
 
-		if (this.stdlib[callName]) this.bypassLiterals = false;
-
 		return result;
 	},
 
 	//literal should always be wrapped to a type
 	literal: function (node) {
-		if (this.bypassLiterals) return node.data;
-		return 'float(' + node.data + ')';
+		return node.data;
 	}
 }
+
+
+/**
+ * Get/set variable from/to a [current] scope
+ */
+GLSL.prototype.variable = function (ident, data, scope) {
+	if (!scope) scope = this.currentScope;
+
+	//set/update variable
+	if (data) {
+		//create variable
+		if (!this.scopes[scope][ident]) {
+			this.scopes[scope][ident] = {};
+		}
+
+		var variable = extend(this.scopes[scope][ident], data);
+
+		//preset default value for a variable
+		if (data.value == null) {
+			if (this.primitives[variable.type] != null) {
+				variable.value = this.primitives[variable.type];
+			}
+			else {
+				variable.value = variable.type + `()`
+			}
+
+			variable.value = this.wrapDimensions(variable.value, variable.dimensions);
+		}
+		//if value is passed - we guess that variable knows how to init itself
+		//usually it is `call` node rendered
+		// else {
+		// }
+
+
+		//just set an id
+		if (variable.id == null) variable.id = ident;
+
+		//save scope
+		if (variable.scope == null) variable.scope = this.scopes[scope];
+
+		return variable;
+	}
+
+	//get varialbe
+	return this.scopes[scope][ident];
+};
+
+
+
+/**
+ * Return value wrapped to the proper number of dimensions
+ */
+GLSL.prototype.wrapDimensions = function (value, dimensions) {
+
+	//wrap value to dimensions
+	if (dimensions.length) {
+		if (typeof value === 'string') value = value.split(/\s*,\s*/);
+		value = dimensions.reduceRight(function (value, curr) {
+			var result = [];
+
+			//for each dimension number - wrap result n times
+			var val, prevVal;
+			for (var i = 0; i < curr; i++) {
+				val = Array.isArray(value) ? value[i] == null ? prevVal : value[i] : value;
+				prevVal = val;
+				result.push(val);
+			}
+			return `[${result.join(', ')}]`;
+		}, value);
+	}
+
+	return value;
+};
+
+
+
+/**
+ * Infer dataType of a node.
+ */
+GLSL.prototype.getType = function (node) {
+	if (node.type === 'ident') {
+		var id = node.token.data;
+
+		var scope = this.scopes[this.currentScope];
+
+		//find the closest scope with the id
+		while (scope[id] == null) {
+			scope = scope.__parentScope;
+		}
+
+		return scope[id].type;
+	}
+	else if (node.type === 'call') {
+		//FIXME: function calls are more difficult than this
+		return node.children[0].data;
+	}
+	else if (node.type === 'literal') {
+		if (/true|false/i.test(node.data)) return 'bool';
+		if (/.|[0-9]e[0-9]/.test(node.data)) return 'float';
+		if (/[0-9]/.test(node.data) > 0) return 'int';
+	}
+	else if (node.type === 'operator') {
+		if (node.data === '.') {
+			//FIXME: struct point-access is not necessarily a swizzle
+			if (/vec/.test(this.getType(node.children[0]))) {
+				var len = node.children[1].data.length;
+				//FIXME: not necessarily a float vector
+				if (len === 1) return 'float';
+				if (len === 2) return 'vec2';
+				if (len === 3) return 'vec3';
+				if (len === 4) return 'vec4';
+			}
+		}
+	}
+	else if (node.type === 'binary') {
+		return this.getType(node.children[0]);
+	}
+	else if (node.type === 'builtin') {
+		//for builtins just notify their simplicity (no need for them being spec types)
+		return 'bool';
+	}
+	unimplemented;
+};
 
 
 module.exports = GLSL;

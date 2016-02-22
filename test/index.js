@@ -28,11 +28,11 @@ test('Interface', function () {
 	attribute vec4 color;
 	varying vec4 fColor;
 	uniform vec2 uScreenSize;
-	float coeff = 1.0, coeff2;
+	float coeff = 1.0, coeff2 = coeff + 1.0;
 
 	void main (void) {
 		fColor = color;
-		vec2 position = vec2(uv.x, -uv.y) * coeff;
+		vec2 position = coeff * vec2(uv.x, -uv.y);
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy *= uv.yx;
 		gl_Position = vec4(position.yx, 0, 1);
@@ -44,12 +44,12 @@ test('Interface', function () {
 	var color = vec4();
 	var fColor = vec4();
 	var uScreenSize = vec2();
-	var coeff = float(1.0), coeff2 = float();
+	var coeff = 1.0, coeff2 = coeff + 1.0;
 
 	function main () {
 		fColor = color;
 		var position = vec2(uv.x, -uv.y).mult(coeff);
-		position.x = position.x.mult(uScreenSize.y.div(uScreenSize.x));
+		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.mult(uv.yx);
 		gl_Position = vec4(position.yx, 0, 1);
 	};
@@ -60,10 +60,14 @@ test('Interface', function () {
 	});
 
 	test('Stream', function (done) {
+		//TODO: bind scopes per GLSL-object, not per-line
 		var res = '';
 
-		StringStream(source.split('\n'))
+		StringStream(source.split('\n').map(function(v){return v + '\n'}))
 		.pipe(TokenStream())
+		// .on('data', function (chunk) {
+		// 	console.log(chunk);
+		// })
 		.pipe(ParseStream())
 		.pipe(CompileStream())
 		.on('end', function() {
@@ -235,11 +239,11 @@ test('Components access', function () {
 		`;
 
 		var res = `
-		var c = [float(5.0), float(7.2), float(1.1)], x = float(), y = float(1);
-		var g = float(), x = float(0);
-		var a = [g, float(1), g, float(2.3), g];
-		var b = [];
-		b = [g, g.add(float(1.0)), g.add(float(2.0))];
+		var c = [5.0, 7.2, 1.1], x = 0, y = 1;
+		var g = 0, x = 0;
+		var a = [g, 1, g, 2.3, g];
+		var b = [0, 0, 0];
+		b = [g, g + 1.0, g + 2.0];
 		`;
 
 		assert.equal(clean(glsl.compile(src)), clean(res));
@@ -329,7 +333,7 @@ test('Vec/matrix operators', function () {
 
 	var res = `
 		var v = vec3(), u = vec3();
-		var f = float();
+		var f = 0;
 		v = u.add(f);
 	`;
 	});
