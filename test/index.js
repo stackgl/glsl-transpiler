@@ -21,14 +21,16 @@ function clean (str) {
 
 
 test('Interface', function () {
-	//examplary source
+	//examplary source, containing all possible tokens
 	var source = `
 	precision mediump float;
 	attribute vec2 uv, xy = vec2(0);
 	attribute vec4 color;
-	varying vec4 fColor;
+	varying vec4 fColor, twoColors[2];
 	uniform vec2 uScreenSize;
-	float coeff = 1.0, coeff2 = coeff + 1.0;
+	float coeff = 1.0, coeff2 = coeff + 1.0, a[2], b[3][2] = float[3](a, a, a);
+
+	int count (float num);
 
 	void main (void) {
 		fColor = color;
@@ -36,15 +38,37 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy *= uv.yx;
 		gl_Position = vec4(position.yx, 0, 1);
+		return;
+	}
+
+	/* just a test function */
+	int count (in float num) {
+		int sum = 0;
+		for (int i = 0; i < 10; i++) {
+			sum += i;
+			if (i > 4) continue;
+			else break;
+
+			discard;
+		}
+		int i = 0;
+		while (i < 10) {
+			--sum;
+		}
+		do {
+			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+		}
+		while (i < 10);
+		return sum;
 	}
 	`;
 
 	var result = `
 	var uv = vec2(), xy = vec2(0);
 	var color = vec4();
-	var fColor = vec4();
+	var fColor = vec4(), twoColors = [vec4(), vec4()];
 	var uScreenSize = vec2();
-	var coeff = 1.0, coeff2 = coeff + 1.0;
+	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
 	function main () {
 		fColor = color;
@@ -52,8 +76,32 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.mult(uv.yx);
 		gl_Position = vec4(position.yx, 0, 1);
+		return;
+	};
+
+	function count (num) {
+		var sum = 0;
+		for (var i = 0; i < 10; i++) {
+			sum += i;
+			if (i > 4) {
+				continue;
+			} else {
+				break;
+			};
+
+			discard();
+		};
+		var i = 0;
+		while (i < 10) {
+			--sum;
+		};
+		do {
+			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+		} while (i < 10);
+		return sum;
 	};
 	`;
+
 
 	test('Direct', function () {
 		assert.equal(clean(compile(source)), clean(result));
@@ -319,23 +367,25 @@ test('Components access', function () {
 
 test('Vec/matrix operators', function () {
 	test('vec + number', function () {
-	var src = `
-		vec3 v, u;
-		float f;
-		v = u + f;
-	`;
+		var src = `
+			vec3 v, u;
+			float f;
+			v = u + f;
+		`;
 
-	var equiv = `
-		v.x = u.x + f;
-		v.y = u.y + f;
-		v.z = u.z + f;
-	`;
+		var equiv = `
+			v.x = u.x + f;
+			v.y = u.y + f;
+			v.z = u.z + f;
+		`;
 
-	var res = `
-		var v = vec3(), u = vec3();
-		var f = 0;
-		v = u.add(f);
-	`;
+		var res = `
+			var v = vec3(), u = vec3();
+			var f = 0;
+			v = u.add(f);
+		`;
+
+		assert.equal(clean(compile(src)), clean(res));
 	});
 
 	test('vec + vec', function () {
@@ -351,57 +401,50 @@ test('Vec/matrix operators', function () {
 		`;
 
 		var res = `
-			var v = vec3, u = vec3, w = vec3;
+			var v = vec3(), u = vec3(), w = vec3();
 			w = v.add(u);
 		`;
+
+		assert.equal(clean(compile(src)), clean(res));
 	});
 
-	test('vec * mat', function () {
+	test('vec * mat & mat * vec', function () {
 		var src = `
 			vec3 v, u;
 			mat3 m;
 			u = v * m;
+			u = m * v;
 		`;
 
 		var equiv = `
 			u.x = dot(v, m[0]); // m[0] is the left column of m
 			u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
 			u.z = dot(v, m[2]);
+
+			u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
+			u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
+			u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
 		`;
 
 		var res = `
 			var v = vec3(), u = vec3();
 			var m = mat3();
 			u = v.mult(m);
+			u = m.mult(v);
 		`;
+
+		assert.equal(clean(compile(src)), clean(res));
 	});
-
-	test('mat * vec', function () {
-		var src = `
-		u = m * v;
-		`;
-
-		var equiv = `
-		u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
-		u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
-		u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
-		`;
-
-		var res = `
-		var u = m.mult(v);
-		`;
-	});
-
 
 	test('Matrix multiplication', function () {
 		var src = `
-		mat3 m, n, r;
-		r = m * n;
+			mat3 m, n, r;
+			r = m * n;
 		`;
 
 		var res = `
-		var m = mat3(), n = mat3(), r = mat3();
-		r = m.mult(n);
+			var m = mat3(), n = mat3(), r = mat3();
+			r = m.mult(n);
 		`;
 
 		var equiv = `
@@ -416,40 +459,61 @@ test('Vec/matrix operators', function () {
 		r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
 		`;
 
-		compile(src);
+		assert.equal(clean(compile(src)), clean(res));
 	});
 });
 
 test.skip('Functions', function () {
-	`
-	vec4 f(in vec4 x, out vec4 y); // (A)
-	vec4 f(in vec4 x, out uvec4 y); // (B) okay, different argument type
-	vec4 f(in ivec4 x, out dvec4 y); // (C) okay, different argument type
-	int f(in vec4 x, out vec4 y); // error, only return type differs
-	vec4 f(in vec4 x, in vec4 y); // error, only qualifier differs
-	vec4 f(const in vec4 x, out vec4 y); // error, only qualifier differs
+	test('Arguments', function () {
+		var src = `
+		vec4 f(in vec4 x, out vec4 y); // (A)
+		vec4 f(in vec4 x, out uvec4 y); // (B) okay, different argument type
+		vec4 f(in ivec4 x, out dvec4 y); // (C) okay, different argument type
+		int f(in vec4 x, out vec4 y); // error, only return type differs
+		vec4 f(in vec4 x, in vec4 y); // error, only qualifier differs
+		vec4 f(const in vec4 x, out vec4 y); // error, only qualifier differs
 
-	f(vec4, vec4); // exact match of vec4 f(in vec4 x, out vec4 y)
-	f(vec4, uvec4); // exact match of vec4 f(in vec4 x, out uvec4 y)
-	f(vec4, ivec4); // matched to vec4 f(in vec4 x, out vec4 y)
-	// (C) not relevant, can't convert vec4 to
-	// ivec4. (A) better than (B) for 2nd
-	// argument (rule 3), same on first argument.
-	f(ivec4, vec4); // NOT matched. All three match by implicit
-	// conversion. (C) is better than (A) and (B)
-	// on the first argument. (A) is better than
-	// (B) and (C).
-	`
+		f(vec4, vec4); // exact match of vec4 f(in vec4 x, out vec4 y)
+		f(vec4, uvec4); // exact match of vec4 f(in vec4 x, out uvec4 y)
+		f(vec4, ivec4); // matched to vec4 f(in vec4 x, out vec4 y)
+		// (C) not relevant, can't convert vec4 to
+		// ivec4. (A) better than (B) for 2nd
+		// argument (rule 3), same on first argument.
+		f(ivec4, vec4); // NOT matched. All three match by implicit
+		// conversion. (C) is better than (A) and (B)
+		// on the first argument. (A) is better than
+		// (B) and (C).
+		`;
+
+		var res = `
+		`;
+
+		assert.equal(clean(compile(src)), clean(res));
+	});
+
+	test('Interface', function () {
+		//as far functions are hoisted, we can not care really much about
+		var src = `
+		vec4 f(in vec4 x);
+
+		vec4 f(in vec4 x) {
+			x;
+		}
+		`;
+
+		var res = `
+		function f(x) {
+			x;
+		};
+		`;
+	});
 });
 
-test.skip('Discard (fragment shader)', function () {
+test.skip('Builtins', function () {
 	`
 	if (intensity < 0.0)
 	 discard;
 	`
-});
-
-test.skip('Builtin vars', function () {
 	`
 	// In the vertex language, the built-ins are intrinsically declared as:
 	in int gl_VertexID;

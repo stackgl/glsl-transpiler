@@ -89,7 +89,7 @@ var result = GLSL(options?).stringify(tree);
 
 ### options
 
-* `stdlib` — custom stdlib instance to use to polyfill default methods. Can be useful to extend webgl to OpenGL env. By default, glsl-stdlib is used.
+* `stdlib` — custom stdlib instance to use to polyfill default methods. Can be useful to extend webgl to OpenGL env. By default, [glsl-stdlib](https://github.com/dfcreative/glsl-stdlib) is used.
 
 
 ### events

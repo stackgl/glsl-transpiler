@@ -101,6 +101,8 @@ GLSL.prototype.compile = function compile (arg) {
  * Transform any glsl ast node to js
  */
 GLSL.prototype.stringify = function stringify (node) {
+	if (!node) return '';
+
 	//in some [weird] cases glsl-parser returns node object extended from other node
 	//which properties exist only in prototype. We gotta ignore that.
 	//See #Structures test for example.
@@ -207,6 +209,9 @@ GLSL.prototype.transforms = {
 	function: function (node) {
 		var result = '';
 
+		//if function has no body, that means it is interface for it. We can ignore it.
+		if (node.children.length < 3) return '';
+
 		//add function name - just render ident node
 		assert.equal(node.children[0].type, 'ident', 'Function should have an identifier.');
 		var name = this.stringify(node.children[0]);
@@ -243,7 +248,9 @@ GLSL.prototype.transforms = {
 			};
 		}
 
-		return node.children.map(this.stringify, this).join(', ');
+		var result = node.children.map(this.stringify, this).join(', ');
+
+		return result;
 	},
 
 	//declarations are mapped to var a = n, b = m;
@@ -273,6 +280,12 @@ GLSL.prototype.transforms = {
 			result += 'var ';
 		}
 		else if (node.token.data === 'uniform') {
+			result += 'var ';
+		}
+		else if (node.token.data === 'buffer') {
+			result += 'var ';
+		}
+		else if (node.token.data === 'shared') {
 			result += 'var ';
 		}
 		else if (node.token.data === 'const') {
@@ -341,7 +354,10 @@ GLSL.prototype.transforms = {
 			}
 		}
 
+		var functionargs = node.parent.parent.type === 'functionargs';
+
 		return ids.map(function (ident) {
+			if (functionargs) return ident;
 			return `${ident} = ${this.variable(ident).value}`;
 		}, this).join(', ');
 
@@ -352,9 +368,27 @@ GLSL.prototype.transforms = {
 		return node.token.data;
 	},
 
-	// forloop: null,
-	// whileloop: null,
-	// if: null,
+	//i++, --i etc
+	suffix: function (node) {
+		return this.stringify(node.children[0]) + node.data;
+	},
+
+	//loops are the same as in js
+	forloop: function (node) {
+		var init = this.stringify(node.children[0]);
+		var cond = this.stringify(node.children[1]);
+		var iter = this.stringify(node.children[2]);
+		var body = this.stringify(node.children[3]);
+
+		return `for (${init}; ${cond}; ${iter}) {\n${body}\n}`;
+	},
+
+	whileloop: function (node) {
+		var cond = this.stringify(node.children[0]);
+		var body = this.stringify(node.children[1]);
+
+		return `while (${cond}) {\n${body}\n}`;
+	},
 
 	//access operators - expand to arrays
 	operator: function (node) {
@@ -384,7 +418,10 @@ GLSL.prototype.transforms = {
 		return '';
 	},
 
-	// comment: null,
+	//FIXME: it never creates comments
+	comment: function (node) {
+	},
+
 	// preprocessor: null,
 
 	//keywords are rendered as they are
@@ -396,11 +433,29 @@ GLSL.prototype.transforms = {
 	ident: function (node) {
 		return node.data;
 	},
-	// return: null,
-	// continue: null,
-	// break: null,
-	// discard: null,
-	// 'do-while': null,
+
+	return: function (node) {
+		var expr = this.stringify(node.children[0]);
+		return 'return' + (expr ? ' ' + expr : '');
+	},
+
+	continue: function () {
+		return 'continue';
+	},
+
+	break: function () {
+		return 'break';
+	},
+
+	discard: function () {
+		return 'discard()';
+	},
+
+	'do-while': function (node) {
+		var exprs = this.stringify(node.children[0]);
+		var cond = this.stringify(node.children[1]);
+		return `do {\n${exprs}\n} while (${cond})`;
+	},
 
 	//simple binary expressions
 	binary: function (node) {
@@ -467,7 +522,13 @@ GLSL.prototype.transforms = {
 		return result;
 	},
 
-	// ternary: null,
+	ternary: function (node) {
+		var cond = this.stringify(node.children[0]);
+		var a = this.stringify(node.children[1]);
+		var b = this.stringify(node.children[2]);
+
+		return `${cond} ? ${a} : ${b}`;
+	},
 
 	unary: function (node) {
 		return node.data + this.stringify(node.children[0]);
@@ -528,7 +589,31 @@ GLSL.prototype.transforms = {
 	//literal should always be wrapped to a type
 	literal: function (node) {
 		return node.data;
+	},
+
+	//ifs are the same as js
+	if: function (node) {
+		var cond = this.stringify(node.children[0]);
+		var ifBody = this.stringify(node.children[1]);
+
+		var result = `if (${cond}) {\n${ifBody}\n}`;
+
+		if (node.children.length > 1) {
+			var elseBody = this.stringify(node.children[2]);
+			result += ` else {\n${elseBody}\n}`;
+		}
+
+		return result;
+	},
+
+	//grouped expression like a = (a - 1);
+	group: function (node) {
+		return '(' + node.children.map(this.stringify, this).join(', ') + ')';
 	}
+
+	// switch: function () {
+	//FIXME: not implemented in glsl-parser
+	// }
 }
 
 
@@ -618,6 +703,7 @@ GLSL.prototype.getType = function (node) {
 		//find the closest scope with the id
 		while (scope[id] == null) {
 			scope = scope.__parentScope;
+			if (!scope) throw `'${id}' is not defined`;
 		}
 
 		return scope[id].type;
@@ -655,6 +741,13 @@ GLSL.prototype.getType = function (node) {
 		//for builtins just notify their simplicity (no need for them being spec types)
 		return 'bool';
 	}
+	else if (node.type === 'ternary') {
+		return this.getType(node.children[1]);
+	}
+	else if (node.type === 'group') {
+		return this.getType(node.children[0]);
+	}
+
 	unimplemented;
 };
 
