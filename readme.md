@@ -74,7 +74,7 @@ fs.createReadStream('./source.glsl')
 
 ### glsl-js
 
-To apply compilation straight to glsl AST, use main `glsl-js`:
+To apply compilation straight to glsl AST, use the main `glsl-js`:
 
 ```js
 var GLSL = require('glsl-js');

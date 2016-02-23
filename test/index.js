@@ -108,7 +108,6 @@ test('Interface', function () {
 	});
 
 	test('Stream', function (done) {
-		//TODO: bind scopes per GLSL-object, not per-line
 		var res = '';
 
 		StringStream(source.split('\n').map(function(v){return v + '\n'}))

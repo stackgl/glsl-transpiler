@@ -1,5 +1,5 @@
 /**
- * Transform from glsl to js.
+ * Transform glsl to js.
  *
  * @module  glsl-js
  */
@@ -10,7 +10,7 @@ var assert = require('assert');
 var flatten = require('array-flatten');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
-var stdlib = require('../glsl-stdlib');
+var stdlib = require('glsl-stdlib');
 var extend = require('xtend/mutable');
 
 

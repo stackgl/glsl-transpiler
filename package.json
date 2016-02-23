@@ -6,6 +6,7 @@
   "dependencies": {
     "array-flatten": "^2.0.0",
     "glsl-parser": "^2.0.0",
+    "glsl-stdlib": "^1.0.0",
     "glsl-tokenizer": "^2.0.2",
     "inherits": "^2.0.1",
     "xtend": "^4.0.1"
