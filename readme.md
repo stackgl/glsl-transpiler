@@ -43,7 +43,7 @@ function main () {
 
 ### glsl-js/string
 
-To compile glsl source code to js directly, just pass string as the argument and it will return compiled string:
+To compile glsl source code to js directly, just pass a string as the argument and it will return the compiled string:
 
 ```js
 var compile = require('glsl-js/string');
@@ -89,23 +89,23 @@ var result = GLSL(options?).stringify(tree);
 
 ### options
 
-* `stdlib` — custom stdlib instance to use to polyfill default methods. Can be useful to extend webgl to OpenGL env. By default, [glsl-stdlib](https://github.com/dfcreative/glsl-stdlib) is used.
+* `stdlib` — custom stdlib instance to use to polyfill default methods. Can be useful to extend webgl to OpenGL env. By default [glsl-stdlib](https://github.com/dfcreative/glsl-stdlib) is used.
 
 
 ### events
 
 _GLSL_ instance emits events during processing chunks:
 
-* `glsl.on('start')` — invoked when `glsl.stringify()` is called.
+* `glsl.on('start')` — invoked when `glsl.stringify()` is called the first time.
 * `glsl.on('<nodeType>')` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list.
-* `glsl.on('end')` — invoked right before the end of `glsl.stringify()`.
+* `glsl.on('end')` — invoked right before the end of the last `glsl.stringify()`.
 
 
 ## Related
 
-> [fake-gl](https://npmjs.org/package/fake-gl) — webgl implementation in node.</br>
-> [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) — webgl/opengl stdlib for node.</br>
-> [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
+> [gl-js](https://npmjs.org/package/gl-js) — webgl implementation in node.</br>
+> [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) — webgl/opengl stdlib for gl-js.</br>
 > [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
-> [glsl.js](https://npmjs.org/package/glsl) — glsl to asm.js by [@devongovett](https://github.com/devongovett) compiler built with [jison](https://npmjs.org/package/jison). Project is abandoned :(.</br>
+> [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
+> [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.</br>
