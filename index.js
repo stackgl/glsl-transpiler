@@ -122,12 +122,14 @@ GLSL.prototype.stringify = function stringify (node) {
 		this.started = true;
 		startCall = true;
 	}
+
+	//apply node serialization
 	var result = t.call(this, node);
 
 	//notify that handle has passed
 	this.emit(node.type, node);
 
-	//envoke end
+	//invoke end
 	if (startCall) {
 		this.started = false;
 		this.emit('end', node);
@@ -141,6 +143,7 @@ GLSL.prototype.stringify = function stringify (node) {
  * Polyfill types — generate string source code for the types detected during compilation
  */
 GLSL.prototype.polyfill = function polyfill (types) {
+	unimplemented;
 	for (var type in types) {
 		var constr = this.stdlib[type];
 	}
@@ -151,7 +154,8 @@ GLSL.prototype.polyfill = function polyfill (types) {
  * List of transforms for various token types
  */
 GLSL.prototype.transforms = {
-	//To keep lines consistency, should be rendered with regarding line numbers
+	//FIXME: To keep lines consistency should be rendered with regarding line numbers
+	//but that is difficult in stream cases
 	stmtlist: function (node) {
 		if (!node.children.length) return '';
 
@@ -229,7 +233,7 @@ GLSL.prototype.transforms = {
 		result = result.replace(/\n/g, '\n\t');
 		result += '\n}';
 
-		//get scope back to global after fn ended
+		//get scope back to the global after fn ended
 		this.currentScope = this.scopes[this.currentScope].__parentScope.__name;
 
 		return result;
@@ -303,16 +307,15 @@ GLSL.prototype.transforms = {
 
 
 	//decl list is the same as in js, so just merge identifiers, that's it
-	//FIXME: except for maybe there is a variable names conflicts
 	decllist: function (node) {
 		var ids = [];
 		var lastId = 0;
 
-		//get datatype - it is 4th children of a decl
+		//get datatype - it is the 4th children of a decl
 		var dataType = node.parent.children[4].token.data;
 
 		//get dimensions - it is from 5th to the len-1 nodes of a decl
-		//that’s in case if dimensions are defined in type like `float[3] c = 1;`
+		//that’s in case if dimensions are defined first-class like `float[3] c = 1;`
 		//result is [] or [3] or [1, 2] or [4, 5, 5], etc.
 		//that is OpenGL 3.0 feature
 		var dimensions = [];
@@ -423,6 +426,7 @@ GLSL.prototype.transforms = {
 	comment: function (node) {
 	},
 
+	//FIXME: manage this guys
 	// preprocessor: null,
 
 	//keywords are rendered as they are
@@ -440,17 +444,11 @@ GLSL.prototype.transforms = {
 		return 'return' + (expr ? ' ' + expr : '');
 	},
 
-	continue: function () {
-		return 'continue';
-	},
+	continue: 'continue',
 
-	break: function () {
-		return 'break';
-	},
+	break: 'break',
 
-	discard: function () {
-		return 'discard()';
-	},
+	discard: 'discard()',
 
 	'do-while': function (node) {
 		var exprs = this.stringify(node.children[0]);
@@ -587,7 +585,8 @@ GLSL.prototype.transforms = {
 		return result;
 	},
 
-	//literal should always be wrapped to a type
+	//literal are rendered the same in js, as it very natural
+	//FIXME: special cases of floats
 	literal: function (node) {
 		return node.data;
 	},
