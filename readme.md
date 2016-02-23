@@ -49,7 +49,7 @@ To compile glsl source code to js directly, just pass string as the argument and
 var compile = require('glsl-js/string');
 var glslify = require('glslify');
 
-compile(glslify('./source.glsl'));
+compile(glslify('./source.glsl'), options);
 ```
 
 ### glsl-js/stream
@@ -64,7 +64,7 @@ var tokenize = require('glsl-tokenizer/stream');
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
 .pipe(parse())
-.pipe(compile())
+.pipe(compile(options?))
 .once('end', function () {
 	//this.source contains the actual version of the compiled code
 	//and gets updated on each input chunk of data.
@@ -86,6 +86,11 @@ var tokens = tokenize(source);
 var tree = parse(tokens);
 var result = GLSL(options?).stringify(tree);
 ```
+
+### options
+
+* `stdlib` — custom stdlib instance to use to polyfill default methods. Can be useful to extend webgl to OpenGL env. By default, glsl-stdlib is used.
+
 
 ### events
 

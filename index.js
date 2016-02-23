@@ -19,15 +19,10 @@ var extend = require('xtend/mutable');
  *
  * @constructor
  */
-function GLSL (stdlib) {
-	if (!(this instanceof GLSL)) return new GLSL(stdlib);
+function GLSL (options) {
+	if (!(this instanceof GLSL)) return new GLSL(options);
 
-	if (stdlib) {
-		this.stdlib = stdlib;
-	}
-	this.on('end', function () {
-		// console.log(this.scopes);
-	});
+	extend(this, options);
 
 	this.reset();
 };
@@ -39,6 +34,7 @@ inherits(GLSL, Emitter);
  * Minimal webgl default types values. Replace with other stdlib, if required.
  */
 GLSL.prototype.stdlib = stdlib;
+
 
 
 /**
@@ -391,9 +387,9 @@ GLSL.prototype.transforms = {
 	// comment: null,
 	// preprocessor: null,
 
-	//keywords, like vec2, attribute etc are mostly ignored
-	//FIXME: find cases where it is not true
+	//keywords are rendered as they are
 	keyword: function (node) {
+		return node.data;
 	},
 
 	//identifier is a name of variable or function, just return it as is
@@ -415,6 +411,12 @@ GLSL.prototype.transforms = {
 		var operator = this.operators[node.data];
 		var left = this.stringify(node.children[0]);
 		var right = this.stringify(node.children[1]);
+
+		//for case of array access like float[3] or something[N] - return as is
+		if (node.data === '[') {
+			return `${typeA}[${right}]`;
+		}
+
 
 		//render primitive types with js operators
 		if (this.primitives[typeA] != null && this.primitives[typeB] != null) {
@@ -481,9 +483,12 @@ GLSL.prototype.transforms = {
 	call: function (node) {
 		var result = '';
 
-		var callName = node.children[0].data;
+		//first node is caller: float(), float[2](), vec4[1][3][4]() etc.
+		var callerNode = node.children[0];
+		var callName = this.stringify(node.children[0]);
 
 		var args = node.children.slice(1);
+		var argValues = args.map(this.stringify, this);
 
 
 		//if first child of the call is array call - expand array
@@ -498,21 +503,21 @@ GLSL.prototype.transforms = {
 
 			//if nested type is primitive - expand literals without wrapping
 			var value = '';
-			if (this.primitives[keywordNode.data] != null) {
+			if (this.primitives[callName] != null) {
 				value += args.map(this.stringify, this).join(', ');
 			} else {
-				value += keywordNode.data + '(';
+				value += callName + '(';
 				value += args.map(this.stringify, this).join(', ');
 				value += ')';
 			}
 
 			//wrap array init expression
-			result += this.wrapDimensions(value, dimensions.reverse());
+			result += this.wrapDimensions(argValues, dimensions.reverse());
 		}
 
 		//else treat as function/constructor call
 		else {
-			result += node.children[0].data + '(';
+			result += callName + '(';
 			result += args.map(this.stringify, this).join(', ');
 			result += ')';
 		}
@@ -542,7 +547,7 @@ GLSL.prototype.variable = function (ident, data, scope) {
 
 		var variable = extend(this.scopes[scope][ident], data);
 
-		//preset default value for a variable
+		//preset default value for a variable, if undefined
 		if (data.value == null) {
 			if (this.primitives[variable.type] != null) {
 				variable.value = this.primitives[variable.type];
@@ -550,7 +555,6 @@ GLSL.prototype.variable = function (ident, data, scope) {
 			else {
 				variable.value = variable.type + `()`
 			}
-
 			variable.value = this.wrapDimensions(variable.value, variable.dimensions);
 		}
 		//if value is passed - we guess that variable knows how to init itself
@@ -581,14 +585,15 @@ GLSL.prototype.wrapDimensions = function (value, dimensions) {
 
 	//wrap value to dimensions
 	if (dimensions.length) {
-		if (typeof value === 'string') value = value.split(/\s*,\s*/);
+		if (!Array.isArray(value)) value = [value];
+
 		value = dimensions.reduceRight(function (value, curr) {
 			var result = [];
 
 			//for each dimension number - wrap result n times
-			var val, prevVal;
+			var prevVal, val;
 			for (var i = 0; i < curr; i++) {
-				val = Array.isArray(value) ? value[i] == null ? prevVal : value[i] : value;
+				val = value[i] == null ? prevVal : value[i];
 				prevVal = val;
 				result.push(val);
 			}
@@ -638,6 +643,10 @@ GLSL.prototype.getType = function (node) {
 				if (len === 4) return 'vec4';
 			}
 		}
+	}
+	//FIXME: guess every keyword is a type, isn’t it?
+	else if (node.type === 'keyword') {
+		return node.data;
 	}
 	else if (node.type === 'binary') {
 		return this.getType(node.children[0]);

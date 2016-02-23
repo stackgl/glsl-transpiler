@@ -249,11 +249,11 @@ test('Components access', function () {
 		assert.equal(clean(glsl.compile(src)), clean(res));
 	});
 
-	test.skip('Arrays of arrays', function () {
+	test('Arrays of arrays', function () {
 		var src = `
 		vec4 b[2];
 		vec4 c[3][2] = vec4[3](b, b, b);
-		vec4 d[4][3][2] = vec4[3][2](c, c, c, c);
+		vec4 d[4][3][2] = vec4[4](c, c, c, c);
 		// vec4[3][2](b, b, b); // constructor
 		// vec4[][2](b, b, b); // constructor, valid, size deduced
 		// vec4[3][](b, b, b); // constructor, valid, size deduced
@@ -261,12 +261,12 @@ test('Components access', function () {
 		`;
 
 		var res = `
-		var b = [[0, 0, 0, 0], [0, 0, 0, 0]];
-		[b, b, b];
-		[]
+		var b = [vec4(), vec4()];
+		var c = [b, b, b];
+		var d = [c, c, c, c];
 		`;
 
-		// assert.equal(clean(glsl.compile(src)), clean(res));
+		assert.equal(clean(glsl.compile(src)), clean(res));
 	});
 
 

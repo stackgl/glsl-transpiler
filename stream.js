@@ -10,8 +10,8 @@ var GLSL = require('./');
 var Transform = require('stream').Transform;
 var inherits = require('inherits');
 
-function GlslJsStream (stdlib) {
-	if (!(this instanceof GlslJsStream)) return new GlslJsStream(stdlib);
+function GlslJsStream (options) {
+	if (!(this instanceof GlslJsStream)) return new GlslJsStream(options);
 
 	Transform.call(this, {
 		objectMode: true
@@ -28,7 +28,7 @@ function GlslJsStream (stdlib) {
 	});
 
 	//glsl compiler
-	this.glsl = GLSL(stdlib);
+	this.glsl = GLSL(options);
 };
 
 inherits(GlslJsStream, Transform);
