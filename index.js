@@ -71,8 +71,7 @@ GLSL.prototype.reset = function () {
 	//collection of types used during processing. To polyfill them after.
 	this.usedTypes = {};
 
-	//scopes analysed. Each scope is named by the function they are constained in
-	//_ is a global scope
+	//scopes analysed. Each scope is named by the function they are contained in
 	this.scopes = {
 		global: {
 			__name: 'global',
@@ -110,7 +109,9 @@ GLSL.prototype.stringify = function stringify (node) {
 
 	var t = this.transforms[node.type];
 
-	if (t === undefined) return '?' + node.type + '?';
+	//wrap unknown node
+	if (t === undefined) return `/* ${node.type} */`;
+
 	if (!t) return '';
 	if (typeof t !== 'function') return t;
 
