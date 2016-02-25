@@ -588,7 +588,11 @@ GLSL.prototype.transforms = {
 	//literal are rendered the same in js, as it very natural
 	//FIXME: special cases of floats
 	literal: function (node) {
-		return node.data;
+		//convert 023 → 0o23
+		if (/^0[0-9]+/.test(node.data)) {
+			node.data = '0o' + node.data.slice(1);
+		}
+		return Number(node.data);
 	},
 
 	//ifs are the same as js
