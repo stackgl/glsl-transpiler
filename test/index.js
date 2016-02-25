@@ -104,7 +104,7 @@ test('Interface', function () {
 
 
 	test('Direct', function () {
-		assert.equal(clean(compile(source)), clean(result));
+		assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
 	});
 
 	test('Stream', function (done) {
@@ -159,25 +159,37 @@ test.skip('main function', function() {
 });
 
 
-test.skip('primative variable declarations', function() {
-	it('should default ints to 0', function() {
-	checkMain('void main() { int test; }',      'function main() { var test = 0; }');
-	checkMain('void main() { int test, foo; }', 'function main() { var test = 0, foo = 0; }');
+test('primative variable declarations', function() {
+	test('should default ints to 0', function() {
+	assert.equal(
+		clean(compile('void main() { int test; }')),
+		clean('function main () {\nvar test = 0;\n};'));
+	assert.equal(
+		clean(compile('void main() { int test, foo; }')),
+		clean('function main () {\nvar test = 0, foo = 0;\n};'));
 	});
 
-	it('should default floats to 0.0', function() {
-	checkMain('void main() { float test; }',      'function main() { var test = (0.0); }');
-	checkMain('void main() { float test, foo; }', 'function main() { var test = (0.0), foo = (0.0); }');
+	test('should default floats to 0.0', function() {
+	assert.equal(
+		clean(compile('void main() { float test; }')),
+		clean('function main () {\nvar test = 0;\n};'));
+	assert.equal(
+		clean(compile('void main() { float test, foo; }')),
+		clean('function main () {\nvar test = 0, foo = 0;\n};'));
 	});
 
-	it('should default bools to 0 (false)', function() {
-	checkMain('void main() { bool test; }',      'function main() { var test = 0; }');
-	checkMain('void main() { bool test, foo; }', 'function main() { var test = 0, foo = 0; }');
+	test('should default bools to 0 (false)', function() {
+	assert.equal(
+		clean(compile('void main() { bool test; }')),
+		clean('function main () {\nvar test = false;\n};'));
+	assert.equal(
+		clean(compile('void main() { bool test, foo; }')),
+		clean('function main () {\nvar test = false, foo = false;\n};'));
 	});
 });
 
 
-test.only('primative variable initializers', function() {
+test('primative variable initializers', function() {
 	test('should allow valid int initializations', function() {
 		assert.equal(
 			clean(compile('void main() { int test = 1; }')),
@@ -199,29 +211,29 @@ test.only('primative variable initializers', function() {
 	test('should allow valid float initializations', function() {
 		assert.equal(
 			clean(compile('void main() { float test = 1.0; }')),
-			clean('function main () {\nvar test = 1;\n};'));
+			clean('function main () {\nvar test = 1.0;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = .04; }')),
-			clean('function main () {\nvar test = 0.04;\n};'));
+			clean('function main () {\nvar test = .04;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = 0.50; }')),
-			clean('function main () {\nvar test = 0.5;\n};'));
+			clean('function main () {\nvar test = 0.50;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = 55.23; }')),
 			clean('function main () {\nvar test = 55.23;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = 5e3; }')),
-			clean('function main () {\nvar test = 5000;\n};'));
+			clean('function main () {\nvar test = 5e3;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = 5.5e3; }')),
-			clean('function main () {\nvar test = 5500;\n};'));
+			clean('function main () {\nvar test = 5.5e3;\n};'));
 		//FIXME: glsl-tokenizer issue
 		// assert.equal(
 		// 	clean(compile('void main() { float test = 5.5e-3; }')),
 		// 	clean('function main () {\nvar test = 0.0055;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = .5e3; }')),
-			clean('function main () {\nvar test = 500;\n};'));
+			clean('function main () {\nvar test = .5e3;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test, foo = 2.2, bar; }')),
 			clean('function main () {\nvar test = 0, foo = 2.2, bar = 0;\n};'));

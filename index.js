@@ -592,7 +592,9 @@ GLSL.prototype.transforms = {
 		if (/^0[0-9]+/.test(node.data)) {
 			node.data = '0o' + node.data.slice(1);
 		}
-		return Number(node.data);
+
+		//if special format - parse it as int, else - return unchanged
+		return /[xob]/.test(node.data) ? Number(node.data) : node.data;
 	},
 
 	//ifs are the same as js
