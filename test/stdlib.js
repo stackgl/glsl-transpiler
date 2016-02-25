@@ -154,8 +154,18 @@ test.only('Types constructors', function () {
 		assert.equal(v.b, 1.2);
 		assert.equal(v.a, undefined);
 	});
+
+	test('vec4(vec3, float)', function () {
+		var v = vec4(vec3(0, 4, 1.2), 0);
+
+		assert.equal(v.length(), 4);
+		assert.equal(v.s, 0);
+		assert.equal(v.t, 4);
+		assert.equal(v.p, 1.2);
+		assert.equal(v.d, 0);
+	});
+
 	`
-	vec4(vec3, float)
 	vec4(float, vec3)
 	vec4(vec2, vec2)
 

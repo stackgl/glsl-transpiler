@@ -34,7 +34,7 @@ test('TypedArray vs inherited array', function () {
 });
 
 
-test('TypedArray vs wrapped array', function () {
+test.only('TypedArray vs wrapped array', function () {
 	//Test setup: how much the wrapper access is slower than array?
 	//Result: unfortunately, growth is exponential or even worse, if to provide class wrappers with inner data as array.
 	//but defining custom methods on array instances in constructor is quite alright, even faster sometimes. We can easily do swizzles.

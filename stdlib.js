@@ -279,14 +279,14 @@ function swizzle (constr) {
 			for (var j = 0; j <= dim; j++) {
 				for (var k = 0; k <= dim; k++) {
 					for (var l = 0; l <= dim; l++) {
-						createSizzle(constr, i,j,k,l,abbr);
+						createSwizzle(constr, i,j,k,l,abbr);
 					}
 				}
 			}
 		}
 	});
 
-	function createSizzle (constr, i,j,k,l, abbr) {
+	function createSwizzle (constr, i,j,k,l, abbr) {
 		var x = abbr[i];
 		var y = abbr[j];
 		var z = abbr[k];
@@ -301,13 +301,20 @@ function swizzle (constr) {
 
 		Object.defineProperty(constr.prototype, prop, {
 			get: function () {
+				if (len < 2) return this[i];
+				if (len < 3) return vec(this[i], this[j]);
+				if (len < 4) return vec(this[i], this[j], this[k]);
 				return vec(this[i], this[j], this[k], this[l]);
 			},
 			set: function (value) {
 				if (x === y || x === z || x === w || y === z || y === w || z === w) throw Error(`Illegal — duplicating swizzle`);
 				if (value.length() !== len) throw Error(`Illegal — mismatch between vec${len} and vec${value.length}`);
 
-				this[i] = value[0];
+				if (len < 2) {
+					this[i] = value;
+					return;
+				}
+
 				this[j] = value[1];
 				if (len < 3) return;
 				this[k] = value[2];
