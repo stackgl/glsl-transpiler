@@ -364,6 +364,9 @@ test('Components access', function () {
 	});
 
 
+	`b[++x].a.length();`;
+
+
 	`
 	vec2 pos;
 	float height;
@@ -407,7 +410,48 @@ test('Components access', function () {
 	m[2][3] = 2.0; // sets the 4th element of the third column to 2.0
 	mat3x4 v;
 	const int L = v.length();
-	`
+	`;
+
+`
+	mat2x2 a = mat2( vec2( 1.0, 0.0 ), vec2( 0.0, 1.0 ) );
+	mat2x2 b = { vec2( 1.0, 0.0 ), vec2( 0.0, 1.0 ) };
+	mat2x2 c = { { 1.0, 0.0 }, { 0.0, 1.0 } };
+`;
+
+`
+float a[2] = { 3.4, 4.2, 5.0 }; // illegal
+vec2 b = { 1.0, 2.0, 3.0 }; // illegal
+mat3x3 c = { vec3(0.0), vec3(1.0), vec3(2.0), vec3(3.0) }; // illegal
+mat2x2 d = { 1.0, 0.0, 0.0, 1.0 }; // illegal, can't flatten nesting
+struct {
+ float a;
+ int b;
+} e = { 1.2, 2, 3 }; // illegal
+`;
+
+`
+mat2(vec2, vec2); // one column per argument
+mat3(vec3, vec3, vec3); // one column per argument
+mat4(vec4, vec4, vec4, vec4); // one column per argument
+mat3x2(vec2, vec2, vec2); // one column per argument
+dmat2(dvec2, dvec2);
+dmat3(dvec3, dvec3, dvec3);
+dmat4(dvec4, dvec4, dvec4, dvec4);
+mat2(float, float, // first column
+ float, float); // second column
+mat3(float, float, float, // first column
+ float, float, float, // second column
+ float, float, float); // third column
+mat4(float, float, float, float, // first column
+ float, float, float, float, // second column
+ float, float, float, float, // third column
+ float, float, float, float); // fourth column
+mat2x3(vec2, float, // first column
+ vec2, float); // second column
+dmat2x4(dvec3, double, // first column
+ double, dvec3) // second column
+`;
+
 });
 
 
@@ -679,3 +723,9 @@ test.skip('Builtins', function () {
 	const int gl_MaxTransformFeedbackInterleavedComponents = 64;
 	`
 });
+
+
+
+
+//include other tests
+require('./stdlib');
