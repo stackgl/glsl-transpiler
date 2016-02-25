@@ -4,6 +4,8 @@
  * @module  glsl-stdlib
  */
 
+var extend = require('xtend/mutable');
+
 
 function noop () {};
 
@@ -45,7 +47,13 @@ function vec2 () {
 	return vec2.create(this, arguments);
 };
 
-vector(vec2, 2, float);
+vector(vec2, {
+	dimensions: 2,
+	type: float,
+	vec2: vec2,
+	vec3: vec3,
+	vec4: vec4
+});
 
 
 /**
@@ -55,7 +63,13 @@ function vec3 () {
 	return vec3.create(this, arguments);
 }
 
-vector(vec3, 3, float);
+vector(vec3, {
+	dimensions: 3,
+	type: float,
+	vec2: vec2,
+	vec3: vec3,
+	vec4: vec4
+});
 
 
 /**
@@ -65,7 +79,108 @@ function vec4 () {
 	return vec4.create(this, arguments);
 }
 
-vector(vec4, 4, float);
+vector(vec4, {
+	dimensions: 4,
+	type: float,
+	vec2: vec2,
+	vec3: vec3,
+	vec4: vec4
+});
+
+/**
+ * ivec2
+ */
+function ivec2 () {
+	return ivec2.create(this, arguments);
+};
+
+vector(ivec2, {
+	dimensions: 2,
+	type: int,
+	vec2: ivec2,
+	vec3: ivec3,
+	vec4: ivec4
+});
+
+
+/**
+ * ivec3
+ */
+function ivec3 () {
+	return ivec3.create(this, arguments);
+}
+
+vector(ivec3, {
+	dimensions: 3,
+	type: int,
+	vec2: ivec2,
+	vec3: ivec3,
+	vec4: ivec4
+});
+
+
+/**
+ * ivec4
+ */
+function ivec4 () {
+	return ivec4.create(this, arguments);
+}
+
+vector(ivec4, {
+	dimensions: 4,
+	type: int,
+	vec2: ivec2,
+	vec3: ivec3,
+	vec4: ivec4
+});
+
+
+/**
+ * bvec2
+ */
+function bvec2 () {
+	return bvec2.create(this, arguments);
+};
+
+vector(bvec2, {
+	dimensions: 2,
+	type: bool,
+	vec2: bvec2,
+	vec3: bvec3,
+	vec4: bvec4
+});
+
+
+/**
+ * bvec3
+ */
+function bvec3 () {
+	return bvec3.create(this, arguments);
+}
+
+vector(bvec3, {
+	dimensions: 3,
+	type: bool,
+	vec2: bvec2,
+	vec3: bvec3,
+	vec4: bvec4
+});
+
+
+/**
+ * bvec4
+ */
+function bvec4 () {
+	return bvec4.create(this, arguments);
+}
+
+vector(bvec4, {
+	dimensions: 4,
+	type: bool,
+	vec2: bvec2,
+	vec3: bvec3,
+	vec4: bvec4
+});
 
 
 /**
@@ -75,7 +190,10 @@ function mat2 () {
 	return mat2.create(this, arguments);
 };
 
-matrix(mat2, vec2, 2);
+matrix(mat2, {
+	type: vec2,
+	dimensions: 2
+});
 
 
 /**
@@ -83,14 +201,15 @@ matrix(mat2, vec2, 2);
  * Fastest vector implementation is proved to be native data type.
  * Performance is comparable to typed arrays.
  *
- * @param {number} n Vector dimensions
+ * Options:
+ * @param {number} dimensions Vector dimensions
+ * @param {function} map function mapper
  */
-function vector (constr, n, map) {
+function vector (constr, opts) {
 	//provide array methods
 	constr.prototype = Object.create(Array.prototype);
 
-	//custom type mapper
-	if (!map) map = arg;
+	extend(constr, opts);
 
 	//create instance
 	constr.create = function (target, args) {
@@ -98,7 +217,7 @@ function vector (constr, n, map) {
 
 		args = flatten(args);
 
-		var i = 0, arg, last = map(0);
+		var i = 0, arg, map = this.type, last = map(0), n = this.dimensions;
 
 		while (i < n) {
 			arg = args[i];
@@ -110,19 +229,16 @@ function vector (constr, n, map) {
 		return target;
 	};
 
-	//some static vars
-	constr.dimensions = n;
-
 	//provide swizzles
-	swizzle(constr.prototype);
+	swizzle(constr);
 
 	//glsl methods
 	constr.prototype.length = function length () {
-		return n;
+		return constr.dimensions;
 	};
 
 	constr.prototype.valueOf = function () {
-		var res = [];
+		var res = [], n = constr.dimensions;
 		for (var i = 0; i < n; i++) {
 			res.push(this[i]);
 		}
@@ -130,6 +246,7 @@ function vector (constr, n, map) {
 	};
 
 	constr.prototype.toString = function () {
+		var n = constr.dimensions;
 		return `vec${n}(${this.valueOf().join(', ')})`;
 	};
 
@@ -143,116 +260,114 @@ function vector (constr, n, map) {
 };
 
 
+
 /**
  * Provide swizzles for an object - a xxxx-getters
  */
-function swizzle (obj, n) {
-	var abbr = ['xyzw', 'stpd', 'rgba'];
+function swizzle (constr) {
+	var dim = constr.dimensions;
 
-	n = Math.min(n || obj.length || 0, 4);
-
-	if (n < 1) return obj;
-
-	//.x, .y
-	abbr.forEach(function (abbr) {
-		for (var i = 0; i < n; i++) {
-			var x = abbr[i];
-			Object.defineProperty(obj, x, {
-				get: function () {
-					return this[i];
-				},
-				set: function (value) {
-					this[i] = value[0] != null ? value[0] : value;
-				}
-			});
-		}
+	var abbr = ['xyzw', 'stpd', 'rgba'].map(function (abbr) {
+		abbr = abbr.split('').slice(0, dim);
+		abbr.push('');
+		return abbr;
 	});
-
-	if (n < 2) return obj;
-
-	//.xy, .yx, ...
-	abbr.forEach(function (abbr) {
-		for (var i = 0; i < n; i++) {
-			for (var j = 0; j < n; j++) {
-				var x = abbr[i];
-				var y = abbr[j];
-				Object.defineProperty(obj, x + y, {
-					get: function () {
-						return vec2(this[i], this[j]);
-					},
-					set: function (value) {
-						if (x === y) throw Error(`Illegal — '${x}' used twice`);
-						if (value.length !== 2) throw Error(`Illegal — mismatch between vec2 and vec${value.length}`);
-
-						this[i] = value[0];
-						this[j] = value[1];
-					}
-				});
-			}
-		}
-	});
-
-	if (n < 3) return obj;
-
-	//.xyz, .yzx, ...
-	abbr.forEach(function (abbr) {
-		for (var i = 0; i < n; i++) {
-			for (var j = 0; j < n; j++) {
-				for (var k = 0; k < n; k++) {
-					var x = abbr[i];
-					var y = abbr[j];
-					var z = abbr[k];
-					Object.defineProperty(obj, x + y + z, {
-						get: function () {
-							return vec3(this[i], this[j], this[k]);
-						},
-						set: function (value) {
-							if (x === y || x === z || y === z) throw Error(`Illegal — duplicating swizzle`);
-							if (value.length !== 3) throw Error(`Illegal — mismatch between vec3 and vec${value.length}`);
-
-							this[i] = value[0];
-							this[j] = value[1];
-							this[k] = value[2];
-						}
-					});
-				}
-			}
-		}
-	});
-
-	if (n < 4) return obj;
 
 	//.xyzw, .xxyy, ...
 	abbr.forEach(function (abbr) {
-		for (var i = 0; i < n; i++) {
-			for (var j = 0; j < n; j++) {
-				for (var k = 0; k < n; k++) {
-					for (var l = 0; l < n; l++) {
-						var x = abbr[i];
-						var y = abbr[j];
-						var z = abbr[k];
-						var w = abbr[l];
-						Object.defineProperty(obj, x + y + z + w, {
-							get: function () {
-								return vec4(this[i], this[j], this[k], this[l]);
-							},
-							set: function (value) {
-								if (x === y || x === z || x === w || y === z || y === w || z === w) throw Error(`Illegal — duplicating swizzle`);
-								if (value.length !== 4) throw Error(`Illegal — mismatch between vec4 and vec${value.length}`);
-
-								this[i] = value[0];
-								this[j] = value[1];
-								this[k] = value[2];
-								this[l] = value[3];
-							}
-						});
+		for (var i = 0; i <= dim; i++) {
+			for (var j = 0; j <= dim; j++) {
+				for (var k = 0; k <= dim; k++) {
+					for (var l = 0; l <= dim; l++) {
+						createSizzle(constr, i,j,k,l,abbr);
 					}
 				}
 			}
 		}
 	});
 
-	return obj;
+	function createSizzle (constr, i,j,k,l, abbr) {
+		var x = abbr[i];
+		var y = abbr[j];
+		var z = abbr[k];
+		var w = abbr[l];
+		var prop = x + y + z + w;
+
+		if (!prop) return;
+		if (constr.prototype.hasOwnProperty(prop)) return;
+
+		var len = prop.length;
+		var vec = constr['vec' + len] || constr.type;
+
+		Object.defineProperty(constr.prototype, prop, {
+			get: function () {
+				return vec(this[i], this[j], this[k], this[l]);
+			},
+			set: function (value) {
+				if (x === y || x === z || x === w || y === z || y === w || z === w) throw Error(`Illegal — duplicating swizzle`);
+				if (value.length() !== len) throw Error(`Illegal — mismatch between vec${len} and vec${value.length}`);
+
+				this[i] = value[0];
+				this[j] = value[1];
+				if (len < 3) return;
+				this[k] = value[2];
+				if (len < 4) return;
+				this[l] = value[3];
+			}
+		});
+	};
+
+	return constr;
+};
+
+
+/**
+ * Matriz constructor.
+ * Matrix is a set of n-dim float vectors.
+ *
+ * Options:
+ * @param {vec} type Vector class to use as a base
+ * @param {number} dimensions Number of columns
+ */
+function matrix (constr, opts) {
+	extend(constr, opts);
+
+	//provide array methods
+	constr.prototype = Object.create(Array.prototype);
+
+	//matrix is created whether from a number of columns as vectors, or a list of args
+	constr.create = function (target, args) {
+		if (!(target instanceof constr)) target = new constr();
+
+		args = flatten(args);
+
+		var vec = this.type;
+		var size = this.dimensions;
+
+		//create vectors
+		for (var i = 0; i < size; i++) {
+			target[i] = vec();
+		}
+
+		//apply args
+		var i = 0, j = 0, arg, last = 0, col, dim = vec.dimensions, n = size * dim;
+
+		while (i < n) {
+			arg = args[i];
+			col = target[Math.floor(i / size)];
+
+			col[i % dim] = arg == null ? last : arg;
+			last = col[i];
+			i++;
+		}
+
+		return target;
+	};
+
+	//length returns number of vectors
+	constr.prototype.length = function () {
+		return constr.dimensions;
+	};
 };
 
 
@@ -263,6 +378,7 @@ function flatten (arr, max) {
 	var result = [];
 
 	if (!arr.length) return arr;
+
 	var l = typeof arr.length === 'number' ? arr.length : arr.length();
 
 	for (var i = 0; i < l; i++) {
@@ -274,46 +390,6 @@ function flatten (arr, max) {
 
 	return result;
 }
-
-console.log(flatten(vec3(1,2,3)))
-
-/**
- * Make constructor a matrix.
- * Matrix is a set of n-dim vectors, it does not contain inner data types.
- *
- * @param {vec} vec Vector class to use as a base
- * @param {number} size Number of columns
- */
-function matrix (constr, vec, size) {
-	//provide array methods
-	constr.prototype = Object.create(Array.prototype);
-
-	//matrix is created whether from a number of columns as vectors, or a list of args
-	constr.create = function (target, args) {
-		if (!(target instanceof constr)) target = new constr();
-
-		args = flatten(args);
-
-		var i = 0, j = 0, arg, last = 0, col = vec(), dim = vec.dimensions, n = size * dim;
-
-		while (i < n) {
-			arg = args[i];
-
-			col[i] = arg == null ? last : arg;
-			last = col[i];
-			i++;
-
-			if (i % 4 === 0) {
-				target.push(col);
-				col = vec();
-			}
-		}
-
-		target.push(col);
-
-		return target;
-	};
-};
 
 
 
@@ -331,15 +407,15 @@ exports.vec4 = vec4;
 exports.dvec2 = vec2;
 exports.dvec3 = vec3;
 exports.dvec4 = vec4;
-exports.bvec2 =	vec2;
-exports.bvec3 = vec3;
-exports.bvec4 = vec4;
-exports.ivec2 = vec2;
-exports.ivec3 = vec3;
-exports.ivec4 = vec4;
-exports.uvec2 = vec2;
-exports.uvec3 = vec3;
-exports.uvec4 = vec4;
+exports.bvec2 =	bvec2;
+exports.bvec3 = bvec3;
+exports.bvec4 = bvec4;
+exports.ivec2 = ivec2;
+exports.ivec3 = ivec3;
+exports.ivec4 = ivec4;
+exports.uvec2 = ivec2;
+exports.uvec3 = ivec3;
+exports.uvec4 = ivec4;
 exports.mat2 =
 exports.mat3 =
 exports.mat4 =

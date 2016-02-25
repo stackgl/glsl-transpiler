@@ -551,6 +551,20 @@ test('Vec/matrix operators', function () {
 
 		assert.equal(clean(compile(src)), clean(res));
 	});
+
+	test.skip('vector/matrix.length() → .length', function () {
+		var src = `
+			vec2 x, y = vec2(1, 2);
+			mat2 xy = mat2(x, y);
+			int z = vec4(x.length(), y.length(), mat2[0].length(), mat2.length()).length();
+		`;
+
+		var res = `
+			var x = vec2(), y = vec2(1, 2);
+			var xy = mat2(x, y);
+			var z = vec4(x.length, y.length, mat2[0].length, mat2.length).length;
+		`;
+	});
 });
 
 test.skip('Functions', function () {

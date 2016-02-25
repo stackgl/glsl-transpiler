@@ -67,7 +67,6 @@ test.only('Types constructors', function () {
 	// the vec4 is column 0 followed by column 1
 	test('vec4(mat2)', function () {
 		var m = mat2(0, 1, 2, 3);
-		console.log(m)
 		var v = vec4(m);
 
 		assert.equal(v.length(), 4);
@@ -77,14 +76,85 @@ test.only('Types constructors', function () {
 		assert.equal(v[3], 3);
 	});
 
+	// initializes a vec2 with 2 floats
+	test('vec2(float, float)', function () {
+		var v = vec2(1.2, 3.3);
+
+		assert.equal(v.length(), 2);
+		assert.equal(v[0], 1.2);
+		assert.equal(v[1], 3.3);
+		assert.equal(v[2], undefined);
+		assert.equal(v[3], undefined);
+	});
+
+	// initializes an ivec3 with 3 ints
+	test('ivec3(int, int, int)', function () {
+		var v = ivec3(1.2, 3.3, 5);
+
+		assert.equal(v.length(), 3);
+		assert.equal(v[0], 1);
+		assert.equal(v[1], 3);
+		assert.equal(v[2], 5);
+		assert.equal(v[3], undefined);
+	});
+
+	// uses 4 Boolean conversions
+	test('bvec4(int, int, float, float)', function () {
+		var v = bvec4(0, 4, 1.2, 0);
+
+		assert.equal(v.length(), 4);
+		assert.equal(v[0], false);
+		assert.equal(v[1], true);
+		assert.equal(v[2], true);
+		assert.equal(v[3], false);
+	});
+
+	// drops the third component of a vec3
+	test('vec2(vec3)', function () {
+		var v3 = vec3(0, 4, 1.2);
+		var v = vec2(v3);
+
+		assert.equal(v.length(), 2);
+		assert.equal(v[0], 0);
+		assert.equal(v[1], 4);
+		assert.equal(v[2], undefined);
+		assert.equal(v[3], undefined);
+	});
+
+	// drops the fourth component of a vec4
+	test('vec3(vec4)', function () {
+		var v4 = vec4(0, 4, 1.2, 2);
+		var v = vec3(v4);
+
+		assert.equal(v.length(), 3);
+		assert.equal(v[0], 0);
+		assert.equal(v[1], 4);
+		assert.equal(v[2], 1.2);
+		assert.equal(v[3], undefined);
+	});
+
+	// vec3.x = vec2.x, vec3.y = vec2.y, vec3.z = float
+	test('vec3(vec2, float)', function () {
+		var v = vec3(vec2(0, 4), 1.2);
+
+		assert.equal(v.length(), 3);
+		assert.equal(v.x, 0);
+		assert.equal(v.y, 4);
+		assert.equal(v.z, 1.2);
+		assert.equal(v.w, undefined);
+	});
+
+	// vec3.x = float, vec3.y = vec2.x, vec3.z = vec2.y
+	test('vec3(float, vec2)', function () {
+		var v = vec3(0, vec2(4, 1.2));
+
+		assert.equal(v.length(), 3);
+		assert.equal(v.r, 0);
+		assert.equal(v.g, 4);
+		assert.equal(v.b, 1.2);
+		assert.equal(v.a, undefined);
+	});
 	`
-	vec2(float, float) // initializes a vec2 with 2 floats
-	ivec3(int, int, int) // initializes an ivec3 with 3 ints
-	bvec4(int, int, float, float) // uses 4 Boolean conversions
-	vec2(vec3) // drops the third component of a vec3
-	vec3(vec4) // drops the fourth component of a vec4
-	vec3(vec2, float) // vec3.x = vec2.x, vec3.y = vec2.y, vec3.z = float
-	vec3(float, vec2) // vec3.x = float, vec3.y = vec2.x, vec3.z = vec2.y
 	vec4(vec3, float)
 	vec4(float, vec3)
 	vec4(vec2, vec2)
