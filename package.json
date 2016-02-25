@@ -1,6 +1,6 @@
 {
   "name": "glsl-js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Transform glsl to js",
   "main": "index.js",
   "dependencies": {
