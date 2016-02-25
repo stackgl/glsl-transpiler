@@ -1,5 +1,6 @@
 var test = require('tst');
 var inherits = require('inherits');
+var lib = require('../stdlib');
 
 
 test('TypedArray vs inherited array', function () {
@@ -33,7 +34,7 @@ test('TypedArray vs inherited array', function () {
 });
 
 
-test.only('TypedArray vs wrapped array', function () {
+test('TypedArray vs wrapped array', function () {
 	//Test setup: how much the wrapper access is slower than array?
 	//Result: unfortunately, growth is exponential or even worse, if to provide class wrappers with inner data as array.
 	//but defining custom methods on array instances in constructor is quite alright, even faster sometimes. We can easily do swizzles.
@@ -144,7 +145,7 @@ test.only('TypedArray vs wrapped array', function () {
 
 
 
-	test.only('Access', function () {
+	test('Access', function () {
 		var max = 10e5;
 
 		test('non-array', function () {
@@ -186,6 +187,14 @@ test.only('TypedArray vs wrapped array', function () {
 				vec.y;
 			}
 		});
+
+		test('stdlib.vec2', function () {
+			var vec = lib.vec2(0,1);
+			for (var i = 0; i < max; i++) {
+				vec.x;
+				vec.y;
+			}
+		});
 	});
 
 
@@ -221,5 +230,16 @@ test.only('TypedArray vs wrapped array', function () {
 				var vec = nonArray([0,1]);
 			}
 		});
+
+		test('stdlib.vec2', function () {
+			for (var i = 0; i < max; i++) {
+				var vec = lib.vec2(0,1);
+			}
+		});
 	});
+});
+
+
+test('ndarray vs gl-matrix vs spec-type', function () {
+
 });

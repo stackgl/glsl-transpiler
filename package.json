@@ -4,7 +4,6 @@
   "description": "Transform glsl to js",
   "main": "index.js",
   "dependencies": {
-    "array-flatten": "^2.0.0",
     "glsl-parser": "^2.0.0",
     "glsl-tokenizer": "^2.0.2",
     "inherits": "^2.0.1",
@@ -23,8 +22,9 @@
     "stdlib"
   ],
   "scripts": {
-    "test": "node test/index.js",
-    "test:browser": "budo test/index.js"
+    "test": "node --harmony test/index.js",
+    "test:browser": "budo test/index.js",
+    "benchmark": "node --harmony test/benchmark.js"
   },
   "repository": {
     "type": "git",

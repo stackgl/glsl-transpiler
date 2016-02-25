@@ -5,13 +5,13 @@
  */
 
 
-/**
- * Basic type constructors.
- * Research shown that own data type wrappers are the best solution,
- * even with instance check in constructors.
- */
-
 function noop () {};
+
+
+/**
+ * Transfer first arg unchanged
+ */
+function arg (val) { return val };
 
 
 /**
@@ -41,73 +41,110 @@ function float (value) {
 /**
  * vec2
  */
-function vec2 (x, y) {
-	if (!(this instanceof vec2)) return new vec2(x, y);
-	var value = [].concat.apply([], arguments);
-	this[0] = value[0] != null ? value[0] : 0;
-	this[1] = value[1] != null ? value[1] : this[0];
+function vec2 () {
+	return vec2.create(this, arguments);
 };
 
-swizzle(vec2.prototype, 2);
-
-vec2.prototype.valueOf = function () {
-	return [this[0], this[1]];
-};
-
-vec2.prototype.mult = function (arg) {
-	if (arg instanceof float) {
-		return vec2(this[0] * arg.value, this[1] * arg.value);
-	}
-};
+vector(vec2, 2, float);
 
 
 /**
  * vec3
  */
-function vec3 (x, y, z) {
-	if (!(this instanceof vec3)) return new vec3(x, y, z);
-	var value = [].concat.apply([], arguments);
-	this[0] = value[0] != null ? value[0] : 0;
-	this[1] = value[1] != null ? value[1] : this[0];
-	this[2] = value[2] != null ? value[2] : this[1];
+function vec3 () {
+	return vec3.create(this, arguments);
 }
 
-swizzle(vec3.prototype, 3);
-
-vec3.prototype.valueOf = function () {
-	return [this[0], this[1], this[2]];
-};
+vector(vec3, 3, float);
 
 
 /**
  * vec4
  */
-function vec4 (x, y, z, w) {
-	if (!(this instanceof vec4)) return new vec4(x, y, z, w);
-	var value = [].concat.apply([], arguments);
-	this[0] = value[0] != null ? value[0] : 0;
-	this[1] = value[1] != null ? value[1] : this[0];
-	this[2] = value[2] != null ? value[2] : this[1];
-	this[3] = value[3] != null ? value[3] : this[2];
+function vec4 () {
+	return vec4.create(this, arguments);
 }
 
-swizzle(vec4.prototype, 4);
-
-vec4.prototype.valueOf = function () {
-	return [this[0], this[1], this[2], this[3]];
-};
+vector(vec4, 4, float);
 
 
 /**
  * mat2
  */
-function mat2 (a,b,c,d) {
+function mat2 () {
+	return mat2.create(this, arguments);
+};
 
+matrix(mat2, vec2, 2);
+
+
+/**
+ * Make constructor a vector.
+ * Fastest vector implementation is proved to be native data type.
+ * Performance is comparable to typed arrays.
+ *
+ * @param {number} n Vector dimensions
+ */
+function vector (constr, n, map) {
+	//provide array methods
+	constr.prototype = Object.create(Array.prototype);
+
+	//custom type mapper
+	if (!map) map = arg;
+
+	//create instance
+	constr.create = function (target, args) {
+		if (!(target instanceof constr)) target = new constr();
+
+		args = flatten(args);
+
+		var i = 0, arg, last = map(0);
+
+		while (i < n) {
+			arg = args[i];
+			target[i] = map(arg == null ? last : arg);
+			last = target[i];
+			i++;
+		}
+
+		return target;
+	};
+
+	//some static vars
+	constr.dimensions = n;
+
+	//provide swizzles
+	swizzle(constr.prototype);
+
+	//glsl methods
+	constr.prototype.length = function length () {
+		return n;
+	};
+
+	constr.prototype.valueOf = function () {
+		var res = [];
+		for (var i = 0; i < n; i++) {
+			res.push(this[i]);
+		}
+		return res;
+	};
+
+	constr.prototype.toString = function () {
+		return `vec${n}(${this.valueOf().join(', ')})`;
+	};
+
+	constr.prototype.mult = function (arg) {
+		if (arg instanceof float) {
+			return vec2(this[0] * arg.value, this[1] * arg.value);
+		}
+	};
+
+	return constr;
 };
 
 
 /**
- * Provide swizzles for an object
+ * Provide swizzles for an object - a xxxx-getters
  */
 function swizzle (obj, n) {
 	var abbr = ['xyzw', 'stpd', 'rgba'];
@@ -216,6 +253,66 @@ function swizzle (obj, n) {
 	});
 
 	return obj;
+};
+
+
+/**
+ * Tiny array-like structures flattener, for args recognition
+ */
+function flatten (arr, max) {
+	var result = [];
+
+	if (!arr.length) return arr;
+	var l = typeof arr.length === 'number' ? arr.length : arr.length();
+
+	for (var i = 0; i < l; i++) {
+		if (arr[i].length != null) result = result.concat(flatten(arr[i], max - result.length));
+		else result.push(arr[i]);
+
+		if (i >= max) break;
+	}
+
+	return result;
+}
+
+console.log(flatten(vec3(1,2,3)))
+
+/**
+ * Make constructor a matrix.
+ * Matrix is a set of n-dim vectors, it does not contain inner data types.
+ *
+ * @param {vec} vec Vector class to use as a base
+ * @param {number} size Number of columns
+ */
+function matrix (constr, vec, size) {
+	//provide array methods
+	constr.prototype = Object.create(Array.prototype);
+
+	//matrix is created whether from a number of columns as vectors, or a list of args
+	constr.create = function (target, args) {
+		if (!(target instanceof constr)) target = new constr();
+
+		args = flatten(args);
+
+		var i = 0, j = 0, arg, last = 0, col = vec(), dim = vec.dimensions, n = size * dim;
+
+		while (i < n) {
+			arg = args[i];
+
+			col[i] = arg == null ? last : arg;
+			last = col[i];
+			i++;
+
+			if (i % 4 === 0) {
+				target.push(col);
+				col = vec();
+			}
+		}
+
+		target.push(col);
+
+		return target;
+	};
 };
 
 
@@ -340,7 +437,7 @@ exports.uimage2DMS =
 exports.usampler2DMSArray =
 exports.uimage2DMSArray =
 exports.usamplerCubeArray =
-exports.uimageCubeArray = vec4;
+exports.uimageCubeArray = mat2;
 
 
 //Preprocessor directives

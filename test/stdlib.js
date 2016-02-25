@@ -1,7 +1,8 @@
 //ref https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
 
 var test = require('tst');
-var lib = require('../stdlib');
+var _ = require('../stdlib');
+var assert = require('assert');
 
 
 test.skip('Primitives', function () {
@@ -27,7 +28,9 @@ test.skip('Primitives', function () {
 	double(float)// converts a float value to a double
 });
 
-test.skip('Types constructors', function () {
+test.only('Types constructors', function () {
+	var {vec2, vec3, vec4, mat2, ivec3, ivec4, bvec4} = _;
+
 	test('vec3()', function () {
 		var v = vec3();
 
@@ -49,9 +52,32 @@ test.skip('Types constructors', function () {
 		assert.equal(v[3], undefined);
 	});
 
+	// makes a vec4 with component-wise conversion
+	test('vec4(ivec4)', function () {
+		var iv = ivec4(0, 1, 2, 3);
+		var v = vec4(iv);
 
-	vec4(ivec4) // makes a vec4 with component-wise conversion
-	vec4(mat2) // the vec4 is column 0 followed by column 1
+		assert.equal(v.length(), 4);
+		assert.equal(v[0], 0);
+		assert.equal(v[1], 1);
+		assert.equal(v[2], 2);
+		assert.equal(v[3], 3);
+	});
+
+	// the vec4 is column 0 followed by column 1
+	test('vec4(mat2)', function () {
+		var m = mat2(0, 1, 2, 3);
+		console.log(m)
+		var v = vec4(m);
+
+		assert.equal(v.length(), 4);
+		assert.equal(v[0], 0);
+		assert.equal(v[1], 1);
+		assert.equal(v[2], 2);
+		assert.equal(v[3], 3);
+	});
+
+	`
 	vec2(float, float) // initializes a vec2 with 2 floats
 	ivec3(int, int, int) // initializes an ivec3 with 3 ints
 	bvec4(int, int, float, float) // uses 4 Boolean conversions
@@ -93,6 +119,7 @@ test.skip('Types constructors', function () {
 	mat3x3(mat4x4); // takes the upper-left 3x3 of the mat4x4
 	mat2x3(mat4x2); // takes the upper-left 2x2 of the mat4x4, last row is 0,0
 	mat4x4(mat3x3); // puts the mat3x3 in the upper-left, sets the lower right component to 1, and the rest to 0
+	`
 });
 
 
