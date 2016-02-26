@@ -652,7 +652,7 @@ test('WebGL subset', function () {
 
 
 
-test.skip('Trigonometry', function () {
+test.skip('Math', function () {
 	// genType radians (genType degrees)
 	// genType degrees (genType radians)
 	// genType sin (genType angle) The standard trigonometric sine function.
@@ -668,9 +668,7 @@ test.skip('Trigonometry', function () {
 	// genType asinh (genType x) Arc hyperbolic sine; returns the inverse of sinh.
 	// genType acosh (genType x)
 	// genType atanh (genType x)
-});
 
-test.skip('Exponential', function () {
 	// genType pow (genType x, genType y)
 	// genType exp (genType x)
 	// genType log (genType x)
@@ -680,9 +678,7 @@ test.skip('Exponential', function () {
 	// genDType sqrt (genDType x)
 	// genType inversesqrt (genType x)
 	// genDType inversesqrt (genDType x)
-});
 
-test.skip('Common', function () {
 	// genType abs (genType x)
 	// genIType abs (genIType x)
 	// genDType abs (genDType x)
