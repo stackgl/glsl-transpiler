@@ -28,7 +28,7 @@ test.skip('Primitives', function () {
 	double(float)// converts a float value to a double
 });
 
-test.only('Types constructors', function () {
+test('Vector constructors', function () {
 	var {vec2, vec3, vec4, mat2, ivec3, ivec4, bvec4} = _;
 
 	test('vec3()', function () {
@@ -165,19 +165,116 @@ test.only('Types constructors', function () {
 		assert.equal(v.d, 0);
 	});
 
-	`
-	vec4(float, vec3)
-	vec4(vec2, vec2)
+	test('vec4(float, vec3)', function () {
+		var v = vec4(0, vec3(4, 1.2, 0));
+
+		assert.equal(v.length(), 4);
+		assert.equal(v[0], 0);
+		assert.equal(v[1], 4);
+		assert.equal(v[2], 1.2);
+		assert.equal(v[3], 0);
+	});
+
+	test('vec4(vec2, vec2)', function () {
+		var v = vec4(vec2(0,4), vec2(1.2, 0));
+
+		assert.equal(v.length(), 4);
+		assert.equal(v[0], 0);
+		assert.equal(v[1], 4);
+		assert.equal(v[2], 1.2);
+		assert.equal(v[3], 0);
+	});
+});
+
+test('Matrix constructors', function () {
+	var {vec2, vec3, vec4, ivec3, ivec4, bvec4} = _;
+	var {mat2, mat3, mat4, mat2, mat2x3, mat2x4, mat3x2, mat3, mat3x4, mat4x2, mat4x3, mat4 } = _;
 
 	// To initialize the diagonal of a matrix with all other elements set to zero:
-	mat2(float)
-	mat3(float)
-	mat4(float)
+	test('mat2(float)', function () {
+		var m = mat2(1.2);
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 1.2);
+		assert.equal(m[0][1], 0);
+		assert.equal(m[1][0], 0);
+		assert.equal(m[1][1], 1.2);
+	});
+
+	test('mat3(float)', function () {
+		var m = mat3(1.2);
+
+		assert.equal(m.length(), 3);
+		assert.equal(m[0][0], 1.2);
+		assert.equal(m[0][1], 0);
+		assert.equal(m[0][2], 0);
+		assert.equal(m[1][0], 0);
+		assert.equal(m[1][1], 1.2);
+		assert.equal(m[1][2], 0);
+		assert.equal(m[2][0], 0);
+		assert.equal(m[2][1], 0);
+		assert.equal(m[2][2], 1.2);
+	});
+
+	test('mat4(float)', function () {
+		var m = mat4(1.2);
+
+		assert.equal(m.length(), 4);
+		assert.equal(m[0][0], 1.2);
+		assert.equal(m[0][1], 0);
+		assert.equal(m[0][2], 0);
+		assert.equal(m[0][3], 0);
+		assert.equal(m[1][0], 0);
+		assert.equal(m[1][1], 1.2);
+		assert.equal(m[1][2], 0);
+		assert.equal(m[1][3], 0);
+		assert.equal(m[2][0], 0);
+		assert.equal(m[2][1], 0);
+		assert.equal(m[2][2], 1.2);
+		assert.equal(m[2][3], 0);
+		assert.equal(m[3][0], 0);
+		assert.equal(m[3][1], 0);
+		assert.equal(m[3][2], 0);
+		assert.equal(m[3][3], 1.2);
+	});
 
 
-	mat2(vec2, vec2); // one column per argument
-	mat3(vec3, vec3, vec3); // one column per argument
-	mat4(vec4, vec4, vec4, vec4); // one column per argument
+	// one column per argument
+	test('mat2(vec2, vec2);', function () {
+		var m = mat2(vec2(0, 1.2), vec2(-3, 3.3));
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[1][0], -3);
+		assert.equal(m[1][1], 3.3);
+	});
+
+
+	// one column per argument
+	test('mat3(vec3, vec3, vec3)', function () {
+		var m = mat3(vec3(1.2), vec3(), vec3(1,2,3));
+
+		assert.equal(m.length(), 3);
+		assert.equal(m[0][0], 1.2);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[0][2], 1.2);
+		assert.equal(m[1][0], 0);
+		assert.equal(m[1][1], 0);
+		assert.equal(m[1][2], 0);
+		assert.equal(m[2][0], 1);
+		assert.equal(m[2][1], 2);
+		assert.equal(m[2][2], 3);
+	});
+
+
+	// one column per argument
+	test('mat4(vec4, vec4, vec4, vec4);', function () {
+
+	});
+
+
+	`
 	mat3x2(vec2, vec2, vec2); // one column per argument
 	dmat2(dvec2, dvec2);
 	dmat3(dvec3, dvec3, dvec3);

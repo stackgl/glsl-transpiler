@@ -1,19 +1,11 @@
 /**
- * glsl-js stdlib.
- *
- * @module  glsl-stdlib
+ * @module  glsl-js/stdlib
  */
 
 var extend = require('xtend/mutable');
 
 
 function noop () {};
-
-
-/**
- * Transfer first arg unchanged
- */
-function arg (val) { return val };
 
 
 /**
@@ -195,6 +187,104 @@ matrix(mat2, {
 	dimensions: 2
 });
 
+/**
+ * mat2x3
+ */
+function mat2x3 () {
+	return mat2x3.create(this, arguments);
+};
+
+matrix(mat2x3, {
+	type: vec3,
+	dimensions: 2
+});
+
+/**
+ * mat2x4
+ */
+function mat2x4 () {
+	return mat2x4.create(this, arguments);
+};
+
+matrix(mat2x4, {
+	type: vec4,
+	dimensions: 2
+});
+
+
+/**
+ * mat3
+ */
+function mat3 () {
+	return mat3.create(this, arguments);
+};
+
+matrix(mat3, {
+	type: vec3,
+	dimensions: 3
+});
+
+/**
+ * mat3x2
+ */
+function mat3x2 () {
+	return mat3x2.create(this, arguments);
+};
+
+matrix(mat3x2, {
+	type: vec2,
+	dimensions: 3
+});
+
+/**
+ * mat3x4
+ */
+function mat3x4 () {
+	return mat3x4.create(this, arguments);
+};
+
+matrix(mat3x4, {
+	type: vec4,
+	dimensions: 3
+});
+
+
+/**
+ * mat4
+ */
+function mat4 () {
+	return mat4.create(this, arguments);
+};
+
+matrix(mat4, {
+	type: vec4,
+	dimensions: 4
+});
+
+/**
+ * mat4x2
+ */
+function mat4x2 () {
+	return mat4x2.create(this, arguments);
+};
+
+matrix(mat4x2, {
+	type: vec2,
+	dimensions: 4
+});
+
+/**
+ * mat4x3
+ */
+function mat4x3 () {
+	return mat4x3.create(this, arguments);
+};
+
+matrix(mat4x3, {
+	type: vec3,
+	dimensions: 4
+});
+
 
 /**
  * Make constructor a vector.
@@ -260,9 +350,8 @@ function vector (constr, opts) {
 };
 
 
-
 /**
- * Provide swizzles for an object - a xxxx-getters
+ * Provide swizzles for a vector - a xxxx-getters
  */
 function swizzle (constr) {
 	var dim = constr.dimensions;
@@ -359,6 +448,16 @@ function matrix (constr, opts) {
 		//apply args
 		var i = 0, j = 0, arg, last = 0, col, dim = vec.dimensions, n = size * dim;
 
+		//of only a number passed - init diagonal
+		if (args.length === 1 && typeof args[0] === 'number') {
+			arg = args[0];
+			for (var l = Math.min(size, dim); i < l; i++) {
+				target[i][i] = arg;
+			}
+			return target;
+		}
+
+		//otherwise do component-fill
 		while (i < n) {
 			arg = args[i];
 			col = target[Math.floor(i / size)];
@@ -400,127 +499,128 @@ function flatten (arr, max) {
 
 
 
-//OpenGL types
-//https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
-exports.void = noop;
-exports.bool = bool;
-exports.int = int;
-exports.uint = int;
-exports.float = float;
-exports.double = float;
-exports.vec2 = vec2;
-exports.vec3 = vec3;
-exports.vec4 = vec4;
-exports.dvec2 = vec2;
-exports.dvec3 = vec3;
-exports.dvec4 = vec4;
-exports.bvec2 =	bvec2;
-exports.bvec3 = bvec3;
-exports.bvec4 = bvec4;
-exports.ivec2 = ivec2;
-exports.ivec3 = ivec3;
-exports.ivec4 = ivec4;
-exports.uvec2 = ivec2;
-exports.uvec3 = ivec3;
-exports.uvec4 = ivec4;
-exports.mat2 =
-exports.mat3 =
-exports.mat4 =
-exports.mat2x2 =
-exports.mat2x3 =
-exports.mat2x4 =
-exports.mat3x2 =
-exports.mat3x3 =
-exports.mat3x4 =
-exports.mat4x2 =
-exports.mat4x3 =
-exports.mat4x4 =
-exports.dmat2 =
-exports.dmat3 =
-exports.dmat4 =
-exports.dmat2x2 =
-exports.dmat2x3 =
-exports.dmat2x4 =
-exports.dmat3x2 =
-exports.dmat3x3 =
-exports.dmat3x4 =
-exports.dmat4x2 =
-exports.dmat4x3 =
-exports.dmat4x4 =
-exports.sampler1D =
-exports.image1D =
-exports.sampler2D =
-exports.image2D =
-exports.sampler3D =
-exports.image3D =
-exports.samplerCube =
-exports.imageCube =
-exports.sampler2DRect =
-exports.image2DRect =
-exports.sampler1DArray =
-exports.image1DArray =
-exports.sampler2DArray =
-exports.image2DArray =
-exports.samplerBuffer =
-exports.imageBuffer =
-exports.sampler2DMS =
-exports.image2DMS =
-exports.sampler2DMSArray =
-exports.image2DMSArray =
-exports.samplerCubeArray =
-exports.imageCubeArray =
-exports.sampler1DShadow =
-exports.sampler2DShadow =
-exports.sampler2DRectShadow =
-exports.sampler1DArrayShadow =
-exports.sampler2DArrayShadow =
-exports.samplerCubeShadow =
-exports.samplerCubeArrayShadow =
-exports.isampler1D =
-exports.iimage1D =
-exports.isampler2D =
-exports.iimage2D =
-exports.isampler3D =
-exports.iimage3D =
-exports.isamplerCube =
-exports.iimageCube =
-exports.isampler2DRect =
-exports.iimage2DRect =
-exports.isampler1DArray =
-exports.iimage1DArray =
-exports.isampler2DArray =
-exports.iimage2DArray =
-exports.isamplerBuffer =
-exports.iimageBuffer =
-exports.isampler2DMS =
-exports.iimage2DMS =
-exports.isampler2DMSArray =
-exports.iimage2DMSArray =
-exports.isamplerCubeArray =
-exports.iimageCubeArray =
-exports.atomic_uint =
-exports.usampler1D =
-exports.uimage1D =
-exports.usampler2D =
-exports.uimage2D =
-exports.usampler3D =
-exports.uimage3D =
-exports.usamplerCube =
-exports.uimageCube =
-exports.usampler2DRect =
-exports.uimage2DRect =
-exports.usampler1DArray =
-exports.uimage1DArray =
-exports.usampler2DArray =
-exports.uimage2DArray =
-exports.usamplerBuffer =
-exports.uimageBuffer =
-exports.usampler2DMS =
-exports.uimage2DMS =
-exports.usampler2DMSArray =
-exports.uimage2DMSArray =
-exports.usamplerCubeArray =
-exports.uimageCubeArray = mat2;
+//OpenGL types @ref https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
+extend(exports, {
+	void: noop,
+	bool: bool,
+	int: int,
+	uint: int,
+	float: float,
+	double: float,
+	vec2: vec2,
+	vec3: vec3,
+	vec4: vec4,
+	dvec2: vec2,
+	dvec3: vec3,
+	dvec4: vec4,
+	bvec2:	bvec2,
+	bvec3: bvec3,
+	bvec4: bvec4,
+	ivec2: ivec2,
+	ivec3: ivec3,
+	ivec4: ivec4,
+	uvec2: ivec2,
+	uvec3: ivec3,
+	uvec4: ivec4,
+	mat2: mat2,
+	mat3: mat3,
+	mat4: mat4,
+	mat2x2: mat2,
+	mat2x3: mat2x3,
+	mat2x4: mat2x4,
+	mat3x2: mat3x2,
+	mat3x3: mat3,
+	mat3x4: mat3x4,
+	mat4x2: mat4x2,
+	mat4x3: mat4x3,
+	mat4x4: mat4,
+	dmat2: mat2,
+	dmat3: mat3,
+	dmat4: mat4,
+	dmat2x2: mat2,
+	dmat2x3: mat2x3,
+	dmat2x4: mat2x4,
+	dmat3x2: mat3x2,
+	dmat3x3: mat3,
+	dmat3x4: mat3x4,
+	dmat4x2: mat4x2,
+	dmat4x3: mat4x3,
+	dmat4x4: mat4,
+	sampler1D: null,
+	image1D: null,
+	sampler2D: null,
+	image2D: null,
+	sampler3D: null,
+	image3D: null,
+	samplerCube: null,
+	imageCube: null,
+	sampler2DRect: null,
+	image2DRect: null,
+	sampler1DArray: null,
+	image1DArray: null,
+	sampler2DArray: null,
+	image2DArray: null,
+	samplerBuffer: null,
+	imageBuffer: null,
+	sampler2DMS: null,
+	image2DMS: null,
+	sampler2DMSArray: null,
+	image2DMSArray: null,
+	samplerCubeArray: null,
+	imageCubeArray: null,
+	sampler1DShadow: null,
+	sampler2DShadow: null,
+	sampler2DRectShadow: null,
+	sampler1DArrayShadow: null,
+	sampler2DArrayShadow: null,
+	samplerCubeShadow: null,
+	samplerCubeArrayShadow: null,
+	isampler1D: null,
+	iimage1D: null,
+	isampler2D: null,
+	iimage2D: null,
+	isampler3D: null,
+	iimage3D: null,
+	isamplerCube: null,
+	iimageCube: null,
+	isampler2DRect: null,
+	iimage2DRect: null,
+	isampler1DArray: null,
+	iimage1DArray: null,
+	isampler2DArray: null,
+	iimage2DArray: null,
+	isamplerBuffer: null,
+	iimageBuffer: null,
+	isampler2DMS: null,
+	iimage2DMS: null,
+	isampler2DMSArray: null,
+	iimage2DMSArray: null,
+	isamplerCubeArray: null,
+	iimageCubeArray: null,
+	atomic_uint: null,
+	usampler1D: null,
+	uimage1D: null,
+	usampler2D: null,
+	uimage2D: null,
+	usampler3D: null,
+	uimage3D: null,
+	usamplerCube: null,
+	uimageCube: null,
+	usampler2DRect: null,
+	uimage2DRect: null,
+	usampler1DArray: null,
+	uimage1DArray: null,
+	usampler2DArray: null,
+	uimage2DArray: null,
+	usamplerBuffer: null,
+	uimageBuffer: null,
+	usampler2DMS: null,
+	uimage2DMS: null,
+	usampler2DMSArray: null,
+	uimage2DMSArray: null,
+	usamplerCubeArray: null,
+	uimageCubeArray: null
+});
 
 
 //Preprocessor directives
