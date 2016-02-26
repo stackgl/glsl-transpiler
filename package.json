@@ -17,9 +17,9 @@
   },
   "files": [
     "index.js",
-    "stream",
-    "string",
-    "stdlib"
+    "stream.js",
+    "string.js",
+    "stdlib.js"
   ],
   "scripts": {
     "test": "node --harmony test/index.js",

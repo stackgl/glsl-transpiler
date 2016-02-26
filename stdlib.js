@@ -305,9 +305,9 @@ function vector (constr, opts) {
 	constr.create = function (target, args) {
 		if (!(target instanceof constr)) target = new constr();
 
-		args = flatten(args);
-
 		var i = 0, arg, map = this.type, last = map(0), n = this.dimensions;
+
+		args = flatten(args, n);
 
 		while (i < n) {
 			arg = args[i];
@@ -318,6 +318,8 @@ function vector (constr, opts) {
 
 		return target;
 	};
+
+	constr.prototype.isVector = true;
 
 	//provide swizzles
 	swizzle(constr);
@@ -435,8 +437,6 @@ function matrix (constr, opts) {
 	constr.create = function (target, args) {
 		if (!(target instanceof constr)) target = new constr();
 
-		args = flatten(args);
-
 		var vec = this.type;
 		var size = this.dimensions;
 
@@ -446,25 +446,49 @@ function matrix (constr, opts) {
 		}
 
 		//apply args
-		var i = 0, j = 0, arg, last = 0, col, dim = vec.dimensions, n = size * dim;
+		var i = 0, j = 0, arg, last = 0, col, dim = vec.dimensions;
 
-		//of only a number passed - init diagonal
-		if (args.length === 1 && typeof args[0] === 'number') {
-			arg = args[0];
+		//of only one arg passed - init diagonal
+		if (args.length === 1 && args[0] != null) {
+			if (typeof args[0] === 'number') {
+				arg = args[0];
+			} else if (args[0].isMatrix) {
+				arg = 1;
+			}
+
 			for (var l = Math.min(size, dim); i < l; i++) {
 				target[i][i] = arg;
 			}
+
+			//if arg passed is also matrix - simplify creation
+			if (args[0].isMatrix) {
+				var m = args[0];
+				dim = Math.min(dim, m[0].length());
+				size = Math.min(size, m.length());
+
+				for (i = 0; i < size; i++) {
+					col = target[i];
+					for (j = 0; j < dim; j++) {
+						arg = m[i][j];
+						col[j] = arg == null ? last : arg;
+						last = col[j];
+					}
+				}
+			}
+
 			return target;
 		}
 
-		//otherwise do component-fill
-		while (i < n) {
-			arg = args[i];
-			col = target[Math.floor(i / size)];
+		args = flatten(args);
 
-			col[i % dim] = arg == null ? last : arg;
-			last = col[i];
-			i++;
+		//otherwise do component-fill
+		for (i = 0; i < size; i++) {
+			col = target[i];
+			for (j = 0; j < dim; j++) {
+				arg = args[i*dim + j];
+				col[j] = arg == null ? last : arg;
+				last = col[j];
+			}
 		}
 
 		return target;
@@ -474,6 +498,8 @@ function matrix (constr, opts) {
 	constr.prototype.length = function () {
 		return constr.dimensions;
 	};
+
+	constr.prototype.isMatrix = true;
 };
 
 
@@ -490,8 +516,6 @@ function flatten (arr, max) {
 	for (var i = 0; i < l; i++) {
 		if (arr[i].length != null) result = result.concat(flatten(arr[i], max - result.length));
 		else result.push(arr[i]);
-
-		if (i >= max) break;
 	}
 
 	return result;

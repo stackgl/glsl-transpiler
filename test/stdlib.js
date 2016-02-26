@@ -1,5 +1,4 @@
 //ref https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
-
 var test = require('tst');
 var _ = require('../stdlib');
 var assert = require('assert');
@@ -29,7 +28,7 @@ test.skip('Primitives', function () {
 });
 
 test('Vector constructors', function () {
-	var {vec2, vec3, vec4, mat2, ivec3, ivec4, bvec4} = _;
+	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4, mat2 = _.mat2, ivec3 = _.ivec3, ivec4 = _.ivec4, bvec4 = _.bvec4;
 
 	test('vec3()', function () {
 		var v = vec3();
@@ -187,8 +186,11 @@ test('Vector constructors', function () {
 });
 
 test('Matrix constructors', function () {
-	var {vec2, vec3, vec4, ivec3, ivec4, bvec4} = _;
-	var {mat2, mat3, mat4, mat2, mat2x3, mat2x4, mat3x2, mat3, mat3x4, mat4x2, mat4x3, mat4 } = _;
+	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4, dvec2 = _.dvec2, dvec3 = _.dvec3, dvec4 = _.dvec4, ivec3 = _.ivec3, ivec4 = _.ivec4, bvec4 = _.bvec4;
+
+	var mat2 = _.mat2, mat3 = _.mat3, mat4 = _.mat4,
+		dmat2 = _.dmat2, dmat3 = _.dmat3, dmat4 = _.dmat4,
+		mat2x3 = _.mat2x3, mat2x4 = _.mat2x4, mat3x2 = _.mat3x2, mat3x4 = _.mat3x4, mat4x2 = _.mat4x2, mat4x3 = _.mat4x3, dmat2x4 = _.dmat2x4;
 
 	// To initialize the diagonal of a matrix with all other elements set to zero:
 	test('mat2(float)', function () {
@@ -270,33 +272,220 @@ test('Matrix constructors', function () {
 
 	// one column per argument
 	test('mat4(vec4, vec4, vec4, vec4);', function () {
+		var m = mat4(vec4(), vec4(1.2), vec4(-2).zzzz, vec4(0,1,2,3).wzyx);
 
+		assert.equal(m.length(), 4);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 0);
+		assert.equal(m[0][2], 0);
+		assert.equal(m[0][3], 0);
+		assert.equal(m[1][0], 1.2);
+		assert.equal(m[1][1], 1.2);
+		assert.equal(m[1][2], 1.2);
+		assert.equal(m[1][3], 1.2);
+		assert.equal(m[2][0], -2);
+		assert.equal(m[2][1], -2);
+		assert.equal(m[2][2], -2);
+		assert.equal(m[2][3], -2);
+		assert.equal(m[3][0], 3);
+		assert.equal(m[3][1], 2);
+		assert.equal(m[3][2], 1);
+		assert.equal(m[3][3], 0);
 	});
 
 
-	`
-	mat3x2(vec2, vec2, vec2); // one column per argument
-	dmat2(dvec2, dvec2);
-	dmat3(dvec3, dvec3, dvec3);
-	dmat4(dvec4, dvec4, dvec4, dvec4);
-	mat2(float, float, // first column
-	 float, float); // second column
-	mat3(float, float, float, // first column
-	 float, float, float, // second column
-	 float, float, float); // third column
-	mat4(float, float, float, float, // first column
-	 float, float, float, float, // second column
-	 float, float, float, float, // third column
-	 float, float, float, float); // fourth column
-	mat2x3(vec2, float, // first column
-	 vec2, float); // second column
-	dmat2x4(dvec3, double, // first column
-	 double, dvec3) // second column
+	// one column per argument
+	test('mat3x2(vec2, vec2, vec2);', function () {
+		var m = mat3x2(vec2(1.2), vec2(-2).xx, vec2(2,3).yx);
 
-	mat3x3(mat4x4); // takes the upper-left 3x3 of the mat4x4
-	mat2x3(mat4x2); // takes the upper-left 2x2 of the mat4x4, last row is 0,0
-	mat4x4(mat3x3); // puts the mat3x3 in the upper-left, sets the lower right component to 1, and the rest to 0
-	`
+		assert.equal(m.length(), 3);
+		assert.equal(m[0][0], 1.2);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[1][0], -2);
+		assert.equal(m[1][1], -2);
+		assert.equal(m[2][0], 3);
+		assert.equal(m[2][1], 2);
+	});
+
+	// one column per argument
+	test('dmat2(dvec2, dvec2);', function () {
+		var m = dmat2(dvec2(0, 1.2), dvec2(-3, 3.3));
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[1][0], -3);
+		assert.equal(m[1][1], 3.3);
+	});
+
+
+	// one column per argument
+	test('dmat3(dvec3, dvec3, dvec3)', function () {
+		var m = dmat3(dvec3(1.2), dvec3(), dvec3(1,2,3));
+
+		assert.equal(m.length(), 3);
+		assert.equal(m[0][0], 1.2);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[0][2], 1.2);
+		assert.equal(m[1][0], 0);
+		assert.equal(m[1][1], 0);
+		assert.equal(m[1][2], 0);
+		assert.equal(m[2][0], 1);
+		assert.equal(m[2][1], 2);
+		assert.equal(m[2][2], 3);
+	});
+
+
+	// one column per argument
+	test('dmat4(dvec4, dvec4, dvec4, dvec4);', function () {
+		var m = dmat4(dvec4(), dvec4(1.2), dvec4(-2).zzzz, dvec4(0,1,2,3).wzyx);
+
+		assert.equal(m.length(), 4);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 0);
+		assert.equal(m[0][2], 0);
+		assert.equal(m[0][3], 0);
+		assert.equal(m[1][0], 1.2);
+		assert.equal(m[1][1], 1.2);
+		assert.equal(m[1][2], 1.2);
+		assert.equal(m[1][3], 1.2);
+		assert.equal(m[2][0], -2);
+		assert.equal(m[2][1], -2);
+		assert.equal(m[2][2], -2);
+		assert.equal(m[2][3], -2);
+		assert.equal(m[3][0], 3);
+		assert.equal(m[3][1], 2);
+		assert.equal(m[3][2], 1);
+		assert.equal(m[3][3], 0);
+	});
+
+	// first column
+	// second column
+	test('mat2(float, float, float, float);', function () {
+		var m = mat2(0, 1.2, -3, 3.3);
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[1][0], -3);
+		assert.equal(m[1][1], 3.3);
+	});
+
+	test('mat3(float × 9)', function () {
+		var m = mat3(0,1.2,-3, 1,2,3, 5,6,7);
+
+		assert.equal(m.length(), 3);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[0][2], -3);
+		assert.equal(m[1][0], 1);
+		assert.equal(m[1][1], 2);
+		assert.equal(m[1][2], 3);
+		assert.equal(m[2][0], 5);
+		assert.equal(m[2][1], 6);
+		assert.equal(m[2][2], 7);
+	});
+
+	test('mat4(float × 16)', function () {
+		var m = mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1);
+
+		assert.equal(m.length(), 4);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[0][2], -3);
+		assert.equal(m[0][3], 3);
+		assert.equal(m[1][0], 1);
+		assert.equal(m[1][1], 2);
+		assert.equal(m[1][2], 3);
+		assert.equal(m[1][3], 4);
+		assert.equal(m[2][0], 5);
+		assert.equal(m[2][1], 6);
+		assert.equal(m[2][2], 7);
+		assert.equal(m[2][3], 8);
+		assert.equal(m[3][0], 0);
+		assert.equal(m[3][1], 0);
+		assert.equal(m[3][2], -1);
+		assert.equal(m[3][3], -1);
+	});
+
+	test('mat2x3(vec2, float, vec2, float);', function () {
+		var m = mat2x3(vec2(0,1.2),-3, vec2(3,1),2);
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[0][2], -3);
+		assert.equal(m[1][0], 3);
+		assert.equal(m[1][1], 1);
+		assert.equal(m[1][2], 2);
+	});
+
+	test('dmat2x4(dvec3, double, double, dvec3)', function () {
+		var m = dmat2x4(dvec3(0,1.2,3),-3, 4, dvec3(3,1,2));
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 0);
+		assert.equal(m[0][1], 1.2);
+		assert.equal(m[0][2], 3);
+		assert.equal(m[0][3], -3);
+		assert.equal(m[1][0], 4);
+		assert.equal(m[1][1], 3);
+		assert.equal(m[1][2], 1);
+		assert.equal(m[1][3], 2);
+	});
+
+
+	// takes the upper-left 3x3 of the mat4x4
+	test('mat3x3(mat4x4);', function () {
+		var m = mat3(mat4(vec4(1), vec4(2), vec4(3), vec4(4)));
+
+		assert.equal(m.length(), 3);
+		assert.equal(m[0][0], 1);
+		assert.equal(m[0][1], 1);
+		assert.equal(m[0][2], 1);
+		assert.equal(m[1][0], 2);
+		assert.equal(m[1][1], 2);
+		assert.equal(m[1][2], 2);
+		assert.equal(m[2][0], 3);
+		assert.equal(m[2][1], 3);
+		assert.equal(m[2][2], 3);
+	});
+
+	// takes the upper-left 2x2 of the mat4x4, last row is 0,0
+	test('mat2x3(mat4x2);', function () {
+		var m = mat2x3(mat4x2(vec2(1), vec2(2), vec2(3), vec2(4)));
+
+		assert.equal(m.length(), 2);
+		assert.equal(m[0][0], 1);
+		assert.equal(m[0][1], 1);
+		assert.equal(m[0][2], 0);
+		assert.equal(m[1][0], 2);
+		assert.equal(m[1][1], 2);
+		assert.equal(m[1][2], 0);
+	});
+
+	// puts the mat3x3 in the upper-left, sets the lower right component to 1, and the rest to 0
+	test('mat4x4(mat3x3);', function () {
+		var m = mat4(mat3(vec3(1), vec3(2), vec3(3)));
+
+		assert.equal(m.length(), 4);
+		assert.equal(m[0][0], 1);
+		assert.equal(m[0][1], 1);
+		assert.equal(m[0][2], 1);
+		assert.equal(m[0][3], 0);
+		assert.equal(m[1][0], 2);
+		assert.equal(m[1][1], 2);
+		assert.equal(m[1][2], 2);
+		assert.equal(m[1][3], 0);
+		assert.equal(m[2][0], 3);
+		assert.equal(m[2][1], 3);
+		assert.equal(m[2][2], 3);
+		assert.equal(m[2][3], 0);
+		assert.equal(m[3][0], 0);
+		assert.equal(m[3][1], 0);
+		assert.equal(m[3][2], 0);
+		assert.equal(m[3][3], 1);
+	});
 });
 
 
