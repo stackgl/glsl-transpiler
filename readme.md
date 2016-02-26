@@ -1,4 +1,4 @@
-> Transform [glsl](https://www.opengl.org/documentation/glsl/) to js.
+> Transform [glsl](https://www.opengl.org/documentation/glsl/) to runnable js. Each OpenGL type is detected in code and provided via [stdlib.js](/stdlib.js).
 
 ## Usage
 
@@ -49,7 +49,7 @@ To compile glsl source code to js directly, just pass a string as the argument a
 var compile = require('glsl-js/string');
 var glslify = require('glslify');
 
-compile(glslify('./source.glsl'), options);
+compile(glslify('./source.glsl'));
 ```
 
 ### glsl-js/stream
@@ -64,7 +64,7 @@ var tokenize = require('glsl-tokenizer/stream');
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
 .pipe(parse())
-.pipe(compile(options?))
+.pipe(compile())
 .once('end', function () {
 	//this.source contains the actual version of the compiled code
 	//and gets updated on each input chunk of data.
@@ -84,15 +84,8 @@ var parse = require('glsl-parser/direct');
 var source = glslify('./source.glsl');
 var tokens = tokenize(source);
 var tree = parse(tokens);
-var result = GLSL(options?).stringify(tree);
+var result = GLSL().stringify(tree);
 ```
-
-### options
-
-Options object can be passed to each glsl-js entry module. It may contain the following fields:
-
-* `stdlib` — custom stdlib instance to use to polyfill default methods. Can be useful to extend webgl to OpenGL env. By default [glsl-stdlib](https://github.com/dfcreative/glsl-stdlib) is used.
-
 
 ### events
 
@@ -105,8 +98,6 @@ _GLSL_ instance emits events during processing chunks:
 
 ## Related
 
-> [gl-js](https://npmjs.org/package/gl-js) — webgl implementation in node.</br>
-> [glsl-stdlib](https://npmjs.org/package/glsl-stdlib) — webgl/opengl stdlib for gl-js.</br>
 > [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
 > [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
