@@ -19,8 +19,12 @@
     "index.js",
     "stream.js",
     "string.js",
-    "stdlib.js"
+    "stdlib.js",
+    "lib"
   ],
+  "directories": {
+    "lib": "./lib"
+  },
   "scripts": {
     "test": "node --harmony test/index.js",
     "test:browser": "budo test/index.js",

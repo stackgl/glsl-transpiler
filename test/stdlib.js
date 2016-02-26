@@ -563,9 +563,15 @@ test('Matrix constructors', function () {
 });
 
 
-test.skip('WebGL subset', function () {
-	// type radians (type degrees)
-	// type degrees (type radians)
+test('WebGL subset', function () {
+	test('type radians (type degrees)', function () {
+		assert.equal(_.radians(360), Math.PI * 2);
+	});
+
+	test('type degrees (type radians)', function () {
+		assert.equal(_.degrees(Math.PI * 2), 360);
+	});
+
 	// type sin (type angle)
 	// type cos (type angle)
 	// type tan (type angle)
