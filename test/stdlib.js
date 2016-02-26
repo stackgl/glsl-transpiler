@@ -4,27 +4,101 @@ var _ = require('../stdlib');
 var assert = require('assert');
 
 
-test.skip('Primitives', function () {
-	int(uint) // converts an unsigned integer to a signed integer
-	int(bool) // converts a Boolean value to an int
-	int(float) // converts a float value to an int
-	int(double) // converts a double value to a signed integer
-	uint(int) // converts a signed integer value to an unsigned integer
-	uint(bool) // converts a Boolean value to an unsigned integer
-	uint(float) // converts a float value to an unsigned integer
-	uint(double) // converts a double value to an unsigned integer
-	bool(int) // converts a signed integer value to a Boolean
-	bool(uint) // converts an unsigned integer value to a Boolean value
-	bool(float) // converts a float value to a Boolean
-	bool(double) // converts a double value to a Boolean
-	float(int) // converts a signed integer value to a float
-	float(uint) // converts an unsigned integer value to a float value
-	float(bool) // converts a Boolean value to a float
-	float(double)// converts a double value to a float
-	double(int) // converts a signed integer value to a double
-	double(uint) // converts an unsigned integer value to a double
-	double(bool) // converts a Boolean value to a double
-	double(float)// converts a float value to a double
+test('Primitives', function () {
+	var int = _.int, uint = _.uint, bool = _.bool, float = _.float, double = _.double;
+
+	// converts an unsigned integer to a signed integer
+	test('int(uint)', function () {
+		assert.equal(int(1243), 1243);
+	});
+
+	// converts a Boolean value to an int
+	test('int(bool)', function () {
+		assert.equal(int(true), 1);
+		assert.equal(int(false), 0);
+	});
+
+	// converts a float value to an int
+	test('int(float)', function () {
+		assert.equal(int(123.4), 123);
+	});
+
+	// converts a double value to a signed integer
+	test('int(double)', function () {
+		assert.equal(int(10e5), 10e5);
+	});
+
+	// converts a signed integer value to an unsigned integer
+	test('uint(int)', function () {
+		assert.equal(uint(123), 123);
+	});
+
+	// converts a Boolean value to an unsigned integer
+	test('uint(bool)', function () {
+		assert.equal(uint(true), 1);
+	});
+
+	// converts a float value to an unsigned integer
+	test('uint(float)', function () {
+		assert.equal(uint(123.4), 123);
+	});
+
+	// converts a double value to an unsigned integer
+	test('uint(double)', function () {
+		assert.equal(uint(123.4e3), 123400);
+	});
+
+	// converts a signed integer value to a Boolean
+	test('bool(int)', function () {
+		assert.equal(bool(123), true);
+		assert.equal(bool(0), false);
+	});
+
+	// converts an unsigned integer value to a Boolean value
+	test('bool(uint)', function () {
+		assert.equal(bool(123), true);
+	});
+
+	// converts a float value to a Boolean
+	test('bool(float)', function () {
+		assert.equal(bool(123.4), true)
+	});
+
+	// converts a double value to a Boolean
+	test('bool(double)', function () {
+		assert.equal(bool(123.4e100), true)
+	});
+
+	// converts a signed integer value to a float
+	test('float(int)', function () {
+		assert.equal(float(123), 123);
+	});
+
+	// converts an unsigned integer value to a float value
+	test('float(uint)', function () {
+		assert.equal(float(34), 34);
+	});
+
+	// converts a Boolean value to a float
+	test('float(bool)', function () {
+		assert.equal(float(true), 1);
+		assert.equal(float(false), 0);
+	});
+
+	// converts a double value to a float
+	test('float(double)');
+
+	// converts a signed integer value to a double
+	test('double(int)');
+
+	// converts an unsigned integer value to a double
+	test('double(uint)');
+
+	// converts a Boolean value to a double
+	test('double(bool)');
+
+	// converts a float value to a double
+	test('double(float)');
 });
 
 test('Vector constructors', function () {

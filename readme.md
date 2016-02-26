@@ -1,4 +1,4 @@
-> Transform [glsl](https://www.opengl.org/documentation/glsl/) to runnable js. Each OpenGL type is detected in code and provided via [stdlib.js](/stdlib.js).
+> Transform [glsl](https://www.opengl.org/documentation/glsl/) to js.
 
 ## Usage
 
