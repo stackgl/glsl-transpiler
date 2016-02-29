@@ -143,9 +143,36 @@ test.only('TypedArray vs wrapped array', function () {
 		}
 	});
 
+	function protoVec (x, y) {
+		this[0] = x;
+		this[1] = y;
+	}
+	inherits(protoVec, Array);
+	Object.defineProperties(protoVec.prototype, {
+		x: {
+			get: function () {
+				return this[0];
+			},
+			set: function (value) {
+				this[0] = value;
+			}
+		},
+		y: {
+			get: function () {
+				return this[1];
+			},
+			set: function (value) {
+				this[1] = value;
+			}
+		}
+	});
+	function descVec (x, y) {
+		protoVec.call(this, x, y);
+	}
+	inherits(descVec, protoVec);
+	// descVec.prototype = Object.create(protoVec.prototype);
 
-
-	test('Access', function () {
+	test.only('Access', function () {
 		var max = 10e5;
 
 		test('non-array', function () {
@@ -188,8 +215,17 @@ test.only('TypedArray vs wrapped array', function () {
 			}
 		});
 
+		test('Prototype vector', function () {
+			var vec = new descVec(1,2);
+			for (var i = 0; i < max; i++) {
+				vec.x;
+				vec.y;
+			}
+		});
+
 		test('stdlib.vec2', function () {
 			var vec = lib.vec2(0,1);
+			// var max = 1;
 			for (var i = 0; i < max; i++) {
 				vec.x;
 				vec.y;
