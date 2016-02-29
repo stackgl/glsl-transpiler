@@ -267,7 +267,7 @@ test('Matrix constructors', function () {
 		mat2x3 = _.mat2x3, mat2x4 = _.mat2x4, mat3x2 = _.mat3x2, mat3x4 = _.mat3x4, mat4x2 = _.mat4x2, mat4x3 = _.mat4x3, dmat2x4 = _.dmat2x4;
 
 	// To initialize the diagonal of a matrix with all other elements set to zero:
-	test.only('mat2(float)', function () {
+	test('mat2(float)', function () {
 		var m = mat2(1.2);
 
 		assert.equal(m.length(), 2);
