@@ -7,6 +7,11 @@ var assert = require('assert');
 test('Primitives', function () {
 	var int = _.int, uint = _.uint, bool = _.bool, float = _.float, double = _.double;
 
+	//recognise input array
+	test('float([1])', function () {
+		assert.equal(float([1]), 1);
+	});
+
 	// converts an unsigned integer to a signed integer
 	test('int(uint)', function () {
 		assert.equal(int(1243), 1243);

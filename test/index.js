@@ -72,9 +72,9 @@ test('Interface', function () {
 
 	function main () {
 		fColor = color;
-		var position = vec2(uv.x, -uv.y).mult(coeff);
+		var position = vec2(uv.x, -uv.y).multiply(coeff);
 		position.x *= uScreenSize.y / uScreenSize.x;
-		xy.xy = xy.xy.mult(uv.yx);
+		xy.xy = xy.xy.multiply(uv.yx);
 		gl_Position = vec4(position.yx, 0, 1);
 		return;
 	};
@@ -227,10 +227,9 @@ test('primative variable initializers', function() {
 		assert.equal(
 			clean(compile('void main() { float test = 5.5e3; }')),
 			clean('function main () {\nvar test = 5.5e3;\n};'));
-		//FIXME: glsl-tokenizer issue
-		// assert.equal(
-		// 	clean(compile('void main() { float test = 5.5e-3; }')),
-		// 	clean('function main () {\nvar test = 0.0055;\n};'));
+		assert.equal(
+			clean(compile('void main() { float test = 5.5e-3; }')),
+			clean('function main () {\nvar test = 5.5e-3;\n};'));
 		assert.equal(
 			clean(compile('void main() { float test = .5e3; }')),
 			clean('function main () {\nvar test = .5e3;\n};'));
@@ -429,29 +428,6 @@ struct {
 } e = { 1.2, 2, 3 }; // illegal
 `;
 
-`
-mat2(vec2, vec2); // one column per argument
-mat3(vec3, vec3, vec3); // one column per argument
-mat4(vec4, vec4, vec4, vec4); // one column per argument
-mat3x2(vec2, vec2, vec2); // one column per argument
-dmat2(dvec2, dvec2);
-dmat3(dvec3, dvec3, dvec3);
-dmat4(dvec4, dvec4, dvec4, dvec4);
-mat2(float, float, // first column
- float, float); // second column
-mat3(float, float, float, // first column
- float, float, float, // second column
- float, float, float); // third column
-mat4(float, float, float, float, // first column
- float, float, float, float, // second column
- float, float, float, float, // third column
- float, float, float, float); // fourth column
-mat2x3(vec2, float, // first column
- vec2, float); // second column
-dmat2x4(dvec3, double, // first column
- double, dvec3) // second column
-`;
-
 });
 
 
@@ -519,8 +495,8 @@ test('Vec/matrix operators', function () {
 		var res = `
 			var v = vec3(), u = vec3();
 			var m = mat3();
-			u = v.mult(m);
-			u = m.mult(v);
+			u = v.multiply(m);
+			u = m.multiply(v);
 		`;
 
 		assert.equal(clean(compile(src)), clean(res));
@@ -534,7 +510,7 @@ test('Vec/matrix operators', function () {
 
 		var res = `
 			var m = mat3(), n = mat3(), r = mat3();
-			r = m.mult(n);
+			r = m.multiply(n);
 		`;
 
 		var equiv = `

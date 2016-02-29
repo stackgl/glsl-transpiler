@@ -41,10 +41,10 @@ GLSL.prototype.stdlib = stdlib;
  * Operator names
  */
 GLSL.prototype.operators = {
-	'*': 'mult',
+	'*': 'multiply',
 	'+': 'add',
-	'-': 'sub',
-	'/': 'div',
+	'-': 'subtract',
+	'/': 'divide',
 	'%': 'mod',
 	'<<': 'lshift',
 	'>>': 'rshift'
