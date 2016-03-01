@@ -49,7 +49,7 @@ To compile glsl source code to js directly, just pass a string as the argument a
 var compile = require('glsl-js/string');
 var glslify = require('glslify');
 
-compile(glslify('./source.glsl'));
+compile(glslify('./source.glsl'), options?);
 ```
 
 ### glsl-js/stream
@@ -64,7 +64,7 @@ var tokenize = require('glsl-tokenizer/stream');
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
 .pipe(parse())
-.pipe(compile())
+.pipe(compile(options?))
 .once('end', function () {
 	//this.source contains the actual version of the compiled code
 	//and gets updated on each input chunk of data.
@@ -84,16 +84,31 @@ var parse = require('glsl-parser/direct');
 var source = glslify('./source.glsl');
 var tokens = tokenize(source);
 var tree = parse(tokens);
-var result = GLSL().stringify(tree);
+var glsl = GLSL(options?); //create glsl instance
+var result = glsl.stringify(tree);
 ```
 
-### events
+### glsl.<property>
 
-_GLSL_ instance emits events during processing chunks:
+To adjust rendering settings it is possible to pass `options` object, which just redefines `glsl` instance values.
 
-* `glsl.on('start')` — invoked when `glsl.stringify()` is called the first time.
-* `glsl.on('<nodeType>')` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list.
-* `glsl.on('end')` — invoked right before the end of the last `glsl.stringify()`.
+| Property | Default | Description |
+|---|:---:|---|
+| `this.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
+| `this.removeAttributes` | `false` | Remove attributes declarations from the output. Can be useful if attributes should be provided separately. |
+| `this.removeVarying` | `false` | Remove varying definitions from the output. Can be useful if uniforms should be provided separately. |
+| `this.stdlib` | `require('./stdlib')` | A collection of environment types and builtins affecting the output. |
+| `this.scopes` | `{}` | Parsed scopes for the whole time of glsl object. Contains scope names with nested variable objects. |
+| `this.attributes` | `{}` | Parsed attributes by name. |
+| `this.varying` | `{}` | Parsed varying variables by name. |
+| `this.uniforms` | `{}` | Parsed uniforms by name. |
+
+### glsl.<method>
+
+| Method | Description |
+|---|---|
+| `this.reset()` | Reinitialize scopes, attributes, varying. |
+| `this.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`. Events are invoked during stringifying. |
 
 
 ## Related

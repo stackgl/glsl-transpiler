@@ -132,6 +132,32 @@ test('Interface', function () {
 			}
 		}))
 	});
+
+	test.only('Detect attributes, uniforms, varying', function () {
+		var glsl = new GLSL({
+			removeAttributes: true,
+			removeUniforms: true,
+			removeVarying: true
+		});
+
+		var result = glsl.compile(source);
+		console.log(result)
+
+		assert.deepEqual(glsl.attributes, {
+			uv: {type: 'vec2', dimensions: []},
+			xy: {type: 'vec2', dimensions: []},
+			color: {type: 'vec4', dimensions: []}
+		});
+
+		assert.deepEqual(glsl.varying, {
+			color: {type: 'vec4', dimensions: []},
+			twoColors: {type: 'vec4', dimensions: [2]}
+		});
+
+		assert.deepEqual(glsl.uniforms, {
+			uScreenSize: {type: 'vec2', dimensions: []}
+		});
+	});
 });
 
 

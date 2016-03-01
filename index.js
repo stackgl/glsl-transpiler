@@ -31,6 +31,14 @@ inherits(GLSL, Emitter);
 
 
 /**
+ * Basic rendering settings
+ */
+GLSL.prototype.removeUniforms = false;
+GLSL.prototype.removeAttributes = false;
+GLSL.prototype.removeVarying = false;
+
+
+/**
  * Minimal webgl default types values. Replace with other stdlib, if required.
  */
 GLSL.prototype.stdlib = stdlib;
@@ -90,7 +98,7 @@ GLSL.prototype.reset = function () {
 	};
 
 	//collected varying-s
-	this.varyings = {
+	this.varying = {
 
 	};
 
@@ -320,7 +328,8 @@ GLSL.prototype.transforms = {
 		else if (this.structures[node.token.data] != null) {
 			result += 'var ';
 		}
-		//structure
+		//default type
+		//FIXME: elaborate this case
 		else if (this.stdlib[node.token.data] != null) {
 			result += 'var ';
 		}
