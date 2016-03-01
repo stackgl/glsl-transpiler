@@ -11,7 +11,7 @@ var flatten = require('array-flatten');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
 var extend = require('xtend/mutable');
-
+var builtins = require('./lib/builtins');
 
 /**
  * Create GLSL codegen instance
@@ -29,12 +29,15 @@ function GLSL (options) {
 inherits(GLSL, Emitter);
 
 
+
 /**
  * Basic rendering settings
  */
 GLSL.prototype.removeUniforms = false;
 GLSL.prototype.removeAttributes = false;
 GLSL.prototype.removeVarying = false;
+GLSL.prototype.unswizzle = false;
+GLSL.prototype.unwrapType = false;
 
 
 
@@ -63,6 +66,9 @@ GLSL.prototype.primitives = {
 	float: 0,
 	double: 0
 };
+
+
+GLSL.prototype.builtins = builtins;
 
 
 /**
@@ -519,10 +525,16 @@ GLSL.prototype.transforms = {
 		var left = this.stringify(node.children[0]);
 		var right = this.stringify(node.children[1]);
 
-		//for case of array access like float[3] or something[N] - return as is
 		if (node.data === '[') {
-			return `${typeA}[${right}]`;
+			//for case of array access like float[3] or something[N] - return as is
+			if (this.primitives[node.type]) {
+				return `${typeA}[${right}]`;
+			}
+
+			//return as is
+			return `${left}[${right}]`;
 		}
+
 
 
 		//render primitive types with js operators
@@ -818,7 +830,7 @@ GLSL.prototype.getType = function (node) {
 	}
 	else if (node.type === 'builtin') {
 		//for builtins just notify their simplicity (no need for them being spec types)
-		return 'bool';
+		return this.builtins[node.data];
 	}
 	else if (node.type === 'ternary') {
 		return this.getType(node.children[1]);

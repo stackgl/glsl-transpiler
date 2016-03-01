@@ -38,6 +38,7 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy *= uv.yx;
 		gl_Position = vec4(position.yx / 2.0, 0, 1);
+		gl_FragColor[0] = gl_FragCoord[0];
 		return;
 	}
 
@@ -76,6 +77,7 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.multiply(uv.yx);
 		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
+		gl_FragColor[0] = gl_FragCoord[0];
 		return;
 	};
 
@@ -111,6 +113,7 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.multiply(uv.yx);
 		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
+		gl_FragColor[0] = gl_FragCoord[0];
 		return;
 	};
 
@@ -172,12 +175,13 @@ test('Interface', function () {
 		var glsl = new GLSL({
 			removeAttributes: true,
 			removeUniforms: true,
-			removeVarying: true
+			removeVarying: true,
+			unswizzle: true
 		});
 
 		var result = glsl.compile(source);
 
-		// assert.equal(clean(result).split('\n')[9], clean(shortResult).split('\n')[9]);
+		// assert.equal(clean(result).split('\n')[5], clean(shortResult).split('\n')[5]);
 		assert.equal(clean(result), clean(shortResult));
 
 		assert.deepEqual(Object.keys(glsl.attributes), ['uv', 'xy', 'color']);
