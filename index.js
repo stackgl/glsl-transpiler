@@ -519,10 +519,10 @@ GLSL.prototype.transforms = {
 	binary: function (node) {
 		var result = '';
 
+		var left = this.stringify(node.children[0]);
 		var typeA = this.getType(node.children[0]);
 		var typeB = this.getType(node.children[1]);
 		var operator = this.operators[node.data];
-		var left = this.stringify(node.children[0]);
 		var right = this.stringify(node.children[1]);
 
 		if (node.data === '[') {
@@ -826,7 +826,16 @@ GLSL.prototype.getType = function (node) {
 		return node.data;
 	}
 	else if (node.type === 'binary') {
-		return this.getType(node.children[0]);
+		//simple binaries like a + 2 are ok
+		if (this.operators[node.data]) {
+			return this.getType(node.children[0]);
+		}
+		else if (node.data === '[') {
+			return 'float';
+		}
+		//access binaries
+		else {
+		}
 	}
 	else if (node.type === 'builtin') {
 		//for builtins just notify their simplicity (no need for them being spec types)

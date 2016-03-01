@@ -38,7 +38,7 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy *= uv.yx;
 		gl_Position = vec4(position.yx / 2.0, 0, 1);
-		gl_FragColor[0] = gl_FragCoord[0];
+		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
 		return;
 	}
 
@@ -77,7 +77,7 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.multiply(uv.yx);
 		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
-		gl_FragColor[0] = gl_FragCoord[0];
+		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
 		return;
 	};
 
@@ -113,7 +113,7 @@ test('Interface', function () {
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.multiply(uv.yx);
 		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
-		gl_FragColor[0] = gl_FragCoord[0];
+		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
 		return;
 	};
 
@@ -142,7 +142,7 @@ test('Interface', function () {
 
 
 	test('Direct', function () {
-		assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
+		// assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
 		assert.equal(clean(compile(source)), clean(result));
 	});
 
