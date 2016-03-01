@@ -185,6 +185,8 @@ test('Interface', function () {
 		assert.deepEqual(Object.keys(glsl.varying), ['fColor', 'twoColors']);
 
 		assert.deepEqual(Object.keys(glsl.uniforms), ['uScreenSize']);
+
+		assert.deepEqual(glsl.types, ['vec2', 'vec4', 'float', 'int']);
 	});
 });
 

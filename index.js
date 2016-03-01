@@ -10,7 +10,6 @@ var assert = require('assert');
 var flatten = require('array-flatten');
 var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
-var stdlib = require('./stdlib');
 var extend = require('xtend/mutable');
 
 
@@ -36,12 +35,6 @@ inherits(GLSL, Emitter);
 GLSL.prototype.removeUniforms = false;
 GLSL.prototype.removeAttributes = false;
 GLSL.prototype.removeVarying = false;
-
-
-/**
- * Minimal webgl default types values. Replace with other stdlib, if required.
- */
-GLSL.prototype.stdlib = stdlib;
 
 
 
@@ -77,7 +70,7 @@ GLSL.prototype.primitives = {
  */
 GLSL.prototype.reset = function () {
 	//collection of types used during processing. To polyfill them after.
-	this.usedTypes = {};
+	this.types = [];
 
 	//scopes analysed. Each scope is named by the function they are contained in
 	this.scopes = {
@@ -170,12 +163,12 @@ GLSL.prototype.stringify = function stringify (node) {
 /**
  * Polyfill types — generate string source code for the types detected during compilation
  */
-GLSL.prototype.polyfill = function polyfill (types) {
-	unimplemented;
-	for (var type in types) {
-		var constr = this.stdlib[type];
-	}
-};
+// GLSL.prototype.polyfill = function polyfill (types) {
+	// unimplemented;
+	// for (var type in types) {
+	// 	var constr = this.stdlib[type];
+	// }
+// };
 
 
 /**
@@ -346,14 +339,17 @@ GLSL.prototype.transforms = {
 		else if (this.structures[node.token.data] != null) {
 			result += 'var ' + this.stringify(decllist);
 		}
-		//default type
-		//FIXME: elaborate this case
-		else if (this.stdlib[node.token.data] != null) {
-			result += 'var ' + this.stringify(decllist);
-		}
-		//case of function args etc
-		else {
+		//case of function args - drop var
+		else if (node.parent.type === 'functionargs') {
 			result += this.stringify(decllist);
+		}
+		//case of struct - also drop var
+		else if (node.parent.type === 'stmt' && node.parent.token.data === 'struct') {
+			result += this.stringify(decllist);
+		}
+		//default type
+		else {
+			result += 'var ' + this.stringify(decllist);
 		}
 
 		return result;
@@ -726,6 +722,9 @@ GLSL.prototype.variable = function (ident, data, scope) {
 		}
 		if (variable.binding === 'varying') {
 			this.varying[ident] = variable;
+		}
+		if (this.types.indexOf(variable.type) < 0) {
+			this.types.push(variable.type);
 		}
 
 		return variable;
