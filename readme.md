@@ -88,27 +88,27 @@ var glsl = GLSL(options?); //create glsl instance
 var result = glsl.stringify(tree);
 ```
 
-### glsl.<property>
+### Properties
 
-To adjust rendering settings it is possible to pass `options` object, which just redefines `glsl` instance values.
+To adjust rendering settings it is possible to pass options object `var glsl = GLSL(options);`, which just sets `glsl` instance values.
 
 | Property | Default | Description |
 |---|:---:|---|
-| `this.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
-| `this.removeAttributes` | `false` | Remove attributes declarations from the output. Can be useful if attributes should be provided separately. |
-| `this.removeVarying` | `false` | Remove varying definitions from the output. Can be useful if uniforms should be provided separately. |
-| `this.stdlib` | `require('./stdlib')` | A collection of environment types and builtins affecting the output. |
-| `this.scopes` | `{}` | Parsed scopes for the whole time of glsl object. Contains scope names with nested variable objects. |
-| `this.attributes` | `{}` | Parsed attributes by name. |
-| `this.varying` | `{}` | Parsed varying variables by name. |
-| `this.uniforms` | `{}` | Parsed uniforms by name. |
+| `glsl.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
+| `glsl.removeAttributes` | `false` | Remove attributes declarations from the output. Can be useful if attributes should be provided separately. |
+| `glsl.removeVarying` | `false` | Remove varying definitions from the output. Can be useful if uniforms should be provided separately. |
+| `glsl.stdlib` | `require('./stdlib')` | A collection of environment types and builtins affecting the output. |
+| `glsl.scopes` | `{}` | Parsed scopes for the whole time of glsl object. Contains scope names with nested variable objects. |
+| `glsl.attributes` | `{}` | Parsed attribute variables. |
+| `glsl.varying` | `{}` | Parsed varying variables. |
+| `glsl.uniforms` | `{}` | Parsed uniform variables. |
 
-### glsl.<method>
+### Methods
 
 | Method | Description |
 |---|---|
-| `this.reset()` | Reinitialize scopes, attributes, varying. |
-| `this.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`.  |
+| `glsl.reset()` | Reinitialize scopes, attributes, uniforms, varying. |
+| `glsl.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `'stmt'`, `'stmtlist'`, `'decl'` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`.  |
 
 
 ## Related
