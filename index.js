@@ -368,6 +368,9 @@ GLSL.prototype.transforms = {
 		//get datatype - it is the 4th children of a decl
 		var dataType = node.parent.children[4].token.data;
 
+		//attribute, uniform, varying etc
+		var bindingType = node.parent.children[1].token.data;
+
 		//get dimensions - it is from 5th to the len-1 nodes of a decl
 		//that’s in case if dimensions are defined first-class like `float[3] c = 1;`
 		//result is [] or [3] or [1, 2] or [4, 5, 5], etc.
@@ -387,6 +390,7 @@ GLSL.prototype.transforms = {
 				//save identifier to the scope
 				this.variable(ident, {
 					type: dataType,
+					binding: bindingType,
 					node: child,
 					dimensions: []
 				});
@@ -712,6 +716,17 @@ GLSL.prototype.variable = function (ident, data, scope) {
 
 		//save scope
 		if (variable.scope == null) variable.scope = this.scopes[scope];
+
+		//save variable to the collections
+		if (variable.binding === 'uniform') {
+			this.uniforms[ident] = variable;
+		}
+		if (variable.binding === 'attribute') {
+			this.attributes[ident] = variable;
+		}
+		if (variable.binding === 'varying') {
+			this.varying[ident] = variable;
+		}
 
 		return variable;
 	}

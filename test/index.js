@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test.only('Interface', function () {
+test('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 	precision mediump float;
@@ -168,7 +168,7 @@ test.only('Interface', function () {
 		}))
 	});
 
-	test.only('Detect attributes, uniforms, varying', function () {
+	test('Detect attributes, uniforms, varying', function () {
 		var glsl = new GLSL({
 			removeAttributes: true,
 			removeUniforms: true,
@@ -180,20 +180,11 @@ test.only('Interface', function () {
 		// assert.equal(clean(result).split('\n')[9], clean(shortResult).split('\n')[9]);
 		assert.equal(clean(result), clean(shortResult));
 
-		assert.deepEqual(glsl.attributes, {
-			uv: {type: 'vec2', dimensions: []},
-			xy: {type: 'vec2', dimensions: []},
-			color: {type: 'vec4', dimensions: []}
-		});
+		assert.deepEqual(Object.keys(glsl.attributes), ['uv', 'xy', 'color']);
 
-		assert.deepEqual(glsl.varying, {
-			color: {type: 'vec4', dimensions: []},
-			twoColors: {type: 'vec4', dimensions: [2]}
-		});
+		assert.deepEqual(Object.keys(glsl.varying), ['fColor', 'twoColors']);
 
-		assert.deepEqual(glsl.uniforms, {
-			uScreenSize: {type: 'vec2', dimensions: []}
-		});
+		assert.deepEqual(Object.keys(glsl.uniforms), ['uScreenSize']);
 	});
 });
 
