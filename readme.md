@@ -96,9 +96,9 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 |---|:---:|---|
 | `glsl.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
 | `glsl.removeAttributes` | `false` | Remove attributes declarations from the output. |
-| `glsl.removeVarying` | `false` | Remove varying definitions from the output. |
-| `glsl.stdlib` | `require('./stdlib')` | A collection of environment types, which are used as a wrappers for initial data, e. g. `vec2(0, 0, 1)`. |
-| `glsl.scopes` | `{}` | Parsed scopes for the whole time of glsl object. Contains scope names with nested variable objects. |
+| `glsl.removeVarying` | `false` | Remove varying declarations from the output. |
+| `glsl.stdlib` | `require('./stdlib')` | A collection of environment types, which are used as a wrappers, e. g. `vec2(0, 1)`. |
+| `glsl.scopes` | `{}` | Parsed scopes. Contains scope names with nested variable objects. |
 | `glsl.attributes` | `{}` | Parsed attribute variables. |
 | `glsl.varying` | `{}` | Parsed varying variables. |
 | `glsl.uniforms` | `{}` | Parsed uniform variables. |
@@ -108,7 +108,7 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 | Method | Description |
 |---|---|
 | `glsl.reset()` | Reinitialize scopes, attributes, uniforms, varying. |
-| `glsl.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `'stmt'`, `'stmtlist'`, `'decl'` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`.  |
+| `glsl.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `'stmt'`, `'stmtlist'`, `'decl'` etc, see [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`.  |
 
 
 ## Related
