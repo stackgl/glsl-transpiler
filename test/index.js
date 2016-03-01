@@ -37,7 +37,7 @@ test('Interface', function () {
 		vec2 position = coeff * vec2(uv.x, -uv.y);
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy *= uv.yx;
-		gl_Position = vec4(position.yx, 0, 1);
+		gl_Position = vec4(position.yx / 2.0, 0, 1);
 		return;
 	}
 
@@ -75,7 +75,7 @@ test('Interface', function () {
 		var position = vec2(uv.x, -uv.y).multiply(coeff);
 		position.x *= uScreenSize.y / uScreenSize.x;
 		xy.xy = xy.xy.multiply(uv.yx);
-		gl_Position = vec4(position.yx, 0, 1);
+		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
 		return;
 	};
 
@@ -105,6 +105,7 @@ test('Interface', function () {
 
 	test('Direct', function () {
 		assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
+		assert.equal(clean(compile(source)), clean(result));
 	});
 
 	test('Stream', function (done) {

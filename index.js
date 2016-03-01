@@ -79,6 +79,26 @@ GLSL.prototype.reset = function () {
 		}
 	};
 
+	//hash of registered structures
+	this.structures = {
+
+	};
+
+	//collected uniforms
+	this.uniforms = {
+
+	};
+
+	//collected varying-s
+	this.varyings = {
+
+	};
+
+	//collected attributes
+	this.attributes = {
+
+	};
+
 	//current scope of the node processed
 	this.currentScope = 'global';
 };
@@ -180,7 +200,7 @@ GLSL.prototype.transforms = {
 		var structName = node.children[0].data;
 
 		//register structure in the types stack
-		this.stdlib[structName] = true;
+		this.structures[structName] = true;
 
 		//get args list
 		var args = node.children.slice(1);
@@ -296,6 +316,11 @@ GLSL.prototype.transforms = {
 		else if (node.token.data === 'const') {
 			result += 'var ';
 		}
+		//structure
+		else if (this.structures[node.token.data] != null) {
+			result += 'var ';
+		}
+		//structure
 		else if (this.stdlib[node.token.data] != null) {
 			result += 'var ';
 		}
@@ -734,6 +759,12 @@ GLSL.prototype.getType = function (node) {
 				if (len === 3) return 'vec3';
 				if (len === 4) return 'vec4';
 			}
+			//access operator, like a.xy
+			if (!this.structures[node.children[0].data]) {
+				if (/[xyzwrgbastpd]+/.test(node.children[1].data)) {
+					return `vec${node.children[1].data.length}`;
+				}
+			}
 		}
 	}
 	//FIXME: guess every keyword is a type, isn’t it?
@@ -754,7 +785,7 @@ GLSL.prototype.getType = function (node) {
 		return this.getType(node.children[0]);
 	}
 
-	unimplemented;
+	throw Error(`getType(${node.type}) is not implemented`);
 };
 
 

@@ -567,6 +567,32 @@ test('Matrix constructors', function () {
 	});
 });
 
+test('Swizzles', function () {
+	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4;
+
+	test('vec2', function () {
+		var v = vec2(1, 2);
+		assert.deepEqual(v.x, 1);
+		assert.deepEqual(v.xy, [1,2]);
+		assert.deepEqual(v.yy, [2,2]);
+	});
+	test('vec3', function () {
+		var v = vec3(1, 2, 3);
+		assert.deepEqual(v.x, 1);
+		assert.deepEqual(v.xy, [1,2]);
+		assert.deepEqual(v.xyz, [1,2,3]);
+		assert.deepEqual(v.zzz, [3,3,3]);
+	});
+	test('vec4', function () {
+		var v = vec4(1, 2, 3, 4);
+		assert.deepEqual(v.x, 1);
+		assert.deepEqual(v.xy, [1,2]);
+		assert.deepEqual(v.xyz, [1,2,3]);
+		assert.deepEqual(v.xyzw, [1,2,3,4]);
+		assert.deepEqual(v.wwww, [4,4,4,4]);
+		assert.deepEqual(v.wzyx, [4,3,2,1]);
+	});
+});
 
 test('WebGL subset', function () {
 	test('type radians (type degrees)', function () {
