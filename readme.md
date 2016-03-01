@@ -95,9 +95,9 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 | Property | Default | Description |
 |---|:---:|---|
 | `glsl.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
-| `glsl.removeAttributes` | `false` | Remove attributes declarations from the output. Can be useful if attributes should be provided separately. |
-| `glsl.removeVarying` | `false` | Remove varying definitions from the output. Can be useful if uniforms should be provided separately. |
-| `glsl.stdlib` | `require('./stdlib')` | A collection of environment types and builtins affecting the output. |
+| `glsl.removeAttributes` | `false` | Remove attributes declarations from the output. |
+| `glsl.removeVarying` | `false` | Remove varying definitions from the output. |
+| `glsl.stdlib` | `require('./stdlib')` | A collection of environment types, which are used as a wrappers for initial data, e. g. `vec2(0, 0, 1)`. |
 | `glsl.scopes` | `{}` | Parsed scopes for the whole time of glsl object. Contains scope names with nested variable objects. |
 | `glsl.attributes` | `{}` | Parsed attribute variables. |
 | `glsl.varying` | `{}` | Parsed varying variables. |
