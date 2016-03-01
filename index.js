@@ -307,34 +307,54 @@ GLSL.prototype.transforms = {
 
 		//define variables
 		if (node.token.data === 'attribute') {
-			result += 'var ';
+			if (this.removeAttributes) {
+				//run stringify to collect vars, but ignore the output. I know, thats no good.
+				this.stringify(decllist);
+			}
+			else {
+				result += 'var ' + this.stringify(decllist);
+			}
 		}
 		else if (node.token.data === 'varying') {
-			result += 'var ';
+			if (this.removeVarying) {
+				//run stringify to collect vars, but ignore the output. I know, thats no good.
+				this.stringify(decllist);
+			}
+			else {
+				result += 'var ' + this.stringify(decllist);
+			}
 		}
 		else if (node.token.data === 'uniform') {
-			result += 'var ';
+			if (this.removeUniforms) {
+				//run stringify to collect vars, but ignore the output. I know, thats no good.
+				this.stringify(decllist);
+			}
+			else {
+				result += 'var ' + this.stringify(decllist);
+			}
 		}
 		else if (node.token.data === 'buffer') {
-			result += 'var ';
+			result += 'var ' + this.stringify(decllist);
 		}
 		else if (node.token.data === 'shared') {
-			result += 'var ';
+			result += 'var ' + this.stringify(decllist);
 		}
 		else if (node.token.data === 'const') {
-			result += 'var ';
+			result += 'var ' + this.stringify(decllist);
 		}
 		//structure
 		else if (this.structures[node.token.data] != null) {
-			result += 'var ';
+			result += 'var ' + this.stringify(decllist);
 		}
 		//default type
 		//FIXME: elaborate this case
 		else if (this.stdlib[node.token.data] != null) {
-			result += 'var ';
+			result += 'var ' + this.stringify(decllist);
 		}
-
-		result += this.stringify(decllist);
+		//case of function args etc
+		else {
+			result += this.stringify(decllist);
+		}
 
 		return result;
 	},
@@ -398,7 +418,6 @@ GLSL.prototype.transforms = {
 			if (functionargs) return ident;
 			return `${ident} = ${this.variable(ident).value}`;
 		}, this).join(', ');
-
 	},
 
 	//placeholders are empty objects - ignore them

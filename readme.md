@@ -108,7 +108,7 @@ To adjust rendering settings it is possible to pass `options` object, which just
 | Method | Description |
 |---|---|
 | `this.reset()` | Reinitialize scopes, attributes, varying. |
-| `this.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`. Events are invoked during stringifying. |
+| `this.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `stms`, `stmtlist`, `decl` etc. See [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`.  |
 
 
 ## Related

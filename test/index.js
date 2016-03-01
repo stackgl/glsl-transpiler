@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test('Interface', function () {
+test.only('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 	precision mediump float;
@@ -102,6 +102,41 @@ test('Interface', function () {
 	};
 	`;
 
+	var shortResult = `
+	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
+
+	function main () {
+		fColor = color;
+		var position = vec2(uv.x, -uv.y).multiply(coeff);
+		position.x *= uScreenSize.y / uScreenSize.x;
+		xy.xy = xy.xy.multiply(uv.yx);
+		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
+		return;
+	};
+
+	function count (num) {
+		var sum = 0;
+		for (var i = 0; i < 10; i++) {
+			sum += i;
+			if (i > 4) {
+				continue;
+			} else {
+				break;
+			};
+
+			discard();
+		};
+		var i = 0;
+		while (i < 10) {
+			--sum;
+		};
+		do {
+			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+		} while (i < 10);
+		return sum;
+	};
+	`;
+
 
 	test('Direct', function () {
 		assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
@@ -141,7 +176,9 @@ test('Interface', function () {
 		});
 
 		var result = glsl.compile(source);
-		console.log(result)
+
+		// assert.equal(clean(result).split('\n')[9], clean(shortResult).split('\n')[9]);
+		assert.equal(clean(result), clean(shortResult));
 
 		assert.deepEqual(glsl.attributes, {
 			uv: {type: 'vec2', dimensions: []},
@@ -740,7 +777,6 @@ test.skip('Builtins', function () {
 	const int gl_MaxTransformFeedbackInterleavedComponents = 64;
 	`
 });
-
 
 
 
