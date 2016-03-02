@@ -171,7 +171,7 @@ test('Interface', function () {
 		}))
 	});
 
-	test('Detect attributes, uniforms, varying', function () {
+	test.skip('Detect attributes, uniforms, varying', function () {
 		var glsl = new GLSL({
 			removeAttributes: true,
 			removeUniforms: true,

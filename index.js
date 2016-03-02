@@ -36,7 +36,6 @@ inherits(GLSL, Emitter);
 GLSL.prototype.removeUniforms = false;
 GLSL.prototype.removeAttributes = false;
 GLSL.prototype.removeVarying = false;
-GLSL.prototype.unswizzle = false;
 
 
 
@@ -164,16 +163,6 @@ GLSL.prototype.stringify = function stringify (node) {
 	return result === undefined ? '' : result;
 }
 
-
-/**
- * Polyfill types — generate string source code for the types detected during compilation
- */
-// GLSL.prototype.polyfill = function polyfill (types) {
-	// unimplemented;
-	// for (var type in types) {
-	// 	var constr = this.stdlib[type];
-	// }
-// };
 
 
 /**
