@@ -37,7 +37,6 @@ GLSL.prototype.removeUniforms = false;
 GLSL.prototype.removeAttributes = false;
 GLSL.prototype.removeVarying = false;
 GLSL.prototype.unswizzle = false;
-GLSL.prototype.unwrapType = false;
 
 
 

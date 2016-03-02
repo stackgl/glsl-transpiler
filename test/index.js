@@ -109,10 +109,10 @@ test('Interface', function () {
 
 	function main () {
 		fColor = color;
-		var position = vec2(uv.x, -uv.y).multiply(coeff);
-		position.x *= uScreenSize.y / uScreenSize.x;
-		xy.xy = xy.xy.multiply(uv.yx);
-		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
+		var position = [[uv[0], -uv[1]][0] * coeff, [uv[0], -uv[1]][1] * coeff];
+		position[0] *= uScreenSize[1] / uScreenSize[0];
+		$(xy, 'xy', mult($(xy, 'xy'), $uv.yx));
+		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
 		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
 		return;
 	};

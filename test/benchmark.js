@@ -1,6 +1,8 @@
 var test = require('tst');
 var inherits = require('inherits');
 var lib = require('../stdlib');
+var glMat = require('gl-matrix');
+var ndarray = require('ndarray');
 
 
 test('TypedArray vs inherited array', function () {
@@ -34,7 +36,7 @@ test('TypedArray vs inherited array', function () {
 });
 
 
-test.only('TypedArray vs wrapped array', function () {
+test('TypedArray vs wrapped array', function () {
 	//Test setup: how much the wrapper access is slower than array?
 	//Result: unfortunately, growth is exponential or even worse, if to provide class wrappers with inner data as array.
 	//but defining custom methods on array instances in constructor is quite alright, even faster sometimes. We can easily do swizzles.
@@ -172,7 +174,13 @@ test.only('TypedArray vs wrapped array', function () {
 	inherits(descVec, protoVec);
 	// descVec.prototype = Object.create(protoVec.prototype);
 
-	test.only('Access', function () {
+
+	//swizzle getter
+	function $(target, num) {
+		return [target[num]];
+	}
+
+	test('Access', function () {
 		var max = 10e5;
 
 		test('non-array', function () {
@@ -231,6 +239,22 @@ test.only('TypedArray vs wrapped array', function () {
 				vec.y;
 			}
 		});
+
+		test('swizzle getter', function () {
+			var vec = glMat.vec2.create(0, 1);
+			for (var i = 0; i < max; i++) {
+				$(vec, 1);
+				$(vec, 0);
+			}
+		});
+
+		test('gl-matrix vec2', function () {
+			var vec = glMat.vec2.create(0, 1);
+			for (var i = 0; i < max; i++) {
+				vec[0];
+				vec[1];
+			}
+		});
 	});
 
 
@@ -240,6 +264,12 @@ test.only('TypedArray vs wrapped array', function () {
 		test('Float32Array', function () {
 			for (var i = 0; i < max; i++) {
 				var vec = new Float32Array([0, 1]);
+			}
+		});
+
+		test('Array', function () {
+			for (var i = 0; i < max; i++) {
+				var vec = [0, 1];
 			}
 		});
 
@@ -272,10 +302,113 @@ test.only('TypedArray vs wrapped array', function () {
 				var vec = lib.vec2(0,1);
 			}
 		});
+
+		test('gl-matrix vec2', function () {
+			var vec2 = glMat.vec2.fromValues;
+			for (var i = 0; i < max; i++) {
+				var vec = vec2(0, 1);
+			}
+		});
+
+		test('ndarray', function () {
+			for (var i = 0; i < max; i++) {
+				var vec = ndarray([0,1]);
+			}
+		});
 	});
 });
 
 
-test('ndarray vs gl-matrix vs spec-type', function () {
+test.only('multiplication', function () {
+	//task: determine which way of multiplying things is the best
+	//for the formula v1.yxzw *= v2.xyzw + fn(coef);
+	//result: plain array is the fastest, after (10% slower) - Float32Array, then - gl-matrix.
+	//also for operations on multiple objects we have to do precalculations like let _precalc = ...
+	//
 
+	function fn(c) {
+		for (var i = 0; i < 100; i++) {
+			c = c*c + 1;
+		}
+		return c;
+	}
+
+	var max = 10e4;
+	test('gl-matrix', function () {
+		var vec4 = glMat.vec4;
+		var v1 = vec4.fromValues(1,2.2,3,4);
+		var v2 = vec4.fromValues(1,2,3,4);
+		var c = 1.2;
+		for (var i = 0; i < max; i++) {
+			let v1yxzw = vec4.fromValues(v1[1],v1[0],v1[2],v1[3]);
+			let v2xyzw = vec4.fromValues(v2[0],v2[1],v2[2],v2[3]);
+			vec4.multiply(v2, v1yxzw, v2xyzw);
+		}
+	});
+
+	test('plain Float32Arrays', function () {
+		var v1 = new Float32Array([1,2.2,3,4]);
+		var v2 = new Float32Array([1,2,3,4]);
+		var c = 1.2;
+		for (var i = 0; i < max; i++) {
+			let v1yxzw = new Float32Array([v1[1],v1[0],v1[2],v1[3]]);
+			let v2xyzw = new Float32Array([v2[0],v2[1],v2[2],v2[3]]);
+			v2[0] = (v1yxzw[0] + fn(c)) * v2xyzw[0];
+			v2[1] = (v1yxzw[1] + fn(c)) * v2xyzw[1];
+			v2[2] = (v1yxzw[2] + fn(c)) * v2xyzw[2];
+			v2[3] = (v1yxzw[3] + fn(c)) * v2xyzw[3];
+		}
+	});
+
+	test('plain arrays', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		for (var i = 0; i < max; i++) {
+			let v1yxzw = [v1[1],v1[0],v1[2],v1[3]];
+			let v2xyzw = [v2[0],v2[1],v2[2],v2[3]];
+			v2[0] = (v1yxzw[0] + fn(c)) * v2xyzw[0];
+			v2[1] = (v1yxzw[1] + fn(c)) * v2xyzw[1];
+			v2[2] = (v1yxzw[2] + fn(c)) * v2xyzw[2];
+			v2[3] = (v1yxzw[3] + fn(c)) * v2xyzw[3];
+		}
+	});
+
+	test('plain array repeated', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		for (var i = 0; i < max; i++) {
+			v2[0] *= v1[1] + fn(c);
+			v2[1] *= v1[0] + fn(c);
+			v2[2] *= v1[2] + fn(c);
+			v2[3] *= v1[3] + fn(c);
+		}
+	});
+
+	test('plain array optimized', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		for (var i = 0; i < max; i++) {
+			var coefPow5 = fn(c);
+			v2[0] *= v1[1] + coefPow5;
+			v2[1] *= v1[0] + coefPow5;
+			v2[2] *= v1[2] + coefPow5;
+			v2[3] *= v1[3] + coefPow5;
+		}
+	});
+
+	test('Float32Array optimized', function () {
+		var v1 = new Float32Array([1,2.2,3,4]);
+		var v2 = new Float32Array([1,2,3,4]);
+		var c = 1.2;
+		for (var i = 0; i < max; i++) {
+			let coefPow5 = fn(c);
+			v2[0] *= v1[1] + coefPow5;
+			v2[1] *= v1[0] + coefPow5;
+			v2[2] *= v1[2] + coefPow5;
+			v2[3] *= v1[3] + coefPow5;
+		}
+	});
 });
