@@ -20,63 +20,65 @@ function clean (str) {
 }
 
 
-test('Interface', function () {
+test.only('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
-	precision mediump float;
-	attribute vec2 uv, xy = vec2(0);
-	attribute vec4 color;
-	varying vec4 fColor, twoColors[2];
-	uniform vec2 uScreenSize;
+	// precision mediump float;
+	// attribute vec2 uv, xy = vec2(1);
+	// attribute vec4 color;
+	// varying vec4 fColor, twoColors[2];
+	// uniform vec2 uScreenSize;
 	float coeff = 1.0, coeff2 = coeff + 1.0, a[2], b[3][2] = float[3](a, a, a);
 
-	int count (float num);
+	// int count (float num);
 
-	void main (void) {
-		fColor = color;
+	// void main (void) {
+	// 	fColor = color;
 		vec2 position = coeff * vec2(uv.x, -uv.y);
-		position.x *= uScreenSize.y / uScreenSize.x;
-		xy.xy *= uv.yx;
-		gl_Position = vec4(position.yx / 2.0, 0, 1);
-		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
-		return;
-	}
+	// 	position.x *= uScreenSize.y / uScreenSize.x;
+	// 	xy.xy *= uv.yx;
+	// 	gl_Position = vec4(position.yx / 2.0, 0, 1);
+	// 	gl_FragColor[0] = gl_FragCoord[0] / 2.0;
+	// 	return;
+	// }
 
-	/* just a test function */
-	int count (in float num) {
-		int sum = 0;
-		for (int i = 0; i < 10; i++) {
-			sum += i;
-			if (i > 4) continue;
-			else break;
+	// /* just a test function */
+	// int count (in float num) {
+	// 	int sum = 0;
+	// 	for (int i = 0; i < 10; i++) {
+	// 		sum += i;
+	// 		if (i > 4) continue;
+	// 		else break;
 
-			discard;
-		}
-		int i = 0;
-		while (i < 10) {
-			--sum;
-		}
-		do {
-			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
-		}
-		while (i < 10);
-		return sum;
-	}
+	// 		discard;
+	// 	}
+	// 	int i = 0;
+	// 	while (i < 10) {
+	// 		--sum;
+	// 	}
+	// 	do {
+	// 		sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+	// 	}
+	// 	while (i < 10);
+	// 	return sum;
+	// }
 	`;
 
 	var result = `
-	var uv = vec2(), xy = vec2(0);
-	var color = vec4();
-	var fColor = vec4(), twoColors = [vec4(), vec4()];
-	var uScreenSize = vec2();
+	var uv = [0, 0], xy = [1, 1];
+	var color = [0, 0, 0, 0];
+	var fColor = [0, 0, 0, 0], twoColors = [[0, 0, 0, 0], [0, 0, 0, 0]];
+	var uScreenSize = [0, 0];
 	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
 	function main () {
 		fColor = color;
-		var position = vec2(uv.x, -uv.y).multiply(coeff);
-		position.x *= uScreenSize.y / uScreenSize.x;
-		xy.xy = xy.xy.multiply(uv.yx);
-		gl_Position = vec4(position.yx.divide(2.0), 0, 1);
+		var position = [uv[0] * coeff, -uv[1] * coeff];
+		position[0] *= uScreenSize[1] / uScreenSize[0];
+		xy[0] *= uv[1];
+		xy[1] *= uv[0];
+		position_yx_divide = [position[1] / 2.0, position[0] / 2.0];
+		gl_Position = [position_yx_divide[0], position_yx_divide[1], 0, 1];
 		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
 		return;
 	};
@@ -101,8 +103,7 @@ test('Interface', function () {
 			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
 		} while (i < 10);
 		return sum;
-	};
-	`;
+	}`;
 
 	var shortResult = `
 	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
@@ -141,7 +142,7 @@ test('Interface', function () {
 	`;
 
 
-	test('Direct', function () {
+	test.only('Direct', function () {
 		// assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
 		assert.equal(clean(compile(source)), clean(result));
 	});
@@ -171,12 +172,11 @@ test('Interface', function () {
 		}))
 	});
 
-	test.skip('Detect attributes, uniforms, varying', function () {
+	test('Detect attributes, uniforms, varying', function () {
 		var glsl = new GLSL({
 			removeAttributes: true,
 			removeUniforms: true,
-			removeVarying: true,
-			unswizzle: true
+			removeVarying: true
 		});
 
 		var result = glsl.compile(source);

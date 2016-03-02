@@ -12,6 +12,7 @@ var tokenize = require('glsl-tokenizer/string');
 var parse = require('glsl-parser/direct');
 var extend = require('xtend/mutable');
 var builtins = require('./lib/builtins');
+var types = require('./lib/types');
 
 /**
  * Create GLSL codegen instance
@@ -53,19 +54,7 @@ GLSL.prototype.operators = {
 };
 
 
-/**
- * Simple types, will be expanded to js instead of wrapped to classes
- */
-GLSL.prototype.primitives = {
-	void: '',
-	bool: false,
-	int: 0,
-	uint: 0,
-	float: 0,
-	double: 0
-};
-
-
+GLSL.prototype.types = types;
 GLSL.prototype.builtins = builtins;
 
 
@@ -73,9 +62,6 @@ GLSL.prototype.builtins = builtins;
  * Initialize analysing scopes/vars/types
  */
 GLSL.prototype.reset = function () {
-	//collection of types used during processing. To polyfill them after.
-	this.types = [];
-
 	//scopes analysed. Each scope is named by the function they are contained in
 	this.scopes = {
 		global: {
@@ -514,24 +500,24 @@ GLSL.prototype.transforms = {
 		var right = this.stringify(node.children[1]);
 
 		if (node.data === '[') {
-			//for case of array access like float[3] or something[N] - return as is
-			if (this.primitives[node.type]) {
+			//for case of array access like float[3]
+			if (this.types[node.type]) {
 				return `${typeA}[${right}]`;
 			}
 
-			//return as is
+			//something[N] return as is
 			return `${left}[${right}]`;
 		}
 
 
 
 		//render primitive types with js operators
-		if (this.primitives[typeA] != null && this.primitives[typeB] != null) {
+		if (this.types[typeA] && this.types[typeB]) {
 			return `${left} ${node.data} ${right}`;
 		}
 
 		//if second arg is not primitive but the first is - swap order
-		if (this.primitives[typeA] != null && this.primitives[typeB] == null) {
+		if (this.types[typeA] && !this.types[typeB]) {
 			return `${right}.${operator}(${left})`;
 		}
 
@@ -551,7 +537,7 @@ GLSL.prototype.transforms = {
 		var rightType = this.getType(node.children[1]);
 
 		//handle primitive with no doubts as floats
-		if (this.primitives[leftType] != null && this.primitives[rightType] != null) {
+		if (this.types[leftType] && this.types[rightType]) {
 			return `${left} ${operator} ${right}`;
 		}
 
@@ -616,7 +602,7 @@ GLSL.prototype.transforms = {
 
 			//if nested type is primitive - expand literals without wrapping
 			var value = '';
-			if (this.primitives[callName] != null) {
+			if (this.types[callName]) {
 				value += args.map(this.stringify, this).join(', ');
 			} else {
 				value += callName + '(';
@@ -630,9 +616,16 @@ GLSL.prototype.transforms = {
 
 		//else treat as function/constructor call
 		else {
-			result += callName + '(';
-			result += args.map(this.stringify, this).join(', ');
-			result += ')';
+			//vec2(), float()
+			if (this.types[callName]) {
+				result += this.types[callName](argValues);
+			}
+			//someFn()
+			else {
+				result += callName + '(';
+				result += args.map(this.stringify, this).join(', ');
+				result += ')';
+			}
 		}
 
 		return result;
@@ -693,8 +686,8 @@ GLSL.prototype.variable = function (ident, data, scope) {
 
 		//preset default value for a variable, if undefined
 		if (data.value == null) {
-			if (this.primitives[variable.type] != null) {
-				variable.value = this.primitives[variable.type];
+			if (this.types[variable.type]) {
+				variable.value = this.types[variable.type]();
 			}
 			else {
 				variable.value = variable.type + `()`
@@ -722,9 +715,6 @@ GLSL.prototype.variable = function (ident, data, scope) {
 		}
 		if (variable.binding === 'varying') {
 			this.varying[ident] = variable;
-		}
-		if (this.types.indexOf(variable.type) < 0) {
-			this.types.push(variable.type);
 		}
 
 		return variable;
