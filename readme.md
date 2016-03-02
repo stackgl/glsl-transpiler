@@ -97,8 +97,6 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 | `glsl.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
 | `glsl.removeAttributes` | `false` | Remove attributes declarations from the output. |
 | `glsl.removeVarying` | `false` | Remove varying declarations from the output. |
-| `glsl.unswizzle` | `false` | Transform swizzles from `a.xyz` to `vec3(a[0], a[1], a[2])`. |
-| `glsl.unwrapType` | `false` | Transform types to arrays. |
 | `glsl.scopes` | `{}` | Parsed scopes. Contains scope names with nested variable objects. |
 | `glsl.attributes` | `{}` | Parsed attribute variables. |
 | `glsl.varying` | `{}` | Parsed varying variables. |
