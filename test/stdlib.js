@@ -1,10 +1,19 @@
 //ref https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
 var test = require('tst');
-var _ = require('../stdlib');
+var _ = require('../lib/stdlib');
 var assert = require('assert');
+var GLSL = require('./');
 
 
-test('Primitives', function () {
+/**
+ * Eval part of glsl in js
+ */
+function eval (str) {
+
+}
+
+
+test.only('Primitives', function () {
 	var int = _.int, uint = _.uint, bool = _.bool, float = _.float, double = _.double;
 
 	//recognise input array

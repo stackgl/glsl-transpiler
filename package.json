@@ -7,10 +7,10 @@
     "glsl-parser": "^2.0.0",
     "glsl-tokenizer": "^2.0.2",
     "inherits": "^2.0.1",
+    "gl-matrix": "^2.3.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
-    "gl-matrix": "^2.3.2",
     "is-browser": "^2.0.1",
     "ndarray": "^1.0.18",
     "stream-array": "^1.1.1",
@@ -21,7 +21,6 @@
     "index.js",
     "stream.js",
     "string.js",
-    "stdlib.js",
     "lib"
   ],
   "directories": {

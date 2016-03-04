@@ -92,7 +92,7 @@ test('Episodes', function () {
 });
 
 
-test.only('Interface', function () {
+test('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 	precision mediump float;
@@ -140,7 +140,7 @@ test.only('Interface', function () {
 	var uv = [0, 0], xy = [1, 1];
 	var color = [0, 0, 0, 0];
 	var fColor = [0, 0, 0, 0], twoColors = [[0, 0, 0, 0], [0, 0, 0, 0]];
-	var uScreenSize = [0, 0];
+	var uScreenSize = [1, 1];
 	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
 	function main () {
@@ -173,7 +173,7 @@ test.only('Interface', function () {
 			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
 		} while (i < 10);
 		return sum;
-	}`;
+	};`;
 
 	var shortResult = `
 	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
@@ -212,8 +212,8 @@ test.only('Interface', function () {
 	`;
 
 
-	test.only('Direct', function () {
-		// assert.equal(clean(compile(source)).split('\n')[4], clean(result).split('\n')[4]);
+	test('Direct', function () {
+		// assert.equal(clean(compile(source)).split('\n')[33], clean(result).split('\n')[33]);
 		assert.equal(clean(compile(source)), clean(result));
 	});
 
@@ -242,7 +242,7 @@ test.only('Interface', function () {
 		}))
 	});
 
-	test('Detect attributes, uniforms, varying', function () {
+	test.skip('Detect attributes, uniforms, varying', function () {
 		var glsl = new GLSL({
 			removeAttributes: true,
 			removeUniforms: true,

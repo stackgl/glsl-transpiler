@@ -1,4 +1,4 @@
-> Transform [glsl](https://www.opengl.org/documentation/glsl/) to js.
+> [glsl-js](https://www.opengl.org/documentation/glsl/) transforms glsl source to optimized readable js code. It represents vec/mat types as arrays, expands swizzles, and utilises [gl-matrix](https://github.com/toji/gl-matrix) for complex operations on vectors or matrices.
 
 ## Usage
 
@@ -24,16 +24,16 @@ compile(`
 
 //result:
 `
-var uv = vec2();
-var color = vec4();
-var fColor = vec4();
-var uScreenSize = vec2();
+var uv = [0, 0];
+var color = [0, 0, 0, 0];
+var fColor = [0, 0, 0, 0];
+var uScreenSize = [0, 0];
 
 function main () {
 	fColor = color;
-	var position = vec2(uv.x, -uv.y).mult(1.0);
-	position.x *= uScreenSize.y / uScreenSize.x;
-	gl_Position = vec4(position, 0, 1);
+	var position = [uv[0], -uv[1]];
+	position[0] *= uScreenSize[1] / uScreenSize[0];
+	gl_Position = [position[0], position[1], 0, 1];
 };
 `
 ```
@@ -88,27 +88,15 @@ var glsl = GLSL(options?); //create glsl instance
 var result = glsl.stringify(tree);
 ```
 
-### Properties
+### Options
 
-To adjust rendering settings it is possible to pass options object `var glsl = GLSL(options);`, which just sets `glsl` instance values.
+To adjust rendering settings it is possible to pass options object `var glsl = GLSL(options);`, which sets `glsl` instance values.
 
 | Property | Default | Description |
 |---|:---:|---|
-| `glsl.removeUniforms` | `false` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
-| `glsl.removeAttributes` | `false` | Remove attributes declarations from the output. |
-| `glsl.removeVarying` | `false` | Remove varying declarations from the output. |
-| `glsl.scopes` | `{}` | Parsed scopes. Contains scope names with nested variable objects. |
-| `glsl.attributes` | `{}` | Parsed attribute variables. |
-| `glsl.varying` | `{}` | Parsed varying variables. |
-| `glsl.uniforms` | `{}` | Parsed uniform variables. |
-| `glsl.types` | `[]` | Collection of data types used, e. g. `vec2`. |
-
-### Methods
-
-| Method | Description |
-|---|---|
-| `glsl.reset()` | Reinitialize scopes, attributes, uniforms, varying. |
-| `glsl.on(<event>)` | Bind event: `'start'` — invoked when `glsl.stringify()` is called the first time; `'<nodeType>'` — event with name according to node type is invoked when that node is being stringified. E. g. `'stmt'`, `'stmtlist'`, `'decl'` etc, see [glsl-parser](https://github.com/stackgl/glsl-parser) for the full list; `'end'` — invoked right before the end of the last `glsl.stringify()`.  |
+| `glsl.removeUniforms` | `true` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
+| `glsl.removeAttributes` | `true` | Remove attributes declarations from the output. |
+| `glsl.removeVarying` | `true` | Remove varying declarations from the output. |
 
 
 ## Related
