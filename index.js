@@ -46,7 +46,7 @@ GLSL.prototype.removeVarying = false;
 /**
  * Operator names
  */
-GLSL.prototype.operators = operators;
+GLSL.prototype.operatorNames = operators;
 
 
 /**
@@ -542,24 +542,36 @@ GLSL.prototype.transforms = {
 
 		//FIXME: some operators can be unwrapped, like 1.0 * [x[1], x[0]] → [1.0 * x[1], 1.0 * x[0]];
 
-		//mark function to include to the final result
+		//resolve not primitive opertations issue
 		if (!this.primitives[typeA] || !this.primitives[typeB]) {
-			var nonPrimitive;
+			var outType = this.primitives[typeA] ? typeB : typeA;
 
-			//convert the primitive type to vector
-			if (this.primitives[typeA]) {
-				//[0, 0, 0, 0].fill(left)
-				//`${this.types[typeB]()}.fill(${left})`;
-				left = this.types[typeB].call(this, node.children[0])
-				nonPrimitive = typeB;
-			}
-			else if (this.primitives[typeB]) {
-				// right = `${this.types[typeA]()}.fill(${right})`;
-				right = this.types[typeA].call(this, node.children[1]);
-				nonPrimitive = typeA;
+			//evaluableNum * vec → [vec[0] * n, vec[n] * n]
+			//vec * evaluableNum → [n * vec[0], n * vec[n]]
+			//eVec * eVec → [vec[0] * vec[0], vec[n] * vec[n]]
+			if (this.complexity(node.children[0]) + this.complexity(node.children[1]) < 10) {
+				var l = this.types[outType].length;
+				var operands = [];
+				for (var i = 0; i < l; i++) {
+					if (this.primitives[typeA]) {
+						operands.push(`${left} ${operator} ${right}[${i}]`);
+					}
+					else if (this.primitives[typeB]) {
+						operands.push(`${left}[${i}] ${operator} ${right}`);
+					}
+					else {
+						operands.push(`${left}[${i}] ${operator} ${right}[${i}]`);
+					}
+				}
+				return `[${operands.join(', ')}]`;
 			}
 
-			return `${nonPrimitive}.${this.operators[operator]}([], ${left}, ${right})`;
+			//otherA * otherB → type.operation(result, otherA, otherB)
+
+			left = this.types[outType].call(this, node.children[0]);
+			right = this.types[outType].call(this, node.children[1]);
+
+			return `${outType}.${this.operatorNames[operator]}([], ${left}, ${right})`;
 		}
 		else {
 			return `${left} ${operator} ${right}`;
@@ -587,7 +599,7 @@ GLSL.prototype.transforms = {
 		//operatory assign, eg *=
 		if (operator.length > 1) {
 			var nonPrimitive = this.primitives[leftType] ? rightType : leftType;
-			var opName = this.operators[operator.slice(0, -1)];
+			var opName = this.operatorNames[operator.slice(0, -1)];
 
 			//in cases of setting swizzle - we gotta be discreet, eg
 			//v.xy *= coef → vec2.multiply(v, [v[0], v[1], [0, 0].fill(coef)]);
@@ -737,6 +749,8 @@ GLSL.prototype.transforms = {
  * Detect whether node is swizzle
  */
 GLSL.prototype.isSwizzle = function (node) {
+	if (node.type != 'operator') return false;
+
 	var prop = node.children[1].data;
 
 	return /[xyzwstpdrgba]{1,4}/.test(prop);
@@ -774,6 +788,65 @@ GLSL.prototype.unswizzle = function (node) {
 	//a.yz → [a[1], a[2]]
 	return `[${args.join(', ')}]`;
 }
+
+
+/**
+ * Measure how many operations does it take to calc a node.
+ * Very euristic approach.
+ */
+GLSL.prototype.complexity = function (node) {
+	//coeff
+	if (node.type === 'ident') {
+		return 0;
+	}
+
+	//1.0
+	if (node.type === 'literal') {
+		return 0;
+	}
+
+	//-x → x is simple
+	if (node.type === 'unary') {
+		return 1 + this.complexity(node.children[0]);
+	}
+
+	//a + b, a[b]
+	if (node.type === 'binary') {
+		return this.complexity(node.children[0]) + 1 + this.complexity(node.children[1]);
+	}
+
+	//a.x, a.xy
+	if (node.type === 'operator' && this.isSwizzle(node)){
+		var prop = node.children[1].data;
+
+		//a.z → a[3] = 2
+		if (prop.length === 1) return 1;
+
+		var unswizzled = this.unswizzle(node);
+
+		//a.yzx → [a[1], a[2], a[0]] = 7
+		if (unswizzled[0] === '[') return 2 * prop.length + 1;
+
+		//a.xy → a
+		return 0;
+	}
+
+	//float(args) is ok → args
+	//vec3(args) is not ok → [a, a, a]
+	if (node.type === 'call') {
+		//type(args)
+		if (this.types[node.children[0].data]) {
+			var l = this.types[node.children[0].data].length;
+
+			return l * node.children.slice(1).map(this.complexity, this)
+				.reduce(function (prev, curr) { return prev + curr; }, 0);
+		}
+	}
+
+	//unknown nodes are too risky to guess
+	return 100;
+};
+
 
 
 /**
