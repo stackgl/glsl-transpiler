@@ -1,6 +1,10 @@
 /**
  * Transform glsl to js.
  *
+ * Dev notes.
+ * glsl-parser often creates identifiers/other nodes by inheriting them from definition.
+ * So by writing som additional info into nodes, note that it will be accessible everywhere below, where initial id is referred by.
+ *
  * @module  glsl-js
  */
 
@@ -17,6 +21,7 @@ var operations = require('./lib/operations');
 var getType = require('./lib/getType.js');
 var primitives = require('./lib/primitives.js');
 var operators = require('./lib/operators.js');
+
 
 /**
  * Create GLSL codegen instance
@@ -140,8 +145,9 @@ GLSL.prototype.stringify = function stringify (node) {
 	if (typeof node === 'string') return node;
 	if (typeof node === 'boolean') return node;
 
-	//in some [weird] cases glsl-parser returns node object extended from other node
-	//which properties exist only in prototype. We gotta ignore that.
+	//in some cases glsl-parser returns node object inherited from other node
+	//which properties exist only in prototype.
+	//Insofar structures take it’s definition type, so should be ignored.
 	//See #Structures test for example.
 	if (!node.hasOwnProperty('type')) return '';
 
@@ -472,12 +478,20 @@ GLSL.prototype.transforms = {
 	//access operators - expand to arrays
 	operator: function (node) {
 		if (node.data === '.') {
-			var ident = this.stringify(node.children[0]);
-			var type = this.getType(node.children[0]);
+			var identNode = node.children[0];
+			var ident = identNode.token.data;
+			var type = this.getType(identNode);
 			var prop = node.children[1].data;
 
 			//ab.xyz for example
-			if (this.isSwizzle(node)) return this.unswizzle(node);
+			if (this.isSwizzle(node)) {
+				//if ident.x - provide arg access
+				if (node.parent.type === 'assign' && node.parent.children[0] === node) {
+					return this.unswizzle(node, true);
+				} else {
+					return this.unswizzle(node);
+				}
+			}
 
 			return `${ident}.${prop}`;
 		}
@@ -572,8 +586,31 @@ GLSL.prototype.transforms = {
 				var operands = [];
 				for (var i = 0; i < l; i++) {
 					var leftOp = this.getComponent(leftNode, i), rightOp = this.getComponent(rightNode, i);
+					var operation = '';
 
-					operands.push(`${leftOp} ${operator} ${rightOp}`);
+					//handle ridiculous math cases like x + 0, x * 0, x + 1
+					if (operator === '+' || operator === '-') {
+						//0 + x
+						if (leftOp == 0) operation = rightOp;
+
+						//x + 0
+						if (rightOp == 0) operation = leftOp;
+					}
+
+					else if (operator === '*') {
+						//0 * x
+						if (leftOp == 0 || rightOp == 0) operation = 0;
+
+						//1 * x
+						else if (parseFloat(leftOp) === 1) operation = rightOp;
+
+						//x * 1
+						else if (parseFloat(rightOp) === 1) operation = leftOp;
+					}
+
+					operation = operation || `${leftOp} ${operator} ${rightOp}`;
+
+					operands.push(operation);
 				}
 				return `[${operands.join(', ')}]`;
 			}
@@ -615,11 +652,12 @@ GLSL.prototype.transforms = {
 
 			//in cases of setting swizzle - we gotta be discreet, eg
 			//v.yx *= coef → vec2.multiply(v, [v[0], v[1], [0, 0].fill(coef)]);
-			// if (node.children[0])
 			var target;
+			//a.xy *= ... → mult(a, ....)
 			if (this.isSwizzle(node.children[0])) {
 				target = this.stringify(node.children[0].children[0]);
 			}
+			//a *= ... → mult(a, ....)
 			else {
 				target = left;
 			}
@@ -771,9 +809,12 @@ GLSL.prototype.isSwizzle = function (node) {
 /**
  * Transform access node to a swizzle construct
  * ab.xyz → [ab[0], ab[1], ab[2]]
+ *
+ * Pass force flag to ensure component access like a[0] instead of attempt to get component
  */
-GLSL.prototype.unswizzle = function (node, unwrap) {
+GLSL.prototype.unswizzle = function (node) {
 	var identNode = node.children[0];
+
 	var ident = this.stringify(identNode);
 	var type = this.getType(identNode);
 	var prop = node.children[1].data;
@@ -781,16 +822,21 @@ GLSL.prototype.unswizzle = function (node, unwrap) {
 	var swizzles = 'xyzwstpdrgba';
 
 	var args = [], positions = [];
+
 	for (var i = 0, l = prop.length; i < l; i++) {
 		var letter = prop[i];
 		var position = swizzles.indexOf(letter) % 4;
 		positions.push(position);
-		if (unwrap) {
-			args.push(this.getComponent(identNode, position));
-		} else {
-			args.push(`${ident}[${position}]`);
-		}
+
+		//[0, 1].yx → [0, 1]
+		// a.yx → [a[1], a[0]]
+		var value = this.getComponent(identNode, position);
+
+		args.push(value);
 	}
+
+	//save unswizzled components for an unswizzled node
+	this.setComponents(node, args);
 
 	//a.x → a[0]
 	if (args.length === 1) {
@@ -812,24 +858,28 @@ GLSL.prototype.unswizzle = function (node, unwrap) {
  * Very euristic approach.
  */
 GLSL.prototype.complexity = function (node) {
+	if (typeof node !== 'object') return 0;
+
+	if (node._complexity != null) return node._complexity;
+
 	//coeff
 	if (node.type === 'ident') {
-		return 0;
+		return node._complexity = 0;
 	}
 
 	//1.0
 	if (node.type === 'literal') {
-		return 0;
+		return node._complexity = 0;
 	}
 
 	//-x → x is simple
 	if (node.type === 'unary') {
-		return 1 + this.complexity(node.children[0]);
+		return node._complexity = 1 + this.complexity(node.children[0]);
 	}
 
 	//a + b, a[b]
 	if (node.type === 'binary') {
-		return this.complexity(node.children[0]) + 1 + this.complexity(node.children[1]);
+		return node._complexity = this.complexity(node.children[0]) + 1 + this.complexity(node.children[1]);
 	}
 
 	//a.x, a.xy
@@ -837,15 +887,15 @@ GLSL.prototype.complexity = function (node) {
 		var prop = node.children[1].data;
 
 		//a.z → a[3] = 2
-		if (prop.length === 1) return 1;
+		if (prop.length === 1) return node._complexity = 1;
 
 		var unswizzled = this.unswizzle(node);
 
 		//a.yzx → [a[1], a[2], a[0]] = 7
-		if (unswizzled[0] === '[') return 2 * prop.length + 1;
+		if (unswizzled[0] === '[') return node._complexity = 2 * prop.length + 1;
 
 		//a.xy → a
-		return 0;
+		return node._complexity = 0;
 	}
 
 	//float(args) is ok → args
@@ -855,13 +905,13 @@ GLSL.prototype.complexity = function (node) {
 		if (this.types[node.children[0].data]) {
 			var l = this.types[node.children[0].data].length;
 
-			return l * node.children.slice(1).map(this.complexity, this)
+			return node._complexity = l * node.children.slice(1).map(this.complexity, this)
 				.reduce(function (prev, curr) { return prev + curr; }, 0);
 		}
 	}
 
 	//unknown nodes are too risky to guess
-	return 100;
+	return node._complexity = 100;
 };
 
 
@@ -877,20 +927,21 @@ GLSL.prototype.getComponent = function (node, n) {
 
 	var nodeType = this.getType(node);
 
+	//if stringify found a shorter component values - use them
+	//FIXME: node can have components of it’s prototype (ident). We can try to update prototype’s values for each `setComponents` call so that optimisation there will be better (constants hoist etc)
+	if (node.hasOwnProperty('_components') && node._components[n] != null) {
+		return node._components[n];
+	}
+
+
 	//primitives are accessed straightly
 	if (this.primitives[nodeType]) {
-		result = this.stringify(node);
+		return this.stringify(node);
 	}
 	//basic way to access components in js: a[n]
 	else {
-		result = `${this.stringify(node)}[${n}]`;
+		return `${this.stringify(node)}[${n}]`;
 	}
-
-
-	//if stringify found a shorter component values - use them
-	if (node._components && node._components[n] != null) return node._components[n];
-
-	return result;
 }
 
 /**

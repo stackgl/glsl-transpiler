@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test('Episodes', function () {
+test.only('Episodes', function () {
 	var glsl = GLSL({
 		removeAttributes: true,
 		removeUniforms: true,
@@ -28,12 +28,12 @@ test('Episodes', function () {
 		muteOperationMethods: true
 	});
 
-	test('float x; vec2 uv, position = fn(x) * vec2(uv.xy.x, -uv.y);', function () {
+	test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function () {
 		assert.equal(
 			clean(glsl.compile(this.title)),
 			clean(`
 			var x = 0;
-			var uv = [0, 0], position = vec2.multiply([], [0, 0].fill(fn(x)), [[uv[0], uv[1]][0], -uv[1]]);
+			var uv = [0, 0], position = vec2.multiply([], [0, 0].fill(fn(x)), [uv[0], -uv[1]]);
 			`)
 			//ideal:
 			// var fnx = fn(x)
@@ -46,14 +46,43 @@ test('Episodes', function () {
 			clean(glsl.compile(this.title)),
 			clean(`
 			var position = [0, 0];
-			vec2.multiply(position, position, vec2.add([], [0, 0].fill(1.0), [0, 0]));
+			vec2.multiply(position, position, [1.0, 1.0]);
+			`)
+		);
+	});
+
+	test('vec2 v = vec2(1, 1); v.x;', function () {
+		assert.equal(
+			clean(glsl.compile(this.title)),
+			clean(`
+			var v = [1, 1];
+			v[0];
+			`)
+		);
+	});
+
+	test('vec2 v = vec2(1, 1); v.yx + 1;', function () {
+		assert.equal(
+			clean(glsl.compile(this.title)),
+			clean(`
+			var v = [1, 1];
+			[v[1] + 1, v[0] + 1];
+			`)
+		);
+	});
+
+	test.only('gl_Position.xy += gl_Position.yx;', function () {
+		assert.equal(
+			clean(glsl.compile(this.title)),
+			clean(`
+			gl_Position = [gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0]];
 			`)
 		);
 	});
 });
 
 
-test.only('Interface', function () {
+test('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 	precision mediump float;
