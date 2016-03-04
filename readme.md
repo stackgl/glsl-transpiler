@@ -1,4 +1,4 @@
-> [glsl-js](https://www.opengl.org/documentation/glsl/) transforms glsl source to optimized readable js code. It represents vec/mat types as arrays, expands swizzles, and utilises [gl-matrix](https://github.com/toji/gl-matrix) for complex operations on vectors or matrices.
+> _glsl-js_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized readable js code. It represents vec/mat types as arrays, expands swizzles, and utilises [gl-matrix](https://github.com/toji/gl-matrix) for complex operations on vectors or matrices.
 
 ## Usage
 
