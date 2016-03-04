@@ -324,7 +324,9 @@ test.only('multiplication', function () {
 	//for the formula v1.yxzw *= v2.xyzw + fn(coef);
 	//result: plain array is the fastest, after (10% slower) - Float32Array, then - gl-matrix.
 	//also for operations on multiple objects we have to do precalculations like let _precalc = ...
-	//
+	//but function calls is not that bad actually, like 5% slower than pure code
+	//but we cannot really polyfill functions, as it causes creation of them each time within call, which is bad. We should pass a lib of ready functions, like gl-matrix...
+	//seems that we have to use gl-matrix and compile everything to most optimally use that.
 
 	function fn(c) {
 		for (var i = 0; i < 100; i++) {
@@ -333,16 +335,26 @@ test.only('multiplication', function () {
 		return c;
 	}
 
-	var max = 10e4;
+	var max = 5e5;
 	test('gl-matrix', function () {
 		var vec4 = glMat.vec4;
 		var v1 = vec4.fromValues(1,2.2,3,4);
 		var v2 = vec4.fromValues(1,2,3,4);
+		var mult = vec4.multiply;
+		var add = vec4.add;
 		var c = 1.2;
+
+		function create(x,y,z,w){
+			if (y == null) y = x;
+			if (z == null) z = y;
+			if (w == null) w = z;
+			return [x,y,z,w];
+		}
+		glMat.vec4 = create;
+
 		for (var i = 0; i < max; i++) {
-			let v1yxzw = vec4.fromValues(v1[1],v1[0],v1[2],v1[3]);
-			let v2xyzw = vec4.fromValues(v2[0],v2[1],v2[2],v2[3]);
-			vec4.multiply(v2, v1yxzw, v2xyzw);
+			//v1.yxzw = v1.yxzw * (v2.xyzw + fn(coef))
+			mult(v1, [v1[1],v1[0],v1[2],v1[3]], add(v2, v2, glMat.vec4(fn(c))));
 		}
 	});
 
@@ -409,6 +421,129 @@ test.only('multiplication', function () {
 			v2[1] *= v1[0] + coefPow5;
 			v2[2] *= v1[2] + coefPow5;
 			v2[3] *= v1[3] + coefPow5;
+		}
+	});
+
+	test('functions', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		function mult (out, v1, v2) {
+			out[0] = v2[0] * v1[0];
+			out[1] = v2[1] * v1[1];
+			out[2] = v2[2] * v1[2];
+			out[3] = v2[3] * v1[3];
+			return out;
+		}
+		function add (out, v, c) {
+			out[0] = v[0] + c;
+			out[1] = v[1] + c;
+			out[2] = v[2] + c;
+			out[3] = v[3] + c;
+			return out;
+		}
+		for (var i = 0; i < max; i++) {
+			mult(v1, add([], [v1[1], v1[0], v1[2], v1[3]], fn(c)), v2);
+		}
+	});
+
+	test('functions within functions', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		function calc() {
+			function mult (out, v1, v2) {
+				out[0] = v2[0] * v1[0];
+				out[1] = v2[1] * v1[1];
+				out[2] = v2[2] * v1[2];
+				out[3] = v2[3] * v1[3];
+				return out;
+			}
+			function add (out, v, c) {
+				out[0] = v[0] + c;
+				out[1] = v[1] + c;
+				out[2] = v[2] + c;
+				out[3] = v[3] + c;
+				return out;
+			}
+			return mult(v1, add([], [v1[1], v1[0], v1[2], v1[3]], fn(c)), v2);
+		}
+		for (var i = 0; i < max; i++) {
+			calc();
+		}
+	});
+
+	test('functions as arguments', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		function mult (out, v1, v2) {
+			out[0] = v2[0] * v1[0];
+			out[1] = v2[1] * v1[1];
+			out[2] = v2[2] * v1[2];
+			out[3] = v2[3] * v1[3];
+			return out;
+		}
+		function add (out, v, c) {
+			out[0] = v[0] + c;
+			out[1] = v[1] + c;
+			out[2] = v[2] + c;
+			out[3] = v[3] + c;
+			return out;
+		}
+		var lib = {mult: mult, add: add};
+		function calc(lib) {
+			var mult = lib.mult, add = lib.add;
+			return mult(v1, add([], [v1[1], v1[0], v1[2], v1[3]], fn(c)), v2);
+		}
+		for (var i = 0; i < max; i++) {
+			calc(lib);
+		}
+	});
+
+	test('functions evaled', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+		var mult = new Function('v1', 'v2', `
+			v2[0] *= v1[0];
+			v2[1] *= v1[1];
+			v2[2] *= v1[2];
+			v2[3] *= v1[3];
+			return v2;
+		`);
+		var add = new Function('v', 'c', `
+			v[0] += c;
+			v[1] += c;
+			v[2] += c;
+			v[3] += c;
+			return v;
+		`);
+		for (var i = 0; i < max; i++) {
+			mult(v1, add([v1[1], v1[0], v1[2], v1[3]], fn(c)), v2);
+		}
+	});
+
+	test('anonymous functions', function () {
+		var v1 = [1,2.2,3,4];
+		var v2 = [1,2,3,4];
+		var c = 1.2;
+
+		for (var i = 0; i < max; i++) {
+			var coefPow5 = fn(c);
+			(function mult (v1, v2) {
+				v2[0] *= v1[0];
+				v2[1] *= v1[1];
+				v2[2] *= v1[2];
+				v2[3] *= v1[3];
+				return v2;
+			})(v1, (function add (v, c) {
+					v[0] += c;
+					v[1] += c;
+					v[2] += c;
+					v[3] += c;
+					return v;
+				})([v1[1], v1[0], v1[2], v1[3]], coefPow5), v2);
 		}
 	});
 });

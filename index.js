@@ -13,6 +13,10 @@ var parse = require('glsl-parser/direct');
 var extend = require('xtend/mutable');
 var builtins = require('./lib/builtins');
 var types = require('./lib/types');
+var operations = require('./lib/operations');
+var getType = require('./lib/getType.js');
+var primitives = require('./lib/primitives.js');
+var operators = require('./lib/operators.js');
 
 /**
  * Create GLSL codegen instance
@@ -39,23 +43,34 @@ GLSL.prototype.removeAttributes = false;
 GLSL.prototype.removeVarying = false;
 
 
-
 /**
  * Operator names
  */
-GLSL.prototype.operators = {
-	'*': 'multiply',
-	'+': 'add',
-	'-': 'subtract',
-	'/': 'divide',
-	'%': 'mod',
-	'<<': 'lshift',
-	'>>': 'rshift'
-};
+GLSL.prototype.operators = operators;
 
 
+/**
+ * Primitive types, same as in js
+ */
+GLSL.prototype.primitives = primitives;
+
+
+/**
+ * Types with their transforms
+ */
 GLSL.prototype.types = types;
+
+
+/**
+ * Map of builtins with their types
+ */
 GLSL.prototype.builtins = builtins;
+
+
+/**
+ * List of operations methods
+ */
+GLSL.prototype.operations = operations;
 
 
 /**
@@ -90,6 +105,11 @@ GLSL.prototype.reset = function () {
 
 	};
 
+	//collected functions, with output types
+	this.functions = {
+
+	};
+
 	//current scope of the node processed
 	this.currentScope = 'global';
 };
@@ -103,7 +123,9 @@ GLSL.prototype.compile = function compile (arg) {
 		arg = parse(tokenize(arg));
 	}
 
-	return this.stringify(arg);
+	var result = this.stringify(arg);
+
+	return result;
 };
 
 
@@ -111,7 +133,11 @@ GLSL.prototype.compile = function compile (arg) {
  * Transform any glsl ast node to js
  */
 GLSL.prototype.stringify = function stringify (node) {
-	if (!node) return '';
+	if (node == null) return '';
+
+	if (typeof node === 'number') return node;
+	if (typeof node === 'string') return node;
+	if (typeof node === 'boolean') return node;
 
 	//in some [weird] cases glsl-parser returns node object extended from other node
 	//which properties exist only in prototype. We gotta ignore that.
@@ -429,15 +455,20 @@ GLSL.prototype.transforms = {
 
 	//access operators - expand to arrays
 	operator: function (node) {
-		var result = '';
+		if (node.data === '.') {
+			var ident = this.stringify(node.children[0]);
+			var type = this.getType(node.children[0]);
+			var prop = node.children[1].data;
 
-		result += this.stringify(node.children[0]);
+			//ab.xyz for example
+			if (this.isSwizzle(node)) return this.unswizzle(node);
 
-		//expand swizzles, if any
-		var prop = node.children[1].data;
-		result += '.' + prop;
+			return `${ident}.${prop}`;
+		}
 
-		return result;
+		throw Error('Unknown operator ' + node.data);
+
+		return '';
 	},
 
 	//simple expressions are mapped 1:1
@@ -496,7 +527,7 @@ GLSL.prototype.transforms = {
 		var left = this.stringify(node.children[0]);
 		var typeA = this.getType(node.children[0]);
 		var typeB = this.getType(node.children[1]);
-		var operator = this.operators[node.data];
+		var operator = node.data;
 		var right = this.stringify(node.children[1]);
 
 		if (node.data === '[') {
@@ -509,20 +540,30 @@ GLSL.prototype.transforms = {
 			return `${left}[${right}]`;
 		}
 
+		//FIXME: some operators can be unwrapped, like 1.0 * [x[1], x[0]] → [1.0 * x[1], 1.0 * x[0]];
 
+		//mark function to include to the final result
+		if (!this.primitives[typeA] || !this.primitives[typeB]) {
+			var nonPrimitive;
 
-		//render primitive types with js operators
-		if (this.types[typeA] && this.types[typeB]) {
-			return `${left} ${node.data} ${right}`;
+			//convert the primitive type to vector
+			if (this.primitives[typeA]) {
+				//[0, 0, 0, 0].fill(left)
+				//`${this.types[typeB]()}.fill(${left})`;
+				left = this.types[typeB].call(this, node.children[0])
+				nonPrimitive = typeB;
+			}
+			else if (this.primitives[typeB]) {
+				// right = `${this.types[typeA]()}.fill(${right})`;
+				right = this.types[typeA].call(this, node.children[1]);
+				nonPrimitive = typeA;
+			}
+
+			return `${nonPrimitive}.${this.operators[operator]}([], ${left}, ${right})`;
 		}
-
-		//if second arg is not primitive but the first is - swap order
-		if (this.types[typeA] && !this.types[typeB]) {
-			return `${right}.${operator}(${left})`;
+		else {
+			return `${left} ${operator} ${right}`;
 		}
-
-		//otherwise - apply normal order op
-		return `${left}.${operator}(${right})`;
 	},
 
 	//assign - same as binary basically
@@ -537,27 +578,33 @@ GLSL.prototype.transforms = {
 		var rightType = this.getType(node.children[1]);
 
 		//handle primitive with no doubts as floats
-		if (this.types[leftType] && this.types[rightType]) {
+		if (this.primitives[leftType] && this.primitives[rightType]) {
 			return `${left} ${operator} ${right}`;
 		}
 
 		//otherwise - expand custom assignments
-		result += left;
-		result += ` = `;
 
-		//operatory assign
+		//operatory assign, eg *=
 		if (operator.length > 1) {
-			result += this.transforms.binary.call(this, {
-				children: [node.children[0], node.children[1]],
-				data: operator.slice(0, -1)
-			});
-		}
-		//simple assign
-		else {
-			result += right;
+			var nonPrimitive = this.primitives[leftType] ? rightType : leftType;
+			var opName = this.operators[operator.slice(0, -1)];
+
+			//in cases of setting swizzle - we gotta be discreet, eg
+			//v.xy *= coef → vec2.multiply(v, [v[0], v[1], [0, 0].fill(coef)]);
+			// if (node.children[0])
+			var target;
+			if (this.isSwizzle(node.children[0])) {
+				target = this.stringify(node.children[0].children[0]);
+			}
+			else {
+				target = left;
+			}
+
+			return `${nonPrimitive}.${opName}(${target}, ${left}, ${right})`;
 		}
 
-		return result;
+		//simple assign, =
+		return `${left} = ${right}`
 	},
 
 	ternary: function (node) {
@@ -581,6 +628,23 @@ GLSL.prototype.transforms = {
 	//or if a data type - then save type as well, avoid wrapping literals
 	call: function (node) {
 		var result = '';
+
+		//if first node is an access, like a.b() - treat special access-call case
+		if (node.children[0].data === '.') {
+			var methodNode = node.children[0].children[1];
+			var holderNode = node.children[0].children[0];
+			var methodName = this.stringify(methodNode);
+			var holderName = this.stringify(holderNode);
+			var type = this.getType(holderNode);
+
+			//if length call - return length of a vector
+			//vecN.length → N
+			if (methodName === 'length' && this.types[type].length > 1) {
+				return this.types[type].length;
+			}
+
+			return `${holderName}.${methodName}`;
+		}
 
 		//first node is caller: float(), float[2](), vec4[1][3][4]() etc.
 		var callerNode = node.children[0];
@@ -618,7 +682,7 @@ GLSL.prototype.transforms = {
 		else {
 			//vec2(), float()
 			if (this.types[callName]) {
-				result += this.types[callName](argValues);
+				result += this.types[callName].apply(this, args);
 			}
 			//someFn()
 			else {
@@ -670,6 +734,49 @@ GLSL.prototype.transforms = {
 
 
 /**
+ * Detect whether node is swizzle
+ */
+GLSL.prototype.isSwizzle = function (node) {
+	var prop = node.children[1].data;
+
+	return /[xyzwstpdrgba]{1,4}/.test(prop);
+}
+
+/**
+ * Transform access node to a swizzle construct
+ * ab.xyz → [ab[0], ab[1], ab[2]]
+ */
+GLSL.prototype.unswizzle = function (node) {
+	var ident = this.stringify(node.children[0]);
+	var type = this.getType(node.children[0]);
+	var prop = node.children[1].data;
+
+	var swizzles = 'xyzwstpdrgba';
+
+	var args = [], positions = [];
+	for (var i = 0, l = prop.length; i < l; i++) {
+		var letter = prop[i];
+		var position = swizzles.indexOf(letter) % 4;
+		positions.push(position);
+		args.push(`${ident}[${position}]`);
+	}
+
+	//a.x → a[0]
+	if (args.length === 1) {
+		return args[0];
+	}
+
+	//vec2 a.xy → a
+	if (args.length === this.types[type].length && positions.every(function (position, i) { return position === i})) {
+		return ident;
+	}
+
+	//a.yz → [a[1], a[2]]
+	return `[${args.join(', ')}]`;
+}
+
+
+/**
  * Get/set variable from/to a [current] scope
  */
 GLSL.prototype.variable = function (ident, data, scope) {
@@ -687,7 +794,7 @@ GLSL.prototype.variable = function (ident, data, scope) {
 		//preset default value for a variable, if undefined
 		if (data.value == null) {
 			if (this.types[variable.type]) {
-				variable.value = this.types[variable.type]();
+				variable.value = this.types[variable.type].call(this);
 			}
 			else {
 				variable.value = variable.type + `()`
@@ -757,77 +864,7 @@ GLSL.prototype.wrapDimensions = function (value, dimensions) {
 /**
  * Infer dataType of a node.
  */
-GLSL.prototype.getType = function (node) {
-	if (node.type === 'ident') {
-		var id = node.token.data;
-
-		var scope = this.scopes[this.currentScope];
-
-		//find the closest scope with the id
-		while (scope[id] == null) {
-			scope = scope.__parentScope;
-			if (!scope) throw `'${id}' is not defined`;
-		}
-
-		return scope[id].type;
-	}
-	else if (node.type === 'call') {
-		//FIXME: function calls are more difficult than this
-		return node.children[0].data;
-	}
-	else if (node.type === 'literal') {
-		if (/true|false/i.test(node.data)) return 'bool';
-		if (/.|[0-9]e[0-9]/.test(node.data)) return 'float';
-		if (/[0-9]/.test(node.data) > 0) return 'int';
-	}
-	else if (node.type === 'operator') {
-		if (node.data === '.') {
-			//FIXME: struct point-access is not necessarily a swizzle
-			if (/vec/.test(this.getType(node.children[0]))) {
-				var len = node.children[1].data.length;
-				//FIXME: not necessarily a float vector
-				if (len === 1) return 'float';
-				if (len === 2) return 'vec2';
-				if (len === 3) return 'vec3';
-				if (len === 4) return 'vec4';
-			}
-			//access operator, like a.xy
-			if (!this.structures[node.children[0].data]) {
-				if (/[xyzwrgbastpd]+/.test(node.children[1].data)) {
-					return `vec${node.children[1].data.length}`;
-				}
-			}
-		}
-	}
-	//FIXME: guess every keyword is a type, isn’t it?
-	else if (node.type === 'keyword') {
-		return node.data;
-	}
-	else if (node.type === 'binary') {
-		//simple binaries like a + 2 are ok
-		if (this.operators[node.data]) {
-			return this.getType(node.children[0]);
-		}
-		else if (node.data === '[') {
-			return 'float';
-		}
-		//access binaries
-		else {
-		}
-	}
-	else if (node.type === 'builtin') {
-		//for builtins just notify their simplicity (no need for them being spec types)
-		return this.builtins[node.data];
-	}
-	else if (node.type === 'ternary') {
-		return this.getType(node.children[1]);
-	}
-	else if (node.type === 'group') {
-		return this.getType(node.children[0]);
-	}
-
-	throw Error(`getType(${node.type}) is not implemented`);
-};
+GLSL.prototype.getType = getType;
 
 
 module.exports = GLSL;

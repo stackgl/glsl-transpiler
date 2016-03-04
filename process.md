@@ -28,3 +28,8 @@
 		* The optimal way: `{let xyxy = vec2.mult(xy, vec2(uv[1], uv[0])); xy = vec2(xyxy[0], xyxy[1])}`. Deswizzling is slow, as any kind of function call, like getter etc, the optimal way is straight literal access.
 	* + Use plain arrays instead of Float32Arrays to construct vectors - that saves time on creating.
 	* + Unwrap multiplication operations eg m1 * m2 → m1[0] * m2[0]; m1[1] * m2[1]; ...
+	* + Using function calls is not that bad, 2% loose. Some things are impossible without functions, like `fn(x) * vec4()`.
+		* We can polyfill methods for each type of operation like `floatMultVec3`, but that would force us passing lib as a param, which is the same slow as using gl-matrix.
+		* We cannot really provide functions init code in a shader call, so we basically need to.
+			* We possibly could’ve modified fake-gl processFragment so that it does not take lib as a param... But that seems to be difficult due to need to provide clean context for each call.
+		* So there is nothing but to pass gl-matrix as a lib and provide transforms so to use it’s methods. Because polyfilling the same isn’t faster really, but prone to difficulties and errors.
