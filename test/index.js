@@ -60,7 +60,7 @@ test.only('Interface', function () {
 	attribute vec2 uv, xy = vec2(1);
 	attribute vec4 color;
 	varying vec4 fColor, twoColors[2];
-	uniform vec2 uScreenSize;
+	uniform vec2 uScreenSize = vec2(1,1);
 	float coeff = 1.0, coeff2 = coeff + 1.0, a[2], b[3][2] = float[3](a, a, a);
 
 	int count (float num);

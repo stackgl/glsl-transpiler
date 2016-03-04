@@ -133,6 +133,7 @@ GLSL.prototype.compile = function compile (arg) {
  * Transform any glsl ast node to js
  */
 GLSL.prototype.stringify = function stringify (node) {
+
 	if (node == null) return '';
 
 	if (typeof node === 'number') return node;
@@ -146,14 +147,28 @@ GLSL.prototype.stringify = function stringify (node) {
 
 	var t = this.transforms[node.type];
 
-	//wrap unknown node
-	if (t === undefined) return `/* ${node.type} */`;
+	//if node was stringified already - just return it.
+	if (node._result) return node._result;
 
-	if (!t) return '';
-	if (typeof t !== 'function') return t;
+	var startCall = false;
+
+	//wrap unknown node
+	if (t === undefined) {
+		node._result = `/* ${node.type} */`;
+		return node._result;
+	}
+
+	if (!t) {
+		node._result = '';
+		return node._result;
+	}
+
+	if (typeof t !== 'function') {
+		node._result = t;
+		return node._result;
+	}
 
 	//do start routines on the first call
-	var startCall = false;
 	if (!this.started) {
 		this.emit('start', node);
 		this.started = true;
@@ -161,7 +176,8 @@ GLSL.prototype.stringify = function stringify (node) {
 	}
 
 	//apply node serialization
-	var result = t.call(this, node);
+	node._result = t.call(this, node);
+	node._result === undefined ? '' : node._result;
 
 	//notify that handle has passed
 	this.emit(node.type, node);
@@ -172,7 +188,7 @@ GLSL.prototype.stringify = function stringify (node) {
 		this.emit('end', node);
 	}
 
-	return result === undefined ? '' : result;
+	return node._result;
 }
 
 
@@ -525,10 +541,12 @@ GLSL.prototype.transforms = {
 		var result = '';
 
 		var left = this.stringify(node.children[0]);
+		var right = this.stringify(node.children[1]);
 		var typeA = this.getType(node.children[0]);
 		var typeB = this.getType(node.children[1]);
+		var leftNode = node.children[0];
+		var rightNode = node.children[1];
 		var operator = node.data;
-		var right = this.stringify(node.children[1]);
 
 		if (node.data === '[') {
 			//for case of array access like float[3]
@@ -553,23 +571,17 @@ GLSL.prototype.transforms = {
 				var l = this.types[outType].length;
 				var operands = [];
 				for (var i = 0; i < l; i++) {
-					if (this.primitives[typeA]) {
-						operands.push(`${left} ${operator} ${right}[${i}]`);
-					}
-					else if (this.primitives[typeB]) {
-						operands.push(`${left}[${i}] ${operator} ${right}`);
-					}
-					else {
-						operands.push(`${left}[${i}] ${operator} ${right}[${i}]`);
-					}
+					var leftOp = this.getComponent(leftNode, i), rightOp = this.getComponent(rightNode, i);
+
+					operands.push(`${leftOp} ${operator} ${rightOp}`);
 				}
 				return `[${operands.join(', ')}]`;
 			}
 
 			//otherA * otherB → type.operation(result, otherA, otherB)
-
-			left = this.types[outType].call(this, node.children[0]);
-			right = this.types[outType].call(this, node.children[1]);
+			//bring both sides to an output type
+			left = this.createType(outType, node.children[0], [node.children[0]]);
+			right = this.createType(outType, node.children[1], [node.children[1]]);
 
 			return `${outType}.${this.operatorNames[operator]}([], ${left}, ${right})`;
 		}
@@ -602,7 +614,7 @@ GLSL.prototype.transforms = {
 			var opName = this.operatorNames[operator.slice(0, -1)];
 
 			//in cases of setting swizzle - we gotta be discreet, eg
-			//v.xy *= coef → vec2.multiply(v, [v[0], v[1], [0, 0].fill(coef)]);
+			//v.yx *= coef → vec2.multiply(v, [v[0], v[1], [0, 0].fill(coef)]);
 			// if (node.children[0])
 			var target;
 			if (this.isSwizzle(node.children[0])) {
@@ -694,7 +706,7 @@ GLSL.prototype.transforms = {
 		else {
 			//vec2(), float()
 			if (this.types[callName]) {
-				result += this.types[callName].apply(this, args);
+				result += this.createType(callName, node, args);
 			}
 			//someFn()
 			else {
@@ -760,9 +772,10 @@ GLSL.prototype.isSwizzle = function (node) {
  * Transform access node to a swizzle construct
  * ab.xyz → [ab[0], ab[1], ab[2]]
  */
-GLSL.prototype.unswizzle = function (node) {
-	var ident = this.stringify(node.children[0]);
-	var type = this.getType(node.children[0]);
+GLSL.prototype.unswizzle = function (node, unwrap) {
+	var identNode = node.children[0];
+	var ident = this.stringify(identNode);
+	var type = this.getType(identNode);
 	var prop = node.children[1].data;
 
 	var swizzles = 'xyzwstpdrgba';
@@ -772,7 +785,11 @@ GLSL.prototype.unswizzle = function (node) {
 		var letter = prop[i];
 		var position = swizzles.indexOf(letter) % 4;
 		positions.push(position);
-		args.push(`${ident}[${position}]`);
+		if (unwrap) {
+			args.push(this.getComponent(identNode, position));
+		} else {
+			args.push(`${ident}[${position}]`);
+		}
 	}
 
 	//a.x → a[0]
@@ -848,6 +865,58 @@ GLSL.prototype.complexity = function (node) {
 };
 
 
+/**
+ * Try to retrieve the most deep argument value from the node
+ * Eg [[0, 1][1]][0] → 1, [a, b, c][0] → a
+ *
+ * but a[3] → a[3]
+ */
+GLSL.prototype.getComponent = function (node, n) {
+	//pass on ready values like 0, null, a etc
+	if (typeof node !== 'object') return node;
+
+	var nodeType = this.getType(node);
+
+	//primitives are accessed straightly
+	if (this.primitives[nodeType]) {
+		result = this.stringify(node);
+	}
+	//basic way to access components in js: a[n]
+	else {
+		result = `${this.stringify(node)}[${n}]`;
+	}
+
+
+	//if stringify found a shorter component values - use them
+	if (node._components && node._components[n] != null) return node._components[n];
+
+	return result;
+}
+
+/**
+ * Save components to the node, if it is vector.
+ * Like vec3(a, b, c) ~→ [aStr, bStr, cStr], but stringified.
+ */
+GLSL.prototype.setComponents = function (node, components) {
+	if (!node) return;
+	if (typeof node !== 'object') return;
+
+	var type = this.getType(node);
+
+	if (this.primitives[type]) return;
+
+	var len = this.types[type].length;
+
+	if (node._components) return;
+
+	node._components = [];
+
+	for (var i = 0; i < len; i++) {
+		node._components[i] = components[i];
+	}
+}
+
+
 
 /**
  * Get/set variable from/to a [current] scope
@@ -867,10 +936,11 @@ GLSL.prototype.variable = function (ident, data, scope) {
 		//preset default value for a variable, if undefined
 		if (data.value == null) {
 			if (this.types[variable.type]) {
-				variable.value = this.types[variable.type].call(this);
+				variable.value = this.createType(variable.type, variable.node);
 			}
+			//some unknown types
 			else {
-				variable.value = variable.type + `()`
+				variable.value = variable.type + `()`;
 			}
 			variable.value = this.wrapDimensions(variable.value, variable.dimensions);
 		}
@@ -932,6 +1002,17 @@ GLSL.prototype.wrapDimensions = function (value, dimensions) {
 	return value;
 };
 
+
+/**
+ * Construct type for a node with the arguments.
+ */
+GLSL.prototype.createType = function (typeName, node, args) {
+	var result = this.types[typeName].apply(this, args);
+	if (result.components) {
+		this.setComponents(node, result.components);
+	}
+	return result + '';
+};
 
 
 /**
