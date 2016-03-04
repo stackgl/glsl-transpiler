@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test.only('Episodes', function () {
+test('Episodes', function () {
 	var glsl = GLSL({
 		removeAttributes: true,
 		removeUniforms: true,
@@ -41,7 +41,7 @@ test.only('Episodes', function () {
 		);
 	});
 
-	test.only('vec2 position; position *= 1.0 + vec2();', function () {
+	test('vec2 position; position *= 1.0 + vec2();', function () {
 		assert.equal(
 			clean(glsl.compile(this.title)),
 			clean(`
@@ -51,7 +51,15 @@ test.only('Episodes', function () {
 		);
 	});
 
-	test('vec2 position; position = position * (1.0 + vec2());');
+	test('vec2 position; position = position * (1.0 + vec2());', function () {
+		assert.equal(
+			clean(glsl.compile(this.title)),
+			clean(`
+			var position = [0, 0];
+			position = [position[0], position[1]];
+			`)
+		);
+	});
 
 	test('vec2 v = vec2(1, 1); v.x;', function () {
 		assert.equal(
@@ -84,7 +92,7 @@ test.only('Episodes', function () {
 });
 
 
-test('Interface', function () {
+test.only('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 	precision mediump float;
@@ -137,12 +145,11 @@ test('Interface', function () {
 
 	function main () {
 		fColor = color;
-		var position = vec2.multiply([], [0, 0].fill(coeff), [uv[0], -uv[1]]);
+		var position = [coeff * uv[0], coeff * -uv[1]];
 		position[0] *= uScreenSize[1] / uScreenSize[0];
-		vec2.multiply(xy, xy, [uv[1], uv[0]]);
-		position_yx_divide = [position[1] / 2.0, position[0] / 2.0];
-		gl_Position = [position_yx_divide[0], position_yx_divide[1], 0, 1];
-		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
+		xy = [xy[0] * uv[1], xy[1] * uv[0]];
+		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
+		gl_FragColor[0] = gl_FragCoord[0] / 4;
 		return;
 	};
 

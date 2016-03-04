@@ -79,6 +79,12 @@ GLSL.prototype.operations = operations;
 
 
 /**
+ * Max number of operations allowable to repeat in unfolding arrays etc
+ */
+GLSL.prototype.maxComplexity = 10;
+
+
+/**
  * Initialize analysing scopes/vars/types
  */
 GLSL.prototype.reset = function () {
@@ -581,7 +587,7 @@ GLSL.prototype.transforms = {
 			//evaluableNum * vec → [vec[0] * n, vec[n] * n]
 			//vec * evaluableNum → [n * vec[0], n * vec[n]]
 			//eVec * eVec → [vec[0] * vec[0], vec[n] * vec[n]]
-			if (this.complexity(node.children[0]) + this.complexity(node.children[1]) < 10) {
+			if (this.complexity(node.children[0]) + this.complexity(node.children[1]) < this.maxComplexity) {
 				var l = this.types[outType].length;
 				var operands = [];
 				for (var i = 0; i < l; i++) {
@@ -667,11 +673,12 @@ GLSL.prototype.transforms = {
 				target = left;
 			}
 
-			var result = this.stringify({
+			var binaryNode = {
 				type: 'binary',
 				children: [node.children[0], node.children[1]],
 				data: subOperator
-			});
+			};
+			var result = this.stringify(binaryNode);
 
 			return `${target} = ${result}`;
 		}
@@ -797,7 +804,11 @@ GLSL.prototype.transforms = {
 
 	//grouped expression like a = (a - 1);
 	group: function (node) {
-		return '(' + node.children.map(this.stringify, this).join(', ') + ')';
+		//bring components of a child
+		var result = '(' + node.children.map(this.stringify, this).join(', ') + ')';
+		this.setComponents(node, this.getComponents(node.children[0]));
+
+		return result;
 	}
 
 	// switch: function () {
@@ -875,7 +886,12 @@ GLSL.prototype.unswizzle = function (node) {
  * Very euristic approach.
  */
 GLSL.prototype.complexity = function (node) {
+	var self = this;
+
 	if (typeof node !== 'object') return 0;
+
+	//list of nodes is a sum of complexities
+	if (Array.isArray(node)) return node.map(this.complexity, this).reduce(function (prev, curr) { return prev + curr; }, 0);
 
 	if (node._complexity != null) return node._complexity;
 
@@ -912,17 +928,22 @@ GLSL.prototype.complexity = function (node) {
 	//float(args) is ok → args
 	//vec3(args) is not ok → [a, a, a]
 	if (node.type === 'call') {
-		//type(args)
+		//knownType(args)
 		if (this.types[node.children[0].data]) {
 			var l = this.types[node.children[0].data].length;
 
-			return node._complexity = l * node.children.slice(1).map(this.complexity, this)
-				.reduce(function (prev, curr) { return prev + curr; }, 0);
+			return node._complexity = l * this.complexity(node.children.slice(1));
 		}
 	}
 
+	//group just consist of components
+	if (node.type === 'group') {
+		return this.complexity(node.children);
+	}
+
 	//unknown nodes are too risky to guess
-	return node._complexity = 100;
+	console.warn('Unknown complexity of a node ' + node.type);
+	return node._complexity = this.maxComplexity;
 };
 
 
@@ -954,6 +975,21 @@ GLSL.prototype.getComponent = function (node, n) {
 		return `${this.stringify(node)}[${n}]`;
 	}
 }
+
+/**
+ * Return components as a list
+ */
+GLSL.prototype.getComponents = function (node) {
+	var nodeType = this.getType(node);
+
+	var components = [];
+	for (var i = 0, l = this.types[nodeType].length; i < l; i++) {
+		components[i] = this.getComponent(node, i);
+	}
+
+	return components;
+};
+
 
 /**
  * Save components to the node, if it is vector.
@@ -1081,6 +1117,51 @@ GLSL.prototype.createType = function (typeName, node, args) {
  * Infer dataType of a node.
  */
 GLSL.prototype.getType = getType;
+
+
+/**
+ * Construct result string for a type, containing components.
+ * Supposed to be used by type constructors, mostyle.
+ * Make decision on output format - if it is simple enough to calculate -
+ * return just a straight newly created output eg [1, 2, 3, 4] instead of [1, 2].concat(3, 4)
+ *
+ * @param {string} main Main stringify method
+ * @param {Array} components List of nodes - components of the constructor
+ */
+GLSL.prototype.createTypeResult = function (main, compNodes) {
+	//rendered components
+	var components = [];
+
+	var n = 0, prev, curr;
+	for (var i = 0; i < compNodes.length; i++) {
+		curr = compNodes[i];
+
+		if (curr === prev) {
+			n = n+1;
+		} else {
+			n = 0;
+		}
+
+		components[i] = this.getComponent(curr, n);
+
+		prev = curr;
+	}
+
+	//decide on complexity
+	if (this.complexity(compNodes) > this.maxComplexity) {
+		var result = new String(main);
+	}
+	else {
+		var result = new String(`[${components.join(', ')}]`);
+	}
+
+	//pass components separately
+	result.components = components;
+
+	return result;
+}
+
+
 
 
 module.exports = GLSL;
