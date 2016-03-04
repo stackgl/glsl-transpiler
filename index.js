@@ -486,11 +486,11 @@ GLSL.prototype.transforms = {
 			//ab.xyz for example
 			if (this.isSwizzle(node)) {
 				//if ident.x - provide arg access
-				if (node.parent.type === 'assign' && node.parent.children[0] === node) {
-					return this.unswizzle(node, true);
-				} else {
+				// if (node.parent.type === 'assign' && node.parent.children[0] === node) {
+				// 	return this.unswizzle(node, true);
+				// } else {
 					return this.unswizzle(node);
-				}
+				// }
 			}
 
 			return `${ident}.${prop}`;
@@ -586,6 +586,7 @@ GLSL.prototype.transforms = {
 				var operands = [];
 				for (var i = 0; i < l; i++) {
 					var leftOp = this.getComponent(leftNode, i), rightOp = this.getComponent(rightNode, i);
+
 					var operation = '';
 
 					//handle ridiculous math cases like x + 0, x * 0, x + 1
@@ -612,6 +613,10 @@ GLSL.prototype.transforms = {
 
 					operands.push(operation);
 				}
+
+				//save operands as node components
+				this.setComponents(node, operands);
+
 				return `[${operands.join(', ')}]`;
 			}
 
@@ -644,11 +649,11 @@ GLSL.prototype.transforms = {
 		}
 
 		//otherwise - expand custom assignments
-
-		//operatory assign, eg *=
+		//operatory assign, eg a *= x → a = a * x
 		if (operator.length > 1) {
 			var nonPrimitive = this.primitives[leftType] ? rightType : leftType;
-			var opName = this.operatorNames[operator.slice(0, -1)];
+			var subOperator = operator.slice(0, -1);
+			var opName = this.operatorNames[subOperator];
 
 			//in cases of setting swizzle - we gotta be discreet, eg
 			//v.yx *= coef → vec2.multiply(v, [v[0], v[1], [0, 0].fill(coef)]);
@@ -662,7 +667,13 @@ GLSL.prototype.transforms = {
 				target = left;
 			}
 
-			return `${nonPrimitive}.${opName}(${target}, ${left}, ${right})`;
+			var result = this.stringify({
+				type: 'binary',
+				children: [node.children[0], node.children[1]],
+				data: subOperator
+			});
+
+			return `${target} = ${result}`;
 		}
 
 		//simple assign, =
@@ -809,8 +820,6 @@ GLSL.prototype.isSwizzle = function (node) {
 /**
  * Transform access node to a swizzle construct
  * ab.xyz → [ab[0], ab[1], ab[2]]
- *
- * Pass force flag to ensure component access like a[0] instead of attempt to get component
  */
 GLSL.prototype.unswizzle = function (node) {
 	var identNode = node.children[0];
@@ -840,16 +849,24 @@ GLSL.prototype.unswizzle = function (node) {
 
 	//a.x → a[0]
 	if (args.length === 1) {
-		return args[0];
+		var result = new String(args[0]);
+		result.complexity = 1;
+		return result;
 	}
 
 	//vec2 a.xy → a
 	if (args.length === this.types[type].length && positions.every(function (position, i) { return position === i})) {
-		return ident;
+		var result = new String(ident);
+		result.complexity = 0;
+		return result;
 	}
 
 	//a.yz → [a[1], a[2]]
-	return `[${args.join(', ')}]`;
+	//return components along with the result
+	var result = new String(`[${args.join(', ')}]`);
+	result.complexity = args.length;
+
+	return result;
 }
 
 
@@ -882,20 +899,14 @@ GLSL.prototype.complexity = function (node) {
 		return node._complexity = this.complexity(node.children[0]) + 1 + this.complexity(node.children[1]);
 	}
 
-	//a.x, a.xy
+	//a.x, a.xy - calc complexity of swizzles
 	if (node.type === 'operator' && this.isSwizzle(node)){
 		var prop = node.children[1].data;
 
 		//a.z → a[3] = 2
 		if (prop.length === 1) return node._complexity = 1;
 
-		var unswizzled = this.unswizzle(node);
-
-		//a.yzx → [a[1], a[2], a[0]] = 7
-		if (unswizzled[0] === '[') return node._complexity = 2 * prop.length + 1;
-
-		//a.xy → a
-		return node._complexity = 0;
+		return this.unswizzle(node).complexity;
 	}
 
 	//float(args) is ok → args
@@ -925,7 +936,6 @@ GLSL.prototype.getComponent = function (node, n) {
 	//pass on ready values like 0, null, a etc
 	if (typeof node !== 'object') return node;
 
-	var nodeType = this.getType(node);
 
 	//if stringify found a shorter component values - use them
 	//FIXME: node can have components of it’s prototype (ident). We can try to update prototype’s values for each `setComponents` call so that optimisation there will be better (constants hoist etc)
@@ -933,6 +943,7 @@ GLSL.prototype.getComponent = function (node, n) {
 		return node._components[n];
 	}
 
+	var nodeType = this.getType(node);
 
 	//primitives are accessed straightly
 	if (this.primitives[nodeType]) {

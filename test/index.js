@@ -41,15 +41,17 @@ test.only('Episodes', function () {
 		);
 	});
 
-	test('vec2 position; position *= 1.0 + vec2();', function () {
+	test.only('vec2 position; position *= 1.0 + vec2();', function () {
 		assert.equal(
 			clean(glsl.compile(this.title)),
 			clean(`
 			var position = [0, 0];
-			vec2.multiply(position, position, [1.0, 1.0]);
+			position = [position[0], position[1]];
 			`)
 		);
 	});
+
+	test('vec2 position; position = position * (1.0 + vec2());');
 
 	test('vec2 v = vec2(1, 1); v.x;', function () {
 		assert.equal(
@@ -71,7 +73,7 @@ test.only('Episodes', function () {
 		);
 	});
 
-	test.only('gl_Position.xy += gl_Position.yx;', function () {
+	test('gl_Position.xy += gl_Position.yx;', function () {
 		assert.equal(
 			clean(glsl.compile(this.title)),
 			clean(`
