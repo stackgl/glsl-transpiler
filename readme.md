@@ -1,4 +1,4 @@
-> _glsl-js_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized readable js code. It represents vec/mat types as arrays, expands swizzles, and utilises [gl-matrix](https://github.com/toji/gl-matrix) for complex operations on vectors or matrices.
+> _glsl-js_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized readable js code. It converts _vec/mat_ to arrays, expands swizzles and engages [gl-matrix](https://github.com/toji/gl-matrix) for complex operations on vectors and matrices.
 
 ## Usage
 
@@ -94,9 +94,9 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 
 | Property | Default | Description |
 |---|:---:|---|
-| `glsl.removeUniforms` | `true` | Remove uniforms declarations from the output. Can be useful if uniforms should be provided separately. |
-| `glsl.removeAttributes` | `true` | Remove attributes declarations from the output. |
-| `glsl.removeVarying` | `true` | Remove varying declarations from the output. |
+| `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `replaceUniform: function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
+| `replaceAttribute` | `false` | Same as `replaceUniforms`, but for attributes. |
+| `replaceVarying` | `false` | Same as `replaceUniforms`, but for varying. |
 
 
 ## Related

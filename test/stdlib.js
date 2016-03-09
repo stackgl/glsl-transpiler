@@ -2,23 +2,24 @@
 var test = require('tst');
 var _ = require('../lib/stdlib');
 var assert = require('assert');
-var GLSL = require('./');
-
+var GLSL = require('../');
 
 /**
  * Eval part of glsl in js
  */
 function eval (str) {
-
+	var str = GLSL.compile(str);
+	var fn = new Function(str);
+	return fn();
 }
 
 
-test.only('Primitives', function () {
+test('Primitives', function () {
 	var int = _.int, uint = _.uint, bool = _.bool, float = _.float, double = _.double;
 
 	//recognise input array
-	test('float([1])', function () {
-		assert.equal(float([1]), 1);
+	test('return float(1)', function () {
+		assert.equal(eval('+float(1);'), 1);
 	});
 
 	// converts an unsigned integer to a signed integer

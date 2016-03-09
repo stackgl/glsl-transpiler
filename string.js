@@ -4,14 +4,10 @@
  * @module  glsl-js
  */
 
-var tokenize = require('glsl-tokenizer/string');
-var parse = require('glsl-parser/direct');
-var GLSL = require('./');
+var GLSL = require('./lib');
 
 function compile (src, options) {
-	var tokens = tokenize(src);
-	var node = parse(tokens);
-	var result = GLSL(options).stringify(node);
+	var result = GLSL(options).compile(src);
 
 	return result;
 };

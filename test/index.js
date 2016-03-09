@@ -176,15 +176,19 @@ test('Interface', function () {
 	};`;
 
 	var shortResult = `
+	var uv = attributes['uv'], xy = attributes['xy'];
+	var color = attributes['color'];
+	var fColor = varying['fColor'], twoColors = varying['twoColors'];
+	var uScreenSize = uniforms['uScreenSize'];
 	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
 	function main () {
 		fColor = color;
-		var position = [[uv[0], -uv[1]][0] * coeff, [uv[0], -uv[1]][1] * coeff];
+		var position = [coeff * uv[0], coeff * -uv[1]];
 		position[0] *= uScreenSize[1] / uScreenSize[0];
-		$(xy, 'xy', mult($(xy, 'xy'), $uv.yx));
+		xy = [xy[0] * uv[1], xy[1] * uv[0]];
 		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
-		gl_FragColor[0] = gl_FragCoord[0] / 2.0;
+		gl_FragColor[0] = gl_FragCoord[0] / 4;
 		return;
 	};
 
@@ -242,11 +246,11 @@ test('Interface', function () {
 		}))
 	});
 
-	test.skip('Detect attributes, uniforms, varying', function () {
+	test('Detect attributes, uniforms, varying', function () {
 		var glsl = new GLSL({
-			removeAttributes: true,
-			removeUniforms: true,
-			removeVarying: true
+			replaceAttribute: function (name) { return `attributes['${name}']`;},
+			replaceUniform: function (name) { return `uniforms['${name}']`;},
+			replaceVarying: function (name) { return `varying['${name}']`;}
 		});
 
 		var result = glsl.compile(source);
@@ -259,8 +263,6 @@ test('Interface', function () {
 		assert.deepEqual(Object.keys(glsl.varying), ['fColor', 'twoColors']);
 
 		assert.deepEqual(Object.keys(glsl.uniforms), ['uScreenSize']);
-
-		assert.deepEqual(glsl.types, ['vec2', 'vec4', 'float', 'int']);
 	});
 });
 

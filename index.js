@@ -4,6 +4,10 @@
  * @module  glsl-js
  */
 
-module.exports = require('./lib');
-exports.string = require('./string');
-exports.stream = require('./stream');
+var GLSL = require('./lib');
+
+GLSL.compile =
+GLSL.string = require('./string');
+GLSL.stream = require('./stream');
+
+module.exports = GLSL;

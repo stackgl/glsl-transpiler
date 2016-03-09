@@ -5,8 +5,8 @@
  */
 
 var tokenize = require('glsl-tokenizer/string');
-var parse = require('glsl-parser/direct');
-var GLSL = require('./');
+var parse = require('./lib/parse');
+var GLSL = require('./lib');
 var Transform = require('stream').Transform;
 var inherits = require('inherits');
 
