@@ -7,9 +7,7 @@
 var GLSL = require('./lib');
 
 function compile (src, options) {
-	var result = GLSL(options).compile(src);
-
-	return result;
+	return GLSL(options)(src);
 };
 
 module.exports = compile;

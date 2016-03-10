@@ -28,7 +28,7 @@ function GlslJsStream (options) {
 	});
 
 	//glsl compiler
-	this.glsl = GLSL(options);
+	this.glsl = GLSL(options).glsl;
 };
 
 inherits(GlslJsStream, Transform);

@@ -22,10 +22,6 @@ function clean (str) {
 
 test('Episodes', function () {
 	var glsl = GLSL({
-		removeAttributes: true,
-		removeUniforms: true,
-		removeVarying: true,
-		muteOperationMethods: true
 	});
 
 	test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function () {
@@ -92,7 +88,7 @@ test('Episodes', function () {
 
 	test('uniform vec4 v; uniform float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(glsl(this.title)),
 			clean(`
 			var v = [0, 0, 0, 0];
 			var c = 0;
@@ -274,7 +270,7 @@ test('Interface', function () {
 			replaceAttribute: function (name) { return `attributes['${name}']`;},
 			replaceUniform: function (name) { return `uniforms['${name}']`;},
 			replaceVarying: function (name) { return `varying['${name}']`;}
-		});
+		}).glsl;
 
 		var result = glsl.compile(source);
 

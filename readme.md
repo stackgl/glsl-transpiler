@@ -84,8 +84,8 @@ var parse = require('glsl-parser/direct');
 var source = glslify('./source.glsl');
 var tokens = tokenize(source);
 var tree = parse(tokens);
-var glsl = GLSL(options?); //create glsl instance
-var result = glsl.stringify(tree);
+var compile = GLSL(options?);
+var result = compile(tree);
 ```
 
 ### Options
