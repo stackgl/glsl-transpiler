@@ -6,8 +6,12 @@
 
 var GLSL = require('./lib');
 
+//static bindings
 GLSL.compile =
-GLSL.string = require('./string');
+GLSL.string = function (str, opt) {
+	return GLSL(opt).compile(str);
+};
+
 GLSL.stream = require('./stream');
 
 module.exports = GLSL;

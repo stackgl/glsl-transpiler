@@ -5,7 +5,17 @@
 [![npm install glsl-js](https://nodei.co/npm/glsl-js.png?mini=true)](https://npmjs.org/package/glsl-js/)
 
 ```js
-var compile = require('glsl-js/string');
+var Compiler = require('glsl-js');
+
+//create compiler function
+var compile = Compiler({
+	replaceUniform: function (name) {
+		return `uniforms.${name}`;
+	},
+	replaceAttribute: function (name) {
+		return `attributes.${name}`;
+	}
+});
 
 compile(`
 	precision mediump float;
@@ -22,12 +32,12 @@ compile(`
 	});
 `)
 
-//result:
+//compilation result
 `
-var uv = [0, 0];
-var color = [0, 0, 0, 0];
+var uv = attributes.uv;
+var color = attributes.color;
 var fColor = [0, 0, 0, 0];
-var uScreenSize = [0, 0];
+var uScreenSize = uniforms.uScreenSize;
 
 function main () {
 	fColor = color;
@@ -40,37 +50,6 @@ function main () {
 
 
 ## API
-
-### glsl-js/string
-
-To compile glsl source code to js directly, just pass a string as the argument and it will return the compiled string:
-
-```js
-var compile = require('glsl-js/string');
-var glslify = require('glslify');
-
-compile(glslify('./source.glsl'), options?);
-```
-
-### glsl-js/stream
-
-_glsl-js_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
-
-```js
-var compile = require('glsl-js/stream');
-var parse = require('glsl-parser/stream');
-var tokenize = require('glsl-tokenizer/stream');
-
-fs.createReadStream('./source.glsl')
-.pipe(tokenize())
-.pipe(parse())
-.pipe(compile(options?))
-.once('end', function () {
-	//this.source contains the actual version of the compiled code
-	//and gets updated on each input chunk of data.
-	console.log(this.source);
-});
-```
 
 ### glsl-js
 
@@ -98,6 +77,26 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 | `replaceAttribute` | `false` | Same as `replaceUniforms`, but for attributes. |
 | `replaceVarying` | `false` | Same as `replaceUniforms`, but for varying. |
 
+
+### glsl-js/stream
+
+_glsl-js_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
+
+```js
+var compile = require('glsl-js/stream');
+var parse = require('glsl-parser/stream');
+var tokenize = require('glsl-tokenizer/stream');
+
+fs.createReadStream('./source.glsl')
+.pipe(tokenize())
+.pipe(parse())
+.pipe(compile(options?))
+.once('end', function () {
+	//this.source contains the actual version of the compiled code
+	//and gets updated on each input chunk of data.
+	console.log(this.source);
+});
+```
 
 ## Related
 
