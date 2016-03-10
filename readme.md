@@ -7,7 +7,6 @@
 ```js
 var Compiler = require('glsl-js');
 
-//create compiler function
 var compile = Compiler({
 	replaceUniform: function (name) {
 		return `uniforms.${name}`;
@@ -32,7 +31,8 @@ compile(`
 	});
 `)
 
-//compilation result
+//↓ ↓ ↓
+
 `
 var uv = attributes.uv;
 var color = attributes.color;
@@ -53,16 +53,12 @@ function main () {
 
 ### glsl-js
 
-To apply compilation straight to glsl AST, use the main `glsl-js`:
+To apply compilation to glsl AST or string, require `glsl-js`:
 
 ```js
 var GLSL = require('glsl-js');
-var tokenize = require('glsl-tokenizer/string');
-var parse = require('glsl-parser/direct');
 
 var source = glslify('./source.glsl');
-var tokens = tokenize(source);
-var tree = parse(tokens);
 var compile = GLSL(options?);
 var result = compile(tree);
 ```
@@ -100,6 +96,7 @@ fs.createReadStream('./source.glsl')
 
 ## Related
 
+> [gl-shader-output](https://github.com/dfcreative/gl-shader-output) — eval fragment shader on rectangular vertex input, gl-less.
 > [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
 > [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
