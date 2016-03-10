@@ -89,6 +89,29 @@ test('Episodes', function () {
 			`)
 		);
 	});
+
+	test('uniform vec4 v; uniform float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
+		assert.equal(
+			clean(glsl.compile(this.title)),
+			clean(`
+			var v = [0, 0, 0, 0];
+			var c = 0;
+			gl_FragColor = [v[3] * c, v[2] * c, v[1] * c, v[0] * c];
+			`)
+		);
+	});
+
+	//constants propagation is unimplemented
+	test.skip('vec4 v; float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
+		assert.equal(
+			clean(glsl.compile(this.title)),
+			clean(`
+			var v = [0, 0, 0, 0];
+			var c = 0;
+			gl_FragColor = [0, 0, 0, 0];
+			`)
+		);
+	});
 });
 
 
