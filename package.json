@@ -4,10 +4,11 @@
   "description": "Transform glsl to js",
   "main": "index.js",
   "dependencies": {
+    "array-flatten": "^2.0.0",
+    "gl-matrix": "^2.3.2",
     "glsl-parser": "^2.0.0",
     "glsl-tokenizer": "^2.0.2",
     "inherits": "^2.0.1",
-    "gl-matrix": "^2.3.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
