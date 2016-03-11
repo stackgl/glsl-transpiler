@@ -9,7 +9,13 @@ var GLSL = require('../');
  */
 function eval (str) {
 	var str = GLSL.compile(str);
-	var fn = new Function(str);
+
+	//return last statement
+	strLines = str.split('\n');
+	strLines[strLines.length - 1] = 'return ' + strLines[strLines.length - 1];
+
+	var fn = new Function(strLines.join('\n'));
+
 	return fn();
 }
 
@@ -18,102 +24,113 @@ test('Primitives', function () {
 	var int = _.int, uint = _.uint, bool = _.bool, float = _.float, double = _.double;
 
 	//recognise input array
-	test('return float(1)', function () {
+	test('float(1)', function () {
 		assert.equal(eval('+float(1);'), 1);
 	});
 
 	// converts an unsigned integer to a signed integer
 	test('int(uint)', function () {
-		assert.equal(int(1243), 1243);
+		assert.equal(eval('+int(1243);'), 1243);
 	});
 
 	// converts a Boolean value to an int
 	test('int(bool)', function () {
-		assert.equal(int(true), 1);
-		assert.equal(int(false), 0);
+		assert.equal(eval('+int(true);'), 1);
+		assert.equal(eval('+int(false);'), 0);
 	});
 
 	// converts a float value to an int
 	test('int(float)', function () {
-		assert.equal(int(123.4), 123);
+		assert.equal(eval('+int(123.4);'), 123);
 	});
 
 	// converts a double value to a signed integer
 	test('int(double)', function () {
-		assert.equal(int(10e5), 10e5);
+		assert.equal(eval('+int(10e5);'), 10e5);
 	});
 
 	// converts a signed integer value to an unsigned integer
 	test('uint(int)', function () {
-		assert.equal(uint(123), 123);
+		assert.equal(eval('+uint(123);'), 123);
 	});
 
 	// converts a Boolean value to an unsigned integer
 	test('uint(bool)', function () {
-		assert.equal(uint(true), 1);
+		assert.equal(eval('+uint(true);'), 1);
 	});
 
 	// converts a float value to an unsigned integer
 	test('uint(float)', function () {
-		assert.equal(uint(123.4), 123);
+		assert.equal(eval('+uint(123.4);'), 123);
 	});
 
 	// converts a double value to an unsigned integer
 	test('uint(double)', function () {
-		assert.equal(uint(123.4e3), 123400);
+		assert.equal(eval('+int(123.4e3);'), 123400);
 	});
 
 	// converts a signed integer value to a Boolean
 	test('bool(int)', function () {
-		assert.equal(bool(123), true);
-		assert.equal(bool(0), false);
+		assert.equal(eval('+bool(123);'), true);
+		assert.equal(eval('+bool(0);'), false);
 	});
 
 	// converts an unsigned integer value to a Boolean value
 	test('bool(uint)', function () {
-		assert.equal(bool(123), true);
+		assert.equal(eval('+bool(123);'), true);
 	});
 
 	// converts a float value to a Boolean
 	test('bool(float)', function () {
-		assert.equal(bool(123.4), true)
+		assert.equal(eval('+bool(123.4);'), true);
 	});
 
 	// converts a double value to a Boolean
 	test('bool(double)', function () {
-		assert.equal(bool(123.4e100), true)
+		assert.equal(eval('+bool(123.4e100);'), true);
 	});
 
 	// converts a signed integer value to a float
 	test('float(int)', function () {
-		assert.equal(float(123), 123);
+		assert.equal(eval('+float(123);'), 123);
 	});
 
 	// converts an unsigned integer value to a float value
 	test('float(uint)', function () {
-		assert.equal(float(34), 34);
+		assert.equal(eval('+float(34);'), 34);
 	});
 
 	// converts a Boolean value to a float
 	test('float(bool)', function () {
-		assert.equal(float(true), 1);
-		assert.equal(float(false), 0);
+		assert.equal(eval('+float(true);'), 1);
+		assert.equal(eval('+float(false);'), 0);
 	});
 
 	// converts a double value to a float
-	test('float(double)');
+	test('float(double)', function () {
+		assert.equal(eval('+float(double(10e15));'), 10e15);
+	});
 
 	// converts a signed integer value to a double
-	test('double(int)');
+	test('double(int)', function () {
+		assert.equal(eval('+double(34);'), 34);
+	});
 
 	// converts an unsigned integer value to a double
-	test('double(uint)');
+	test('double(uint)', function () {
+		assert.equal(eval('+double(uint(34));'), 34);
+	});
 
 	// converts a Boolean value to a double
-	test('double(bool)');
+	test('double(bool)', function () {
+		assert.equal(eval('+double(true);'), 1);
+		assert.equal(eval('+double(false);'), 0);
+	});
 
 	// converts a float value to a double
-	test('double(float)');
+	test('double(float)', function () {
+		assert.equal(eval('+double(34.45);'), 34.45);
+	});
 });
 
 test('Vector constructors', function () {
