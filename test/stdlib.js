@@ -21,8 +21,6 @@ function eval (str) {
 
 
 test('Primitives', function () {
-	var int = _.int, uint = _.uint, bool = _.bool, float = _.float, double = _.double;
-
 	//recognise input array
 	test('float(1)', function () {
 		assert.equal(eval('+float(1);'), 1);
@@ -73,6 +71,10 @@ test('Primitives', function () {
 	test('bool(int)', function () {
 		assert.equal(eval('+bool(123);'), true);
 		assert.equal(eval('+bool(0);'), false);
+		assert.equal(eval('bool x = true; x;'), true);
+		assert.equal(eval('bool x = false; x;'), false);
+		assert.equal(eval('bool x = bool(true); x;'), true);
+		assert.equal(eval('bool x = bool(false); x;'), false);
 	});
 
 	// converts an unsigned integer value to a Boolean value
@@ -137,157 +139,125 @@ test('Vector constructors', function () {
 	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4, mat2 = _.mat2, ivec3 = _.ivec3, ivec4 = _.ivec4, bvec4 = _.bvec4;
 
 	test('vec3()', function () {
-		var v = vec3();
-
-		assert.equal(v.length(), 3);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 0);
-		assert.equal(v[2], 0);
-		assert.equal(v[3], undefined);
+		assert.equal(eval('+vec3().length();'), 3);
+		assert.equal(eval('+vec3()[0];'), 0);
+		assert.equal(eval('+vec3()[1];'), 0);
+		assert.equal(eval('+vec3()[2];'), 0);
+		assert.equal(eval('float x = vec3()[3]; x;'), undefined);
 	});
 
 	// initializes each component of the vec3 with the float
 	test('vec3(float)', function () {
-		var v = vec3(2.2);
-
-		assert.equal(v.length(), 3);
-		assert.equal(v[0], 2.2);
-		assert.equal(v[1], 2.2);
-		assert.equal(v[2], 2.2);
-		assert.equal(v[3], undefined);
+		assert.equal(eval('+vec3(2.2).length();'), 3);
+		assert.equal(eval('float x = vec3(2.2)[0]; x;'), 2.2);
+		assert.equal(eval('float x = vec3(2.2)[1]; x;'), 2.2);
+		assert.equal(eval('float x = vec3(2.2)[2]; x;'), 2.2);
+		assert.equal(eval('float x = vec3(2.2)[3]; x;'), undefined);
 	});
 
 	// makes a vec4 with component-wise conversion
 	test('vec4(ivec4)', function () {
-		var iv = ivec4(0, 1, 2, 3);
-		var v = vec4(iv);
-
-		assert.equal(v.length(), 4);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 1);
-		assert.equal(v[2], 2);
-		assert.equal(v[3], 3);
+		assert.equal(eval('float x = vec4(ivec4(0, 1, 2, 3)).length(); x;'), 4);
+		assert.equal(eval('float x = vec4(ivec4(0, 1, 2, 3))[0]; x;'), 0);
+		assert.equal(eval('float x = vec4(ivec4(0, 1, 2, 3))[1]; x;'), 1);
+		assert.equal(eval('float x = vec4(ivec4(0, 1, 2, 3))[2]; x;'), 2);
+		assert.equal(eval('float x = vec4(ivec4(0, 1, 2, 3))[3]; x;'), 3);
 	});
 
 	// the vec4 is column 0 followed by column 1
 	test('vec4(mat2)', function () {
-		var m = mat2(0, 1, 2, 3);
-		var v = vec4(m);
-
-		assert.equal(v.length(), 4);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 1);
-		assert.equal(v[2], 2);
-		assert.equal(v[3], 3);
+		assert.equal(eval('float x = vec4(mat2(0, 1, 2, 3)).length(); x;'), 4);
+		assert.equal(eval('float x = vec4(mat2(0, 1, 2, 3))[0]; x;'), 0);
+		assert.equal(eval('float x = vec4(mat2(0, 1, 2, 3))[1]; x;'), 1);
+		assert.equal(eval('float x = vec4(mat2(0, 1, 2, 3))[2]; x;'), 2);
+		assert.equal(eval('float x = vec4(mat2(0, 1, 2, 3))[3]; x;'), 3);
 	});
 
 	// initializes a vec2 with 2 floats
 	test('vec2(float, float)', function () {
-		var v = vec2(1.2, 3.3);
-
-		assert.equal(v.length(), 2);
-		assert.equal(v[0], 1.2);
-		assert.equal(v[1], 3.3);
-		assert.equal(v[2], undefined);
-		assert.equal(v[3], undefined);
+		assert.equal(eval('float x = vec2(1.2, 3.3).length(); x;'), 2);
+		assert.equal(eval('float x = vec2(1.2, 3.3)[0]; x;'), 1.2);
+		assert.equal(eval('float x = vec2(1.2, 3.3)[1]; x;'), 3.3);
+		assert.equal(eval('float x = vec2(1.2, 3.3)[2]; x;'), undefined);
+		assert.equal(eval('float x = vec2(1.2, 3.3)[3]; x;'), undefined);
 	});
 
 	// initializes an ivec3 with 3 ints
 	test('ivec3(int, int, int)', function () {
-		var v = ivec3(1.2, 3.3, 5);
-
-		assert.equal(v.length(), 3);
-		assert.equal(v[0], 1);
-		assert.equal(v[1], 3);
-		assert.equal(v[2], 5);
-		assert.equal(v[3], undefined);
+		assert.equal(eval('float x = ivec3(1.2, 3.3, 5).length(); x;'), 3);
+		assert.equal(eval('float x = ivec3(1.2, 3.3, 5)[0]; x;'), 1);
+		assert.equal(eval('float x = ivec3(1.2, 3.3, 5)[1]; x;'), 3);
+		assert.equal(eval('float x = ivec3(1.2, 3.3, 5)[2]; x;'), 5);
+		assert.equal(eval('float x = ivec3(1.2, 3.3, 5)[3]; x;'), undefined);
 	});
 
 	// uses 4 Boolean conversions
 	test('bvec4(int, int, float, float)', function () {
-		var v = bvec4(0, 4, 1.2, 0);
-
-		assert.equal(v.length(), 4);
-		assert.equal(v[0], false);
-		assert.equal(v[1], true);
-		assert.equal(v[2], true);
-		assert.equal(v[3], false);
+		assert.equal(eval('int x = bvec4(0, 4, 1.2, false).length(); x;'), 4);
+		assert.equal(eval('bool x = bvec4(true, 0, 1.2, false)[0]; x;'), true);
+		assert.equal(eval('bool x = bvec4(true, 0, 1.2, false)[1]; x;'), false);
+		assert.equal(eval('bool x = bvec4(true, 0, 1.2, false)[2]; x;'), true);
+		assert.equal(eval('bool x = bvec4(true, 0, 1.2, false)[3]; x;'), false);
 	});
 
 	// drops the third component of a vec3
 	test('vec2(vec3)', function () {
-		var v3 = vec3(0, 4, 1.2);
-		var v = vec2(v3);
-
-		assert.equal(v.length(), 2);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 4);
-		assert.equal(v[2], undefined);
-		assert.equal(v[3], undefined);
+		assert.equal(eval('float x = vec2(vec3(0, 4, 1.2)).length(); x;'), 2);
+		assert.equal(eval('float x = vec2(vec3(0, 4, 1.2))[0]; x;'), 0);
+		assert.equal(eval('float x = vec2(vec3(0, 4, 1.2))[1]; x;'), 4);
+		assert.equal(eval('float x = vec2(vec3(0, 4, 1.2))[2]; x;'), undefined);
+		assert.equal(eval('float x = vec2(vec3(0, 4, 1.2))[3]; x;'), undefined);
 	});
 
 	// drops the fourth component of a vec4
 	test('vec3(vec4)', function () {
-		var v4 = vec4(0, 4, 1.2, 2);
-		var v = vec3(v4);
-
-		assert.equal(v.length(), 3);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 4);
-		assert.equal(v[2], 1.2);
-		assert.equal(v[3], undefined);
+		assert.equal(eval('float x = vec3(vec4(0, 4, 1.2, 2)).length(); x;'), 3);
+		assert.equal(eval('float x = vec3(vec4(0, 4, 1.2, 2))[0]; x;'), 0);
+		assert.equal(eval('float x = vec3(vec4(0, 4, 1.2, 2))[1]; x;'), 4);
+		assert.equal(eval('float x = vec3(vec4(0, 4, 1.2, 2))[2]; x;'), 1.2);
+		assert.equal(eval('float x = vec3(vec4(0, 4, 1.2, 2))[3]; x;'), undefined);
 	});
 
 	// vec3.x = vec2.x, vec3.y = vec2.y, vec3.z = float
 	test('vec3(vec2, float)', function () {
-		var v = vec3(vec2(0, 4), 1.2);
-
-		assert.equal(v.length(), 3);
-		assert.equal(v.x, 0);
-		assert.equal(v.y, 4);
-		assert.equal(v.z, 1.2);
-		assert.equal(v.w, undefined);
+		assert.equal(eval('float x = vec3(vec2(0, 4), 1.2).length(); x;'), 3);
+		assert.equal(eval('float x = vec3(vec2(0, 4), 1.2).x; x;'), 0);
+		assert.equal(eval('float x = vec3(vec2(0, 4), 1.2).y; x;'), 4);
+		assert.equal(eval('float x = vec3(vec2(0, 4), 1.2).z; x;'), 1.2);
+		assert.equal(eval('float x = vec3(vec2(0, 4), 1.2).w; x;'), undefined);
 	});
 
 	// vec3.x = float, vec3.y = vec2.x, vec3.z = vec2.y
 	test('vec3(float, vec2)', function () {
-		var v = vec3(0, vec2(4, 1.2));
-
-		assert.equal(v.length(), 3);
-		assert.equal(v.r, 0);
-		assert.equal(v.g, 4);
-		assert.equal(v.b, 1.2);
-		assert.equal(v.a, undefined);
+		assert.equal(eval('float x = vec3(0, vec2(4, 1.2)).length(); x;'), 3);
+		assert.equal(eval('float x = vec3(0, vec2(4, 1.2)).r; x;'), 0);
+		assert.equal(eval('float x = vec3(0, vec2(4, 1.2)).g; x;'), 4);
+		assert.equal(eval('float x = vec3(0, vec2(4, 1.2)).b; x;'), 1.2);
+		assert.equal(eval('float x = vec3(0, vec2(4, 1.2)).a; x;'), undefined);
 	});
 
 	test('vec4(vec3, float)', function () {
-		var v = vec4(vec3(0, 4, 1.2), 0);
-
-		assert.equal(v.length(), 4);
-		assert.equal(v.s, 0);
-		assert.equal(v.t, 4);
-		assert.equal(v.p, 1.2);
-		assert.equal(v.d, 0);
+		assert.equal(eval('float x = vec4(vec3(0, 4, 1.2), 0).length(); x;'), 4);
+		assert.equal(eval('float x = vec4(vec3(0, 4, 1.2), 0).s; x;'), 0);
+		assert.equal(eval('float x = vec4(vec3(0, 4, 1.2), 0).t; x;'), 4);
+		assert.equal(eval('float x = vec4(vec3(0, 4, 1.2), 0).p; x;'), 1.2);
+		assert.equal(eval('float x = vec4(vec3(0, 4, 1.2), 0).d; x;'), 0);
 	});
 
 	test('vec4(float, vec3)', function () {
-		var v = vec4(0, vec3(4, 1.2, 0));
-
-		assert.equal(v.length(), 4);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 4);
-		assert.equal(v[2], 1.2);
-		assert.equal(v[3], 0);
+		assert.equal(eval('float x = vec4(0, vec3(4, 1.2, 0)).length(); x;'), 4);
+		assert.equal(eval('float x = vec4(0, vec3(4, 1.2, 0))[0]; x;'), 0);
+		assert.equal(eval('float x = vec4(0, vec3(4, 1.2, 0))[1]; x;'), 4);
+		assert.equal(eval('float x = vec4(0, vec3(4, 1.2, 0))[2]; x;'), 1.2);
+		assert.equal(eval('float x = vec4(0, vec3(4, 1.2, 0))[3]; x;'), 0);
 	});
 
 	test('vec4(vec2, vec2)', function () {
-		var v = vec4(vec2(0,4), vec2(1.2, 0));
-
-		assert.equal(v.length(), 4);
-		assert.equal(v[0], 0);
-		assert.equal(v[1], 4);
-		assert.equal(v[2], 1.2);
-		assert.equal(v[3], 0);
+		assert.equal(eval('float x = vec4(vec2(0, 4), vec2(1.2, 0)).length(); x;'), 4);
+		assert.equal(eval('float x = vec4(vec2(0, 4), vec2(1.2, 0))[0]; x;'), 0);
+		assert.equal(eval('float x = vec4(vec2(0, 4), vec2(1.2, 0))[1]; x;'), 4);
+		assert.equal(eval('float x = vec4(vec2(0, 4), vec2(1.2, 0))[2]; x;'), 1.2);
+		assert.equal(eval('float x = vec4(vec2(0, 4), vec2(1.2, 0))[3]; x;'), 0);
 	});
 });
 
