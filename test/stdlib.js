@@ -3,6 +3,7 @@ var test = require('tst');
 var _ = require('../lib/stdlib');
 var assert = require('assert');
 var GLSL = require('../');
+var compile = GLSL.compile;
 
 /**
  * Eval part of glsl in js
