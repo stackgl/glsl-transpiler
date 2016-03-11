@@ -69,7 +69,11 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 
 | Property | Default | Description |
 |---|:---:|---|
-| `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `replaceUniform: function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
+| `replaceUniform` | `false` | A function replacing each uniform declaration. Ex:
+```
+replaceUniform: function (name, node) { return 'uniforms["' + name + '"]'; }
+```
+will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
 | `replaceAttribute` | `false` | Same as `replaceUniforms`, but for attributes. |
 | `replaceVarying` | `false` | Same as `replaceUniforms`, but for varying. |
 
@@ -96,7 +100,7 @@ fs.createReadStream('./source.glsl')
 
 ## Related
 
-> [gl-shader-output](https://github.com/dfcreative/gl-shader-output) — eval fragment shader on rectangular vertex input, gl-less.
+> [gl-shader-output](https://github.com/dfcreative/gl-shader-output) — eval fragment shader on rectangular vertex input.<br/>
 > [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
 > [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
