@@ -4,12 +4,14 @@ var _ = require('../lib/stdlib');
 var assert = require('assert');
 var GLSL = require('../');
 var compile = GLSL.compile;
+var parse = require('glsl-parser/direct');
+var tokenize = require('glsl-tokenizer/string');
 
 /**
  * Eval part of glsl in js
  */
-function eval (str) {
-	var str = GLSL.compile(str);
+function eval (str, opt) {
+	var str = GLSL.compile(str, opt);
 
 	//return last statement
 	strLines = str.split('\n');
@@ -137,8 +139,6 @@ test('Primitives', function () {
 });
 
 test('Vector constructors', function () {
-	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4, mat2 = _.mat2, ivec3 = _.ivec3, ivec4 = _.ivec4, bvec4 = _.bvec4;
-
 	test('vec3()', function () {
 		assert.equal(eval('+vec3().length();'), 3);
 		assert.equal(eval('+vec3()[0];'), 0);
@@ -262,7 +262,7 @@ test('Vector constructors', function () {
 	});
 });
 
-test('Matrix constructors', function () {
+test.only('Matrix constructors', function () {
 	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4, dvec2 = _.dvec2, dvec3 = _.dvec3, dvec4 = _.dvec4, ivec3 = _.ivec3, ivec4 = _.ivec4, bvec4 = _.bvec4;
 
 	var mat2 = _.mat2, mat3 = _.mat3, mat4 = _.mat4,
@@ -271,13 +271,12 @@ test('Matrix constructors', function () {
 
 	// To initialize the diagonal of a matrix with all other elements set to zero:
 	test('mat2(float)', function () {
-		var m = mat2(1.2);
-
-		assert.equal(m.length(), 2);
-		assert.equal(m[0][0], 1.2);
-		assert.equal(m[0][1], 0);
-		assert.equal(m[1][0], 0);
-		assert.equal(m[1][1], 1.2);
+		assert.equal(eval('float x = mat2(1.2).length(); x;'), 2);
+		assert.equal(eval('float x = mat2(1.2)[0][0]; x;'), 1.2);
+		assert.equal(eval('float x = mat2(1.2)[0][1]; x;'), 0);
+		assert.equal(eval('float x = mat2(1.2)[1][0]; x;'), 0);
+		assert.equal(eval('float x = mat2(1.2)[1][1]; x;'), 1.2);
+		assert.equal(eval('float x = mat2(1.2)[1][1]; x;', {optimize: false}), 1.2);
 	});
 
 	test('mat3(float)', function () {

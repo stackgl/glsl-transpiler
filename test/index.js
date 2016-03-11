@@ -311,7 +311,7 @@ test.skip('main function', function() {
 });
 
 
-test('primative variable declarations', function() {
+test('primitive variable declarations', function() {
 	test('should default ints to 0', function() {
 	assert.equal(
 		clean(compile('void main() { int test; }')),
@@ -341,7 +341,7 @@ test('primative variable declarations', function() {
 });
 
 
-test('primative variable initializers', function() {
+test('primitive variable initializers', function() {
 	test('should allow valid int initializations', function() {
 		assert.equal(
 			clean(compile('void main() { int test = 1; }')),
