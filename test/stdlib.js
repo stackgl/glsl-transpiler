@@ -528,26 +528,24 @@ test.only('Matrix constructors', function () {
 	});
 
 	// puts the mat3x3 in the upper-left, sets the lower right component to 1, and the rest to 0
-	test('mat4x4(mat3x3);', function () {
-		var m = mat4(mat3(vec3(1), vec3(2), vec3(3)));
-
-		assert.equal(m.length(), 4);
-		assert.equal(m[0][0], 1);
-		assert.equal(m[0][1], 1);
-		assert.equal(m[0][2], 1);
-		assert.equal(m[0][3], 0);
-		assert.equal(m[1][0], 2);
-		assert.equal(m[1][1], 2);
-		assert.equal(m[1][2], 2);
-		assert.equal(m[1][3], 0);
-		assert.equal(m[2][0], 3);
-		assert.equal(m[2][1], 3);
-		assert.equal(m[2][2], 3);
-		assert.equal(m[2][3], 0);
-		assert.equal(m[3][0], 0);
-		assert.equal(m[3][1], 0);
-		assert.equal(m[3][2], 0);
-		assert.equal(m[3][3], 1);
+	test.only('mat4x4(mat3x3);', function () {
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3))).length();'), 4);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][0];'), 1);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][1];'), 1);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][2];'), 1);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][3];'), 0);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][0];'), 2);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][1];'), 2);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][2];'), 2);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][3];'), 0);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][0];'), 3);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][1];'), 3);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][2];'), 3);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][3];'), 0);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][0];'), 0);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][1];'), 0);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][2];'), 0);
+		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][3];'), 1);
 	});
 });
 
