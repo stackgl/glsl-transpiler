@@ -69,11 +69,7 @@ To adjust rendering settings it is possible to pass options object `var glsl = G
 
 | Property | Default | Description |
 |---|:---:|---|
-| `replaceUniform` | `false` | A function replacing each uniform declaration. Ex:
-```
-replaceUniform: function (name, node) { return 'uniforms["' + name + '"]'; }
-```
-will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
+| `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
 | `replaceAttribute` | `false` | Same as `replaceUniforms`, but for attributes. |
 | `replaceVarying` | `false` | Same as `replaceUniforms`, but for varying. |
 
