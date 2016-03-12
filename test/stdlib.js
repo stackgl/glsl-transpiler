@@ -688,11 +688,39 @@ test.only('WebGL subset', function () {
 		assert.almost(eval(`acos(mat4(1));`), mat4(0));
 	});
 
-	// type atan (type y, type x)
-	// type atan (type y_over_x)
-	// type pow (type x, type y)
-	// type exp (type x)
-	// type log (type x)
+	test('type atan (type y_over_x)', function () {
+		assert.almost(eval(`atan(1);`), Math.PI/4);
+		assert.almost(eval(`atan(vec4(1));`), vec4(Math.PI/4));
+		assert.almost(eval(`atan(mat4(1));`), mat4(Math.PI/4));
+	});
+
+	test('type atan (type y, type x)', function () {
+		assert.almost(eval(`atan(1, 0);`), Math.PI/2);
+		assert.almost(eval(`atan(vec4(1), vec4(0));`), vec4(Math.PI/2));
+		assert.almost(eval(`atan(mat4(1), mat4(0));`), mat4(Math.PI/2));
+	});
+
+	test('type pow (type x, type y)', function () {
+		var x = Math.random() * 100, y = Math.random() * 100;
+		assert.almost(eval(`pow(${x}, ${y});`), Math.pow(x, y));
+		assert.almost(eval(`pow(vec4(${x}), vec4(${y}));`), vec4(Math.pow(x, y)));
+		assert.almost(eval(`pow(mat4(${x}), mat4(${y}));`), mat4(Math.pow(x, y)));
+	});
+
+	test('type exp (type x, type y)', function () {
+		var x = Math.random() * 100, y = Math.random() * 100;
+		assert.almost(eval(`exp(${x}, ${y});`), Math.exp(x, y));
+		assert.almost(eval(`exp(vec4(${x}), vec4(${y}));`), vec4(Math.exp(x, y)));
+		assert.almost(eval(`exp(mat4(${x}), mat4(${y}));`), mat4(Math.exp(x, y)));
+	});
+
+	test('type log (type x, type y)', function () {
+		var x = Math.random() * 100, y = Math.random() * 100;
+		assert.almost(eval(`log(${x}, ${y});`), Math.log(x, y));
+		assert.almost(eval(`log(vec4(${x}), vec4(${y}));`), vec4(Math.log(x, y)));
+		assert.almost(eval(`log(mat4(${x}), mat4(${y}));`), mat4(Math.log(x, y)));
+	});
+
 	// type exp2 (type x)
 	// type log2 (type x)
 	// type sqrt (type x)
