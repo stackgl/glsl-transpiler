@@ -1,7 +1,7 @@
 {
   "name": "glsl-js",
   "version": "2.1.8",
-  "description": "Transform glsl to js",
+  "description": "glsl to js compiler",
   "main": "index.js",
   "dependencies": {
     "array-flatten": "^2.0.0",
@@ -37,6 +37,8 @@
     "url": "git+https://github.com/dfcreative/glsl-js.git"
   },
   "keywords": [
+    "headless-gl",
+    "gl",
     "glsl",
     "stackgl",
     "js",

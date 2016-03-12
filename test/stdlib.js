@@ -781,19 +781,73 @@ test.only('Math', function () {
 		assert.almost(eval(`ceil(mat4(${x}));`), mat4(Math.ceil(x)));
 	});
 
-	// type fract (type x)
-	// type mod (type x, float y)
-	// type mod (type x, type y)
-	// type min (type x, type y)
-	// type min (type x, float y)
-	// type max (type x, type y)
-	// type max (type x, float y)
-	// type clamp (type x, type minV, type maxV)
-	// type clamp (type x, float minV, float maxV)
-	// type mix (type x, type y, type a)
-	// type mix (type x, type y, float a)
-	// type step (type edge, type x)
-	// type step (float edge, type x)
+	test('type fract (type x)', function () {
+		var x = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`fract(${x});`), x - Math.floor(x));
+		assert.almost(eval(`fract(vec4(${x}));`), vec4(x - Math.floor(x)));
+		assert.almost(eval(`fract(mat4(${x}));`), mat4(x - Math.floor(x)));
+	});
+
+	test('type mod (type x, type y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`mod(${x}, ${y});`), x % y);
+		assert.almost(eval(`mod(vec4(${x}), vec4(${y}));`), vec4(x % y));
+		assert.almost(eval(`mod(mat4(${x}), mat4(${y}));`), mat4(x % y));
+		assert.almost(eval(`mod(vec4(${x}), ${y});`), vec4(x % y));
+		assert.almost(eval(`mod(mat4(${x}), ${y});`), mat4(x % y));
+	});
+
+	test('type min (type x, type|float y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`min(${x}, ${y});`), Math.min(x, y));
+		assert.almost(eval(`min(vec4(${x}), vec4(${y}));`), vec4(Math.min(x, y)));
+		assert.almost(eval(`min(mat4(${x}), mat4(${y}));`), mat4(Math.min(x, y)));
+		assert.almost(eval(`min(vec4(${x}), ${y});`), vec4(Math.min(x, y)));
+		assert.almost(eval(`min(mat4(${x}), ${y});`), mat4(Math.min(x, y)));
+	});
+
+	test('type max (type x, type|float y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`max(${x}, ${y});`), Math.max(x, y));
+		assert.almost(eval(`max(vec4(${x}), vec4(${y}));`), vec4(Math.max(x, y)));
+		assert.almost(eval(`max(mat4(${x}), mat4(${y}));`), mat4(Math.max(x, y)));
+		assert.almost(eval(`max(vec4(${x}), ${y});`), vec4(Math.max(x, y)));
+		assert.almost(eval(`max(mat4(${x}), ${y});`), mat4(Math.max(x, y)));
+	});
+
+	test('type clamp (type x, type|float min, type|float max)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`clamp(${x}, ${y}, ${z});`), Math.min(Math.max(x, y), z));
+		assert.almost(eval(`clamp(vec4(${x}), vec4(${y}), vec4(${z}));`), vec4(Math.min(Math.max(x, y), z)));
+		assert.almost(eval(`clamp(mat4(${x}), mat4(${y}), mat4(${z}));`), mat4(Math.min(Math.max(x, y), z)));
+		assert.almost(eval(`clamp(vec4(${x}), ${y}, ${z});`), vec4(Math.min(Math.max(x, y), z)));
+		assert.almost(eval(`clamp(mat4(${x}), ${y}, ${z});`), mat4(Math.min(Math.max(x, y), z)));
+	});
+
+	test('type mix (type x, type y, type|float a)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, a = Math.random();
+		assert.almost(eval(`mix(${x}, ${y}, ${a});`), x*(1-a)+y*a);
+		assert.almost(eval(`mix(vec4(${x}), vec4(${y}), vec4(${a}));`), vec4(x*(1-a)+y*a));
+		assert.almost(eval(`mix(mat4(${x}), mat4(${y}), mat4(${a}));`), mat4(x*(1-a)+y*a));
+		assert.almost(eval(`mix(vec4(${x}), vec4(${y}), ${a});`), vec4(x*(1-a)+y*a));
+		assert.almost(eval(`mix(mat4(${x}), mat4(${y}), ${a});`), mat4(x*(1-a)+y*a));
+	});
+
+	test('type step (type|float edge, type x)', function () {
+		var edge = (Math.random() - 0.5) * 100, x = (Math.random() - 0.5) * 100;
+
+		function step (edge, x) {
+			return x < edge ? 0.0 : 1.0;
+		}
+
+		assert.almost(eval(`step(${edge}, ${x});`), step(edge, x));
+		assert.almost(eval(`step(vec4(${edge}), vec4(${x}));`), vec4(step(edge, x)));
+		assert.almost(eval(`step(mat4(${edge}), mat4(${x}));`), mat4(step(edge, x)));
+		assert.almost(eval(`step(${edge}, vec4(${x}));`), vec4(step(edge, x)));
+		assert.almost(eval(`step(${edge}, mat4(${x}));`), mat4(step(edge, x)));
+	});
+
+
 	// type smoothstep (type a, type b, type x)
 	// type smoothstep (float a, float b, type x)
 	// mat matrixCompMult (mat x, mat y)
