@@ -65,15 +65,12 @@ var result = compile(tree);
 
 ### Options
 
-To adjust rendering settings it is possible to pass options object `var glsl = GLSL(options);`, which sets `glsl` instance values.
-
 | Property | Default | Description |
 |---|:---:|---|
 | `optimize` | `true` | Enable simple optimizations, for example `mat2(vec2(1, 2), vec2(3, 4))[0][1]` with the flag on will be transformed to `2`, and without to `[[1, 2], [3, 4]][0][1]`. |
 | `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
-| `replaceAttribute` | `false` | Same as `replaceUniforms`, but for attributes. |
-| `replaceVarying` | `false` | Same as `replaceUniforms`, but for varying. |
-| `replaceStdlib` | `false` | Provide implementation of an stdlib function. If disabled,a  default implementation from the [stdlib](/lib/stdlib.js) will be included. |
+| `replaceAttribute` | `false` | Same as `replaceUniform`, but for attribute declarations. |
+| `replaceVarying` | `false` | Same as `replaceUniform`, but for varying declarations. |
 
 
 ### glsl-js/stream
