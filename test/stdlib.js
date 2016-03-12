@@ -1,11 +1,13 @@
 //ref https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
 var test = require('tst');
-var _ = require('../lib/stdlib');
+var stdlib = require('../lib/stdlib');
 var assert = require('assert');
 var GLSL = require('../');
 var compile = GLSL.compile;
 var parse = require('glsl-parser/direct');
 var tokenize = require('glsl-tokenizer/string');
+var glmat = require('gl-matrix');
+
 
 /**
  * Eval part of glsl in js
@@ -15,10 +17,13 @@ function eval (str, opt) {
 
 	opt = opt || {};
 
+	var glsl = GLSL(opt).glsl;
+	var debugStr = '';
+
 	//take last statement as a result
 	try {
-		str = GLSL.compile(str, opt);
-		if (opt.debug) console.log(str);
+		str = glsl.stringify(glsl.parse(str));
+		debugStr = str;
 		strLines = str.trim().split(/\n/);
 		if (!/^var/.test(strLines[strLines.length - 1])) {
 			strLines[strLines.length - 1] = 'return ' + strLines[strLines.length - 1];
@@ -30,10 +35,14 @@ function eval (str, opt) {
 		strLines.unshift('float _');
 		strLines[strLines.length - 1] = '_ = ' + strLines[strLines.length - 1];
 		str = strLines.join(';\n') + ';';
-		str = GLSL.compile(str, opt);
-		if (opt.debug) console.log(str);
+		str = glsl.stringify(glsl.parse(str));
+		debugStr = str;
 		str += '\nreturn _;';
 	}
+
+	var stdlib = glsl.stringifyStdlib();
+	str += stdlib;
+	if (opt.debug) console.log(debugStr, stdlib);
 
 	var fn = new Function(str);
 
@@ -599,39 +608,42 @@ test('Matrix constructors', function () {
 });
 
 test('Swizzles', function () {
-	var vec2 = _.vec2, vec3 = _.vec3, vec4 = _.vec4;
-
 	test('vec2', function () {
-		var v = vec2(1, 2);
-		assert.deepEqual(v.x, 1);
-		assert.deepEqual(v.xy, [1,2]);
-		assert.deepEqual(v.yy, [2,2]);
+		assert.deepEqual(eval('vec2(1, 2).x;'), 1);
+		assert.deepEqual(eval('vec2(1, 2).xy;'), [1,2]);
+		assert.deepEqual(eval('vec2(1, 2).yy;'), [2,2]);
 	});
 	test('vec3', function () {
-		var v = vec3(1, 2, 3);
-		assert.deepEqual(v.x, 1);
-		assert.deepEqual(v.xy, [1,2]);
-		assert.deepEqual(v.xyz, [1,2,3]);
-		assert.deepEqual(v.zzz, [3,3,3]);
+		assert.deepEqual(eval('vec3(1, 2, 3).x;'), 1);
+		assert.deepEqual(eval('vec3(1, 2, 3).xy;'), [1,2]);
+		assert.deepEqual(eval('vec3(1, 2, 3).xyz;'), [1,2,3]);
+		assert.deepEqual(eval('vec3(1, 2, 3).zzz;'), [3,3,3]);
 	});
 	test('vec4', function () {
-		var v = vec4(1, 2, 3, 4);
-		assert.deepEqual(v.x, 1);
-		assert.deepEqual(v.xy, [1,2]);
-		assert.deepEqual(v.xyz, [1,2,3]);
-		assert.deepEqual(v.xyzw, [1,2,3,4]);
-		assert.deepEqual(v.wwww, [4,4,4,4]);
-		assert.deepEqual(v.wzyx, [4,3,2,1]);
+		assert.deepEqual(eval('vec4(1, 2, 3, 4).x;'), 1);
+		assert.deepEqual(eval('vec4(1, 2, 3, 4).xy;'), [1,2]);
+		assert.deepEqual(eval('vec4(1, 2, 3, 4).xyz;'), [1,2,3]);
+		assert.deepEqual(eval('vec4(1, 2, 3, 4).xyzw;'), [1,2,3,4]);
+		assert.deepEqual(eval('vec4(1, 2, 3, 4).wwww;'), [4,4,4,4]);
+		assert.deepEqual(eval('vec4(1, 2, 3, 4).wzyx;'), [4,3,2,1]);
 	});
 });
 
-test('WebGL subset', function () {
+test.only('WebGL subset', function () {
+	var mat4 = stdlib.mat4;
+	var vec4 = stdlib.vec4;
+
 	test('type radians (type degrees)', function () {
-		assert.equal(_.radians(360), Math.PI * 2);
+		assert.deepEqual(eval('radians(360);'), Math.PI * 2);
+		assert.deepEqual(eval('radians(vec4(360));'), vec4(Math.PI * 2));
+		assert.deepEqual(eval('radians(mat4(360));'), mat4(Math.PI * 2));
 	});
 
 	test('type degrees (type radians)', function () {
-		assert.equal(_.degrees(Math.PI * 2), 360);
+		var pi2 = Math.PI * 2;
+		assert.deepEqual(eval(`degrees(${pi2});`), 360);
+		assert.deepEqual(eval(`degrees(vec4(${pi2}));`), vec4(360));
+		assert.deepEqual(eval(`degrees(mat4(${pi2}));`), mat4(360));
 	});
 
 	// type sin (type angle)

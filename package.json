@@ -21,7 +21,6 @@
   "files": [
     "index.js",
     "stream.js",
-    "string.js",
     "lib"
   ],
   "directories": {
