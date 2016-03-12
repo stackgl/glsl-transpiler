@@ -97,6 +97,24 @@ test('Episodes', function () {
 		);
 	});
 
+	test('vec3 x = mat3(2)[1];', function () {
+		assert.equal(
+			clean(glsl(this.title)),
+			clean(`
+			var x = [0, 2, 0];
+			`)
+		);
+	});
+
+	test('mat3 x = mat3(2);', function () {
+		assert.equal(
+			clean(glsl(this.title)),
+			clean(`
+			var x = [2, 0, 0, 0, 2, 0, 0, 0, 2];
+			`)
+		);
+	});
+
 	//constants propagation is unimplemented
 	test.skip('vec4 v; float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
 		assert.equal(
