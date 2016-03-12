@@ -847,9 +847,21 @@ test.only('Math', function () {
 		assert.almost(eval(`step(${edge}, mat4(${x}));`), mat4(step(edge, x)));
 	});
 
+	test('type smoothstep (type|float a, type|float b, type x)', function () {
+		var a = (Math.random() - 0.5) * 100, b = (Math.random() - 0.5) * 100, x = (Math.random() - 0.5) * 100;
 
-	// type smoothstep (type a, type b, type x)
-	// type smoothstep (float a, float b, type x)
+		function smoothstep (edge0, edge1, x) {
+			var t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0.0), 1.0);
+			return t * t * (3.0 - 2.0 * t);
+		}
+
+		assert.almost(eval(`smoothstep(${a}, ${b}, ${x});`), smoothstep(a, b, x));
+		assert.almost(eval(`smoothstep(vec4(${a}), vec4(${b}), vec4(${x}));`), vec4(smoothstep(a, b, x)));
+		assert.almost(eval(`smoothstep(mat4(${a}), mat4(${b}), mat4(${x}));`), mat4(smoothstep(a, b, x)));
+		assert.almost(eval(`smoothstep(${a}, ${b}, vec4(${x}));`), vec4(smoothstep(a, b, x)));
+		assert.almost(eval(`smoothstep(${a}, ${b}, mat4(${x}));`), mat4(smoothstep(a, b, x)));
+	});
+
 	// mat matrixCompMult (mat x, mat y)
 	// float length (type x)
 	// float distance (type p0, type p1)
