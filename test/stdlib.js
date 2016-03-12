@@ -11,6 +11,21 @@ var almost = require('almost-equal');
 
 
 /**
+ * Add almost method
+ */
+assert.almost = function (x, y) {
+	if (Array.isArray(x) && Array.isArray(y)) return x.every(function (x, i) {
+		assert.almost(x, y[i]);
+	});
+
+	var EPSILON = 10e-10;
+	if (!almost(x, y, EPSILON)) assert.fail(x, y,
+		`${x} ≈ ${y}`, '≈');
+	return true;
+};
+
+
+/**
  * Eval part of glsl in js
  */
 function eval (str, opt) {
@@ -630,21 +645,10 @@ test('Swizzles', function () {
 	});
 });
 
-test.only('WebGL subset', function () {
+test.only('Math', function () {
 	var mat4 = stdlib.mat4;
 	var vec4 = stdlib.vec4;
 	var pi2 = Math.PI * 2;
-
-	assert.almost = function (x, y) {
-		if (Array.isArray(x) && Array.isArray(y)) return x.every(function (x, i) {
-			assert.almost(x, y[i]);
-		});
-
-		var EPSILON = 10e-6;
-		if (!almost(x, y, EPSILON)) assert.fail(x, y,
-			`${x} ≈ ${y}`, '≈');
-		return true;
-	};
 
 	test('type radians (type degrees)', function () {
 		assert.deepEqual(eval('radians(360);'), Math.PI * 2);
@@ -707,28 +711,76 @@ test.only('WebGL subset', function () {
 		assert.almost(eval(`pow(mat4(${x}), mat4(${y}));`), mat4(Math.pow(x, y)));
 	});
 
-	test('type exp (type x, type y)', function () {
-		var x = Math.random() * 100, y = Math.random() * 100;
-		assert.almost(eval(`exp(${x}, ${y});`), Math.exp(x, y));
-		assert.almost(eval(`exp(vec4(${x}), vec4(${y}));`), vec4(Math.exp(x, y)));
-		assert.almost(eval(`exp(mat4(${x}), mat4(${y}));`), mat4(Math.exp(x, y)));
+	test('type exp (type x)', function () {
+		var x = Math.random() * 100;
+		assert.almost(eval(`exp(${x});`), Math.exp(x));
+		assert.almost(eval(`exp(vec4(${x}));`), vec4(Math.exp(x)));
+		assert.almost(eval(`exp(mat4(${x}));`), mat4(Math.exp(x)));
 	});
 
-	test('type log (type x, type y)', function () {
-		var x = Math.random() * 100, y = Math.random() * 100;
-		assert.almost(eval(`log(${x}, ${y});`), Math.log(x, y));
-		assert.almost(eval(`log(vec4(${x}), vec4(${y}));`), vec4(Math.log(x, y)));
-		assert.almost(eval(`log(mat4(${x}), mat4(${y}));`), mat4(Math.log(x, y)));
+	test('type log (type x)', function () {
+		var x = Math.random() * 100;
+		assert.almost(eval(`log(${x});`), Math.log(x));
+		assert.almost(eval(`log(vec4(${x}));`), vec4(Math.log(x)));
+		assert.almost(eval(`log(mat4(${x}));`), mat4(Math.log(x)));
 	});
 
-	// type exp2 (type x)
-	// type log2 (type x)
-	// type sqrt (type x)
-	// type inversesqrt (type x)
-	// type abs (type x)
-	// type sign (type x)
-	// type floor (type x)
-	// type ceil (type x)
+	test('type exp2 (type x)', function () {
+		var x = Math.random() * 100;
+		assert.almost(eval(`exp2(${x});`), Math.pow(2, x));
+		assert.almost(eval(`exp2(vec4(${x}));`), vec4(Math.pow(2, x)));
+		assert.almost(eval(`exp2(mat4(${x}));`), mat4(Math.pow(2, x)));
+	});
+
+	test('type log2 (type x)', function () {
+		var x = Math.random() * 100;
+		assert.almost(eval(`log2(${x});`), Math.log2(x));
+		assert.almost(eval(`log2(vec4(${x}));`), vec4(Math.log2(x)));
+		assert.almost(eval(`log2(mat4(${x}));`), mat4(Math.log2(x)));
+	});
+
+	test('type sqrt (type x)', function () {
+		var x = Math.random() * 100;
+		assert.almost(eval(`sqrt(${x});`), Math.sqrt(x));
+		assert.almost(eval(`sqrt(vec4(${x}));`), vec4(Math.sqrt(x)));
+		assert.almost(eval(`sqrt(mat4(${x}));`), mat4(Math.sqrt(x)));
+	});
+
+	test('type inversesqrt (type x)', function () {
+		var x = Math.random() * 100;
+		assert.almost(eval(`inversesqrt(${x});`), 1/Math.sqrt(x));
+		assert.almost(eval(`inversesqrt(vec4(${x}));`), vec4(1/Math.sqrt(x)));
+		assert.almost(eval(`inversesqrt(mat4(${x}));`), mat4(1/Math.sqrt(x)));
+	});
+
+	test('type abs (type x)', function () {
+		var x = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`abs(${x});`), Math.abs(x));
+		assert.almost(eval(`abs(vec4(${x}));`), vec4(Math.abs(x)));
+		assert.almost(eval(`abs(mat4(${x}));`), mat4(Math.abs(x)));
+	});
+
+	test('type sign (type x)', function () {
+		var x = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`sign(${x});`), Math.sign(x));
+		assert.almost(eval(`sign(vec4(${x}));`), vec4(Math.sign(x)));
+		assert.almost(eval(`sign(mat4(${x}));`), mat4(Math.sign(x)));
+	});
+
+	test('type floor (type x)', function () {
+		var x = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`floor(${x});`), Math.floor(x));
+		assert.almost(eval(`floor(vec4(${x}));`), vec4(Math.floor(x)));
+		assert.almost(eval(`floor(mat4(${x}));`), mat4(Math.floor(x)));
+	});
+
+	test('type ceil (type x)', function () {
+		var x = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`ceil(${x});`), Math.ceil(x));
+		assert.almost(eval(`ceil(vec4(${x}));`), vec4(Math.ceil(x)));
+		assert.almost(eval(`ceil(mat4(${x}));`), mat4(Math.ceil(x)));
+	});
+
 	// type fract (type x)
 	// type mod (type x, float y)
 	// type mod (type x, type y)
@@ -787,20 +839,7 @@ test.only('WebGL subset', function () {
 	// vec4 textureCubeGradEXT(samplerCube sampler, vec3 P, vec3 dPdx, vec3 dPdy)
 	// type dFdx( type x ), dFdy( type x )
 	// type fwidth( type p )
-});
 
-
-
-test.skip('Math', function () {
-	// genType radians (genType degrees)
-	// genType degrees (genType radians)
-	// genType sin (genType angle) The standard trigonometric sine function.
-	// genType cos (genType angle) The standard trigonometric cosine function.
-	// genType tan (genType angle) The standard trigonometric tangent.
-	// genType asin (genType x)
-	// genType acos (genType x)
-	// genType atan (genType y, genType x)
-	// genType atan (genType y_over_x)
 	// genType sinh (genType x)
 	// genType cosh (genType x)
 	// genType tanh (genType x)
@@ -808,32 +847,12 @@ test.skip('Math', function () {
 	// genType acosh (genType x)
 	// genType atanh (genType x)
 
-	// genType pow (genType x, genType y)
-	// genType exp (genType x)
-	// genType log (genType x)
-	// genType exp2 (genType x)
-	// genType log2 (genType x)
-	// genType sqrt (genType x)
-	// genDType sqrt (genDType x)
-	// genType inversesqrt (genType x)
-	// genDType inversesqrt (genDType x)
-
-	// genType abs (genType x)
-	// genIType abs (genIType x)
-	// genDType abs (genDType x)
-	// genType sign (genType x)
-	// genIType sign (genIType x)
-	// genDType sign (genDType x)
-	// genType floor (genType x)
-	// genDType floor (genDType x)
 	// genType trunc (genType x)
 	// genDType trunc (genDType x)
 	// genType round (genType x)
 	// genDType round (genDType x)
 	// genType roundEven (genType x)
 	// genDType roundEven (genDType x)
-	// genType ceil (genType x)
-	// genDType ceil (genDType x)
 	// genType fract (genType x)
 	// genDType fract (genDType x)
 	// genType mod (genType x, float y)
@@ -939,6 +958,7 @@ test.skip('Math', function () {
 	// genDType ldexp (genDType x,
 	//  in genIType exp)
 });
+
 
 
 test.skip('Packing/unpacking', function () {
