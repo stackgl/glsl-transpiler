@@ -7,6 +7,7 @@ var compile = GLSL.compile;
 var parse = require('glsl-parser/direct');
 var tokenize = require('glsl-tokenizer/string');
 var glmat = require('gl-matrix');
+var almost = require('almost-equal');
 
 
 /**
@@ -632,6 +633,18 @@ test('Swizzles', function () {
 test.only('WebGL subset', function () {
 	var mat4 = stdlib.mat4;
 	var vec4 = stdlib.vec4;
+	var pi2 = Math.PI * 2;
+
+	assert.almost = function (x, y) {
+		if (Array.isArray(x) && Array.isArray(y)) return x.every(function (x, i) {
+			assert.almost(x, y[i]);
+		});
+
+		var EPSILON = 10e-6;
+		if (!almost(x, y, EPSILON)) assert.fail(x, y,
+			`${x} ≈ ${y}`, '≈');
+		return true;
+	};
 
 	test('type radians (type degrees)', function () {
 		assert.deepEqual(eval('radians(360);'), Math.PI * 2);
@@ -640,17 +653,41 @@ test.only('WebGL subset', function () {
 	});
 
 	test('type degrees (type radians)', function () {
-		var pi2 = Math.PI * 2;
 		assert.deepEqual(eval(`degrees(${pi2});`), 360);
 		assert.deepEqual(eval(`degrees(vec4(${pi2}));`), vec4(360));
 		assert.deepEqual(eval(`degrees(mat4(${pi2}));`), mat4(360));
 	});
 
-	// type sin (type angle)
-	// type cos (type angle)
-	// type tan (type angle)
-	// type asin (type x)
-	// type acos (type x)
+	test('type sin (type angle)', function () {
+		assert.almost(eval(`sin(${pi2});`), 0);
+		assert.almost(eval(`sin(vec4(${pi2}));`), vec4(0));
+		assert.almost(eval(`sin(mat4(${pi2}));`), mat4(0));
+	});
+
+	test('type cos (type angle)', function () {
+		assert.almost(eval(`cos(${pi2});`), 1);
+		assert.almost(eval(`cos(vec4(${pi2}));`), vec4(1));
+		assert.almost(eval(`cos(mat4(${pi2}));`), mat4(1));
+	});
+
+	test('type tan (type angle)', function () {
+		assert.almost(eval(`tan(${pi2});`), 0);
+		assert.almost(eval(`tan(vec4(${pi2}));`), vec4(0));
+		assert.almost(eval(`tan(mat4(${pi2}));`), mat4(0));
+	});
+
+	test('type asin (type x)', function () {
+		assert.almost(eval(`asin(1);`), Math.PI/2);
+		assert.almost(eval(`asin(vec4(1));`), vec4(Math.PI/2));
+		assert.almost(eval(`asin(mat4(1));`), mat4(Math.PI/2));
+	});
+
+	test('type acos (type x)', function () {
+		assert.almost(eval(`acos(1);`), 0);
+		assert.almost(eval(`acos(vec4(1));`), vec4(0));
+		assert.almost(eval(`acos(mat4(1));`), mat4(0));
+	});
+
 	// type atan (type y, type x)
 	// type atan (type y_over_x)
 	// type pow (type x, type y)

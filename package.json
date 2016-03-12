@@ -11,6 +11,7 @@
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "almost-equal": "^1.1.0",
     "gl-matrix": "^2.3.2",
     "is-browser": "^2.0.1",
     "ndarray": "^1.0.18",
