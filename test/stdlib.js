@@ -911,24 +911,57 @@ test.only('Math', function () {
 		assert.almost(eval(`refract(vec2(1, 1), vec2(-1, -1), 0);`), [1, 1]);
 	});
 
+	test('bvec lessThan (vec x, vec y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`lessThan(vec2(${x}), vec2(${y}));`), [x < y, x < y]);
+		assert.almost(eval(`lessThan(vec3(${x}), vec3(${y}));`), [x < y, x < y, x < y]);
+	});
+
+	test('bvec lessThanEqual (vec x, vec y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`lessThanEqual(vec2(${x}), vec2(${y}));`), [x <= y, x <= y]);
+		assert.almost(eval(`lessThanEqual(vec3(${x}), vec3(${y}));`), [x <= y, x <= y, x <= y]);
+	});
+
+	test('bvec greaterThan (vec x, vec y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`greaterThan(vec2(${x}), vec2(${y}));`), [x > y, x > y]);
+		assert.almost(eval(`greaterThan(vec3(${x}), vec3(${y}));`), [x > y, x > y, x > y]);
+	});
+
+	test('bvec greaterThanEqual (vec x, vec y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`greaterThanEqual(vec2(${x}), vec2(${y}));`), [x >= y, x >= y]);
+		assert.almost(eval(`greaterThanEqual(vec3(${x}), vec3(${y}));`), [x >= y, x >= y, x >= y]);
+	});
+
+	test('bvec equal (vec x, vec y)', function () {
+		assert.almost(eval(`equal(vec2(1), vec2(1));`), [true, true]);
+		assert.almost(eval(`equal(vec3(1), vec3(1));`), [true, true, true]);
+		assert.almost(eval(`equal(vec3(1), vec3(1, 1, -1));`), [true, true, false]);
+	});
+
+	test('bvec notEqual (vec x, vec y)', function () {
+		assert.almost(eval(`notEqual(vec2(1), vec2(1));`), [false, false]);
+		assert.almost(eval(`notEqual(vec3(1), vec3(1));`), [false, false, false]);
+		assert.almost(eval(`notEqual(vec3(1), vec3(1, -1, 1));`), [false, true, false]);
+	});
+
+	test('bvec not (bvec x)', function () {
+		assert.deepEqual(eval(`not(bvec2(false, true));`), [true, false]);
+	});
+
+	test('bool any (bvec x)', function () {
+		assert.equal(eval(`any(bvec3(false, true, false));`), true);
+		assert.equal(eval(`any(bvec3(false, false, false));`), false);
+	});
+
+	test('bool all (bvec x)', function () {
+		assert.equal(eval(`all(bvec3(false, true, false));`), false);
+		assert.equal(eval(`all(bvec3(true, true, true));`), true);
+	});
+
 	// mat matrixCompMult (mat x, mat y)
-	// bvec lessThan(vec x, vec y)
-	// bvec lessThan(ivec x, ivec y)
-	// bvec lessThanEqual(vec x, vec y)
-	// bvec lessThanEqual(ivec x, ivec y)
-	// bvec greaterThan(vec x, vec y)
-	// bvec greaterThan(ivec x, ivec y)
-	// bvec greaterThanEqual(vec x, vec y)
-	// bvec greaterThanEqual(ivec x, ivec y)
-	// bvec equal(vec x, vec y)
-	// bvec equal(ivec x, ivec y)
-	// bvec equal(bvec x, bvec y)
-	// bvec notEqual(vec x, vec y)
-	// bvec notEqual(ivec x, ivec y)
-	// bvec notEqual(bvec x, bvec y)
-	// bool any(bvec x)
-	// bool all(bvec x)
-	// bvec not(bvec x)
 	// vec4 texture2D(sampler2D sampler, vec2 coord )
 	// vec4 texture2D(sampler2D sampler, vec2 coord, float bias)
 	// vec4 textureCube(samplerCube sampler, vec3 coord)
