@@ -888,6 +888,12 @@ test.only('Math', function () {
 		assert.almost(eval(`cross(vec3(${x}, ${y}, ${z}), vec3(${a}, ${b}, ${c}));`), [-3, 6, -3]);
 	});
 
+	test('type normalize (type x)', function () {
+		assert.almost(eval(`normalize(vec2(5, 0));`), [1, 0]);
+		assert.almost(eval(`normalize(vec3(0, 5, 0));`), [0, 1, 0]);
+		assert.almost(eval(`normalize(vec4(0, 0, 0, 0.5));`), [0, 0, 0, 1]);
+	});
+
 	// mat matrixCompMult (mat x, mat y)
 	// type normalize (type x)
 	// type faceforward (type N, type I, type Nref)
@@ -941,90 +947,9 @@ test.only('Math', function () {
 	// genDType round (genDType x)
 	// genType roundEven (genType x)
 	// genDType roundEven (genDType x)
-	// genType fract (genType x)
-	// genDType fract (genDType x)
-	// genType mod (genType x, float y)
-	// genType mod (genType x, genType y)
-	// genDType mod (genDType x, double y)
-	// genDType mod (genDType x, genDType y)
 	// genType modf (genType x, out genType i)
 	// genDType modf (genDType x,
 	//  out genDType i)
-	// genType min (genType x, genType y)
-	// genType min (genType x, float y)
-	// genDType min (genDType x, genDType y)
-	// genDType min (genDType x, double y)
-	// genIType min (genIType x, genIType y)
-	// genIType min (genIType x, int y)
-	// genUType min (genUType x, genUType y)
-	// genUType min (genUType x, uint y)
-	// genType max (genType x, genType y)
-	// genType max (genType x, float y)
-	// genDType max (genDType x, genDType y)
-	// genDType max (genDType x, double y)
-	// genIType max (genIType x, genIType y)
-	// genIType max (genIType x, int y)
-	// genUType max (genUType x, genUType y)
-	// genUType max (genUType x, uint y)
-	// genType clamp (genType x,
-	//  genType minVal,
-	//  genType maxVal)
-	// genType clamp (genType x,
-	//  float minVal,
-	//  float maxVal)
-	// genDType clamp (genDType x,
-	//  genDType minVal,
-	//  genDType maxVal)
-	// genDType clamp (genDType x,
-	//  double minVal,
-	//  double maxVal)
-	// genIType clamp (genIType x,
-	//  genIType minVal,
-	//  genIType maxVal)
-	// genIType clamp (genIType x,
-	//  int minVal,
-	//  int maxVal)
-	// genUType clamp (genUType x,
-	//  genUType minVal,
-	//  genUType maxVal)
-	// genUType clamp (genUType x,
-	//  uint minVal,
-	//  uint maxVal)
-	// genType mix (genType x,
-	//  genType y,
-	//  genType a)
-	// genType mix (genType x,
-	//  genType y,
-	//  float a)
-	// genDType mix (genDType x,
-	//  genDType y,
-	//  genDType a)
-	// genDType mix (genDType x,
-	//  genDType y,
-	//  double a)
-	// genType mix (genType x,
-	//  genType y,
-	//  genBType a)
-	// genDType mix (genDType x,
-	//  genDType y,
-	//  genBType a)
-	// genType step (genType edge, genType x)
-	// genType step (float edge, genType x)
-	// genDType step (genDType edge,
-	//  genDType x)
-	// genDType step (double edge, genDType x)
-	// genType smoothstep (genType edge0,
-	//  genType edge1,
-	//  genType x)
-	// genType smoothstep (float edge0,
-	//  float edge1,
-	//  genType x)
-	// genDType smoothstep (genDType edge0,
-	//  genDType edge1,
-	//  genDType x)
-	// genDType smoothstep (double edge0,
-	//  double edge1,
-	//  genDType x)
 	// genBType isnan (genType x)
 	// genBType isnan (genDType x)
 	// genBType isinf (genType x)
@@ -1062,34 +987,6 @@ test.skip('Packing/unpacking', function () {
 	// uvec2 unpackDouble2x32 (double v)
 	// uint packHalf2x16 (vec2 v)
 	// vec2 unpackHalf2x16 (uint v)
-});
-
-test.skip('Geometry', function () {
-	// float length (genType x)
-	// double length (genDType x)
-	// float distance (genType p0, genType p1)
-	// double distance (genDType p0,
-	// genDType p1)
-	// float dot (genType x, genType y)
-	// double dot (genDType x, genDType y)
-	// vec3 cross (vec3 x, vec3 y)
-	// dvec3 cross (dvec3 x, dvec3 y)
-	// genType normalize (genType x)
-	// genDType normalize (genDType x)
-	// genType faceforward (genType N,
-	// genType I,
-	// genType Nref)
-	// genDType faceforward (genDType N,
-	// genDType I,
-	// genDType Nref)
-	// genType reflect (genType I, genType N)
-	// genDType reflect (genDType I,
-	// genDType N)
-	// genType refract (genType I, genType N,
-	// float eta)
-	// genDType refract (genDType I,
-	// genDType N,
-	// float eta)
 });
 
 test.skip('Matrix functions', function () {
