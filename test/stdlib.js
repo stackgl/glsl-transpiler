@@ -903,10 +903,14 @@ test.only('Math', function () {
 
 	test('type reflect (type I, type N)', function () {
 		assert.almost(eval(`reflect(vec3(1, 1, 0), vec3(1, 0, 0));`), [-1, 1, 0]);
+		assert.almost(eval(`reflect(vec2(1, 1), vec2(1, 0));`), [-1, 1]);
+		assert.almost(eval(`reflect(vec4(1, 1, 0, 0), vec4(0, 1, 0, 0));`), [1, -1, 0, 0]);
 	});
 
-	// type reflect (type I, type N)
-	// type refract (type I, type N,float eta)
+	test('type refract (type I, type N, float eta)', function () {
+		assert.almost(eval(`refract(vec2(1, 1), vec2(-1, -1), 0);`), [1, 1]);
+	});
+
 	// mat matrixCompMult (mat x, mat y)
 	// bvec lessThan(vec x, vec y)
 	// bvec lessThan(ivec x, ivec y)
