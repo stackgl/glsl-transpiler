@@ -901,9 +901,13 @@ test.only('Math', function () {
 		assert.almost(eval(`faceforward(vec3(1, 2, 3), vec3(1));`), [-1, -2, -3]);
 	});
 
-	// mat matrixCompMult (mat x, mat y)
+	test('type reflect (type I, type N)', function () {
+		assert.almost(eval(`reflect(vec3(1, 1, 0), vec3(1, 0, 0));`), [-1, 1, 0]);
+	});
+
 	// type reflect (type I, type N)
 	// type refract (type I, type N,float eta)
+	// mat matrixCompMult (mat x, mat y)
 	// bvec lessThan(vec x, vec y)
 	// bvec lessThan(ivec x, ivec y)
 	// bvec lessThanEqual(vec x, vec y)
