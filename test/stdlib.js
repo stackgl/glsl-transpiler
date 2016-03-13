@@ -894,9 +894,14 @@ test.only('Math', function () {
 		assert.almost(eval(`normalize(vec4(0, 0, 0, 0.5));`), [0, 0, 0, 1]);
 	});
 
+	test('type faceforward (type N, type I, type Nref)', function () {
+		var x = -1, y = -2, z = -3;
+		assert.almost(eval(`faceforward(vec3(-1, -2, -3), vec3(-1));`), [1, 2, 3]);
+		assert.almost(eval(`faceforward(vec3(1, 2, 3), vec3(-1));`), [1, 2, 3]);
+		assert.almost(eval(`faceforward(vec3(1, 2, 3), vec3(1));`), [-1, -2, -3]);
+	});
+
 	// mat matrixCompMult (mat x, mat y)
-	// type normalize (type x)
-	// type faceforward (type N, type I, type Nref)
 	// type reflect (type I, type N)
 	// type refract (type I, type N,float eta)
 	// bvec lessThan(vec x, vec y)
