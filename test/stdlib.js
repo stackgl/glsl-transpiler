@@ -645,7 +645,7 @@ test('Swizzles', function () {
 	});
 });
 
-test.only('Math', function () {
+test('Math', function () {
 	var mat4 = stdlib.mat4;
 	var vec4 = stdlib.vec4;
 	var pi2 = Math.PI * 2;
