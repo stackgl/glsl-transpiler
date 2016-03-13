@@ -862,9 +862,21 @@ test.only('Math', function () {
 		assert.almost(eval(`smoothstep(${a}, ${b}, mat4(${x}));`), mat4(smoothstep(a, b, x)));
 	});
 
+	test('type length (type x)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100, w = (Math.random() - 0.5) * 100;
+		assert.almost(eval(`length(vec2(${x}, ${y}));`), Math.sqrt(x*x + y*y));
+		assert.almost(eval(`length(vec3(${x}, ${y}, ${z}));`), Math.sqrt(x*x + y*y + z*z));
+		assert.almost(eval(`length(vec4(${x}, ${y}, ${z}, ${w}));`), Math.sqrt(x*x + y*y + z*z + w*w));
+	});
+
+	test('type distance (type x, type y)', function () {
+		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+		var d = x-y;
+		assert.almost(eval(`distance(vec2(${x}), vec2(${y}));`), Math.sqrt(d*d + d*d));
+		assert.almost(eval(`distance(vec2(${x}, ${y}), vec2(${y}, ${x}));`), Math.sqrt(d*d + d*d));
+	});
+
 	// mat matrixCompMult (mat x, mat y)
-	// float length (type x)
-	// float distance (type p0, type p1)
 	// float dot (type x, type y)
 	// vec3 cross (vec3 x, vec3 y)
 	// type normalize (type x)
