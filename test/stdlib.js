@@ -8,6 +8,7 @@ var parse = require('glsl-parser/direct');
 var tokenize = require('glsl-tokenizer/string');
 var glmat = require('gl-matrix');
 var almost = require('almost-equal');
+var eval = require('./eval');
 
 
 /**
@@ -23,47 +24,6 @@ assert.almost = function (x, y) {
 		`${x} ≈ ${y}`, '≈');
 	return true;
 };
-
-
-/**
- * Eval part of glsl in js
- */
-function eval (str, opt) {
-	var strLines;
-
-	opt = opt || {};
-
-	var glsl = GLSL(opt).glsl;
-	var debugStr = '';
-
-	//take last statement as a result
-	try {
-		str = glsl.stringify(glsl.parse(str));
-		debugStr = str;
-		strLines = str.trim().split(/\n/);
-		if (!/^var/.test(strLines[strLines.length - 1])) {
-			strLines[strLines.length - 1] = 'return ' + strLines[strLines.length - 1];
-		}
-		str = strLines.join('\n');
-	} catch (e) {
-		//NOTE: if initial string is like int x = ...; then it is evaled badly.
-		strLines = str.trim().split(/\s*;\s*/).slice(0,-1);
-		strLines.unshift('float _');
-		strLines[strLines.length - 1] = '_ = ' + strLines[strLines.length - 1];
-		str = strLines.join(';\n') + ';';
-		str = glsl.stringify(glsl.parse(str));
-		debugStr = str;
-		str += '\nreturn _;';
-	}
-
-	var stdlib = glsl.stringifyStdlib();
-	str += stdlib;
-	if (opt.debug) console.log(debugStr, stdlib);
-
-	var fn = new Function(str);
-
-	return fn();
-}
 
 
 test('Primitives', function () {
@@ -911,6 +871,57 @@ test('Math', function () {
 		assert.almost(eval(`refract(vec2(1, 1), vec2(-1, -1), 0);`), [1, 1]);
 	});
 
+	// type dFdx( type x ), dFdy( type x )
+	// type fwidth( type p )
+
+	// genType sinh (genType x)
+	// genType cosh (genType x)
+	// genType tanh (genType x)
+	// genType asinh (genType x) Arc hyperbolic sine; returns the inverse of sinh.
+	// genType acosh (genType x)
+	// genType atanh (genType x)
+
+	// genType trunc (genType x)
+	// genDType trunc (genDType x)
+	// genType round (genType x)
+	// genDType round (genDType x)
+	// genType roundEven (genType x)
+	// genDType roundEven (genDType x)
+	// genType modf (genType x, out genType i)
+	// genDType modf (genDType x, out genDType i)
+	// genBType isnan (genType x)
+	// genBType isnan (genDType x)
+	// genBType isinf (genType x)
+	// genBType isinf (genDType x)
+	// genIType floatBitsToInt (genType value)
+	// genUType floatBitsToUint (genType value)
+	// genType intBitsToFloat (genIType value)
+	// genType uintBitsToFloat (genUType value)
+	// genType fma (genType a, genType b, genType c)
+	// genDType fma (genDType a, genDType b, genDType c)
+	// genType frexp (genType x, out genIType exp)
+	// genDType frexp (genDType x, out genIType exp)
+	// genType ldexp (genType x, in genIType exp)
+	// genDType ldexp (genDType x, in genIType exp)
+
+	// float interpolateAtCentroid (float interpolant)
+	// vec2 interpolateAtCentroid (vec2 interpolant)
+	// vec3 interpolateAtCentroid (vec3 interpolant)
+	// vec4 interpolateAtCentroid (vec4 interpolant)
+	// float interpolateAtSample (float interpolant, int sample)
+	// vec2 interpolateAtSample (vec2 interpolant, int sample)
+	// vec3 interpolateAtSample (vec3 interpolant, int sample)
+	// vec4 interpolateAtSample (vec4 interpolant, int sample)
+	// float interpolateAtOffset (float interpolant, vec2 offset)
+	// vec2 interpolateAtOffset (vec2 interpolant, vec2 offset)
+	// vec3 interpolateAtOffset (vec3 interpolant, vec2 offset)
+	// vec4 interpolateAtOffset (vec4 interpolant, vec2 offset)
+
+});
+
+test('Vector relational functions', function () {
+
+
 	test('bvec lessThan (vec x, vec y)', function () {
 		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
 		assert.almost(eval(`lessThan(vec2(${x}), vec2(${y}));`), [x < y, x < y]);
@@ -960,8 +971,9 @@ test('Math', function () {
 		assert.equal(eval(`all(bvec3(false, true, false));`), false);
 		assert.equal(eval(`all(bvec3(true, true, true));`), true);
 	});
+});
 
-	// mat matrixCompMult (mat x, mat y)
+test.skip('Textures', function () {
 	// vec4 texture2D(sampler2D sampler, vec2 coord )
 	// vec4 texture2D(sampler2D sampler, vec2 coord, float bias)
 	// vec4 textureCube(samplerCube sampler, vec3 coord)
@@ -977,45 +989,6 @@ test('Math', function () {
 	// vec4 texture2DProjGradEXT(sampler2D sampler, vec3 P, vec2 dPdx, vec2 dPdy)
 	// vec4 texture2DProjGradEXT(sampler2D sampler, vec4 P, vec2 dPdx, vec2 dPdy)
 	// vec4 textureCubeGradEXT(samplerCube sampler, vec3 P, vec3 dPdx, vec3 dPdy)
-	// type dFdx( type x ), dFdy( type x )
-	// type fwidth( type p )
-
-	// genType sinh (genType x)
-	// genType cosh (genType x)
-	// genType tanh (genType x)
-	// genType asinh (genType x) Arc hyperbolic sine; returns the inverse of sinh.
-	// genType acosh (genType x)
-	// genType atanh (genType x)
-
-	// genType trunc (genType x)
-	// genDType trunc (genDType x)
-	// genType round (genType x)
-	// genDType round (genDType x)
-	// genType roundEven (genType x)
-	// genDType roundEven (genDType x)
-	// genType modf (genType x, out genType i)
-	// genDType modf (genDType x,
-	//  out genDType i)
-	// genBType isnan (genType x)
-	// genBType isnan (genDType x)
-	// genBType isinf (genType x)
-	// genBType isinf (genDType x)
-	// genIType floatBitsToInt (genType value)
-	// genUType floatBitsToUint (genType value)
-	// genType intBitsToFloat (genIType value)
-	// genType uintBitsToFloat (genUType value)
-	// genType fma (genType a, genType b,
-	//  genType c)
-	// genDType fma (genDType a, genDType b,
-	//  genDType c)
-	// genType frexp (genType x,
-	//  out genIType exp)
-	// genDType frexp (genDType x,
-	//  out genIType exp)
-	// genType ldexp (genType x,
-	//  in genIType exp)
-	// genDType ldexp (genDType x,
-	//  in genIType exp)
 });
 
 
@@ -1067,45 +1040,6 @@ test.skip('Matrix functions', function () {
 	// mat4 inverse (mat4 m)
 });
 
-test.skip('vector relational fns', function () {
-	// bvec lessThan (vec x, vec y)
-	// bvec lessThan (ivec x, ivec y)
-	// bvec lessThan (uvec x, uvec y)
-	// Returns the component-wise compare of x < y.
-	// bvec lessThanEqual (vec x, vec y)
-	// bvec lessThanEqual (ivec x, ivec y)
-	// bvec lessThanEqual (uvec x, uvec y)
-	// Returns the component-wise compare of x <= y.
-	// bvec greaterThan (vec x, vec y)
-	// bvec greaterThan (ivec x, ivec y)
-	// bvec greaterThan (uvec x, uvec y)
-	// Returns the component-wise compare of x > y.
-	// bvec greaterThanEqual (vec x, vec y)
-	// bvec greaterThanEqual (ivec x, ivec y)
-	// bvec greaterThanEqual (uvec x, uvec y)
-	// Returns the component-wise compare of x >= y.
-	// bvec equal (vec x, vec y)
-	// bvec equal (ivec x, ivec y)
-	// bvec equal (uvec x, uvec y)
-	// bvec equal (bvec x, bvec y)
-	// bvec notEqual (vec x, vec y)
-	// bvec notEqual (ivec x, ivec y)
-	// bvec notEqual (uvec x, uvec y)
-	// bvec notEqual (bvec x, bvec y)
-	// Returns the component-wise compare of x == y.
-	// Returns the component-wise compare of x != y.
-	// bool any (bvec x) Returns true if any component of x is true.
-	// bool all (bvec x) Returns true only if all components of x are true.
-	// bvec not (bvec x) Returns the component-wise logical complement of x.
-});
-
-test('Integer functions', function () {
-
-});
-
-test('Texture functions', function () {
-
-});
 
 test.skip('Noise functions', function () {
 	// float noise1 (genType x) Returns a 1D noise value based on the input value x.

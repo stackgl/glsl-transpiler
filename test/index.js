@@ -11,7 +11,7 @@ var fs = require('fs');
 var isBrowser = require('is-browser');
 var StringStream = require('stream-array');
 var Sink = require('stream').Writable;
-
+var eval = require('./eval');
 
 
 //clean empty strings
@@ -463,27 +463,44 @@ test('primitive variable initializers', function() {
 test('Structures', function () {
 	var glsl = GLSL();
 
-	var src = `
-	struct light {
-		float intensity, range;
-		vec3 position;
-	};
+	test('Nested', function () {
+		var src = `
+		struct photon {
+			vec3 direction;
+		};
 
-	light lightVar = light(3.0, 5.0, vec3(1.0, 2.0, 3.0));
-	`;
+		struct light {
+			photon photon;
+			float intensity, range;
+			vec3 position;
+		};
 
-	var res = `
-	function light (intensity, range, position) {
-		if (!(this instanceof light)) return new light(intensity, range, position);
+		light lightVar = light(photon(vec3(0, 1, 1)), 3.0, 5.0, vec3(1.0, 2.0, 3.0));
+		lightVar;
+		`;
 
-		this.intensity = intensity;
-		this.range = range;
-		this.position = position;
-	};
-	var lightVar = light(3.0, 5.0, vec3(1.0, 2.0, 3.0));
-	`;
+		assert.deepEqual(eval(src, {debug: false}), {
+			intensity: 3.0,
+			range: 5.0,
+			position: [1.0, 2.0, 3.0],
+			photon: {
+				direction: [0, 1, 1]
+			}
+		});
+	});
 
-	assert.equal(clean(glsl.compile(src)), clean(res));
+	test('Anonymous', function () {
+		var src = `
+		struct photon {
+			vec3 direction;
+		} x;
+		`;
+
+		assert.equal(clean(compile(src)), clean(`
+			var x = {
+				direction: [0, 0, 0]
+			};`));
+	});
 });
 
 
