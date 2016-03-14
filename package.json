@@ -1,6 +1,6 @@
 {
   "name": "glsl-js",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "description": "glsl to js compiler",
   "main": "index.js",
   "dependencies": {
