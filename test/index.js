@@ -570,115 +570,117 @@ test('Components access', function () {
 	});
 
 
-	`
-	vec2 pos;
-	float height;
-	pos.x // is legal
-	pos.z // is illegal
-	height.x // is legal
-	height.y // is illegal
+// 	`
+// 	vec2 pos;
+// 	float height;
+// 	pos.x // is legal
+// 	pos.z // is illegal
+// 	height.x // is legal
+// 	height.y // is illegal
 
 
-	vec4 v4;
-	v4.rgba; // is a vec4 and the same as just using v4,
-	v4.rgb; // is a vec3,
-	v4.b; // is a float,
-	v4.xy; // is a vec2,
-	v4.xgba; // is illegal - the component names do not come from
-	 // the same set.
+// 	vec4 v4;
+// 	v4.rgba; // is a vec4 and the same as just using v4,
+// 	v4.rgb; // is a vec3,
+// 	v4.b; // is a float,
+// 	v4.xy; // is a vec2,
+// 	v4.xgba; // is illegal - the component names do not come from
+// 	 // the same set.
 
-	vec4 pos = vec4(1.0, 2.0, 3.0, 4.0);
-	vec4 swiz= pos.wzyx; // swiz = (4.0, 3.0, 2.0, 1.0)
-	vec4 dup = pos.xxyy; // dup = (1.0, 1.0, 2.0, 2.0)
-	float f = 1.2;
-	vec4 dup = f.xxxx; // dup = (1.2, 1.2, 1.2, 1.2)
+// 	vec4 pos = vec4(1.0, 2.0, 3.0, 4.0);
+// 	vec4 swiz= pos.wzyx; // swiz = (4.0, 3.0, 2.0, 1.0)
+// 	vec4 dup = pos.xxyy; // dup = (1.0, 1.0, 2.0, 2.0)
+// 	float f = 1.2;
+// 	vec4 dup = f.xxxx; // dup = (1.2, 1.2, 1.2, 1.2)
 
-	vec4 f;
-	vec4 g = pos.xyzwxy.xyzw; // illegal; pos.xyzwxy is non-existent “vec6”
+// 	vec4 f;
+// 	vec4 g = pos.xyzwxy.xyzw; // illegal; pos.xyzwxy is non-existent “vec6”
 
-	vec4 pos = vec4(1.0, 2.0, 3.0, 4.0);
-	pos.xw = vec2(5.0, 6.0); // pos = (5.0, 2.0, 3.0, 6.0)
-	pos.wx = vec2(7.0, 8.0); // pos = (8.0, 2.0, 3.0, 7.0)
-	pos.xx = vec2(3.0, 4.0); // illegal - 'x' used twice
-	pos.xy = vec3(1.0, 2.0, 3.0); // illegal - mismatch between vec2 and vec3
+// 	vec4 pos = vec4(1.0, 2.0, 3.0, 4.0);
+// 	pos.xw = vec2(5.0, 6.0); // pos = (5.0, 2.0, 3.0, 6.0)
+// 	pos.wx = vec2(7.0, 8.0); // pos = (8.0, 2.0, 3.0, 7.0)
+// 	pos.xx = vec2(3.0, 4.0); // illegal - 'x' used twice
+// 	pos.xy = vec3(1.0, 2.0, 3.0); // illegal - mismatch between vec2 and vec3
 
-	vec3 v;
-	const int L = v.length();
-	L === 3;
+// 	vec3 v;
+// 	const int L = v.length();
+// 	L === 3;
 
 
-	mat4 m;
-	m[1] = vec4(2.0); // sets the second column to all 2.0
-	m[0][0] = 1.0; // sets the upper left element to 1.0
-	m[2][3] = 2.0; // sets the 4th element of the third column to 2.0
-	mat3x4 v;
-	const int L = v.length();
-	`;
+// 	mat4 m;
+// 	m[1] = vec4(2.0); // sets the second column to all 2.0
+// 	m[0][0] = 1.0; // sets the upper left element to 1.0
+// 	m[2][3] = 2.0; // sets the 4th element of the third column to 2.0
+// 	mat3x4 v;
+// 	const int L = v.length();
+// 	`;
 
-`
-	mat2x2 a = mat2( vec2( 1.0, 0.0 ), vec2( 0.0, 1.0 ) );
-	mat2x2 b = { vec2( 1.0, 0.0 ), vec2( 0.0, 1.0 ) };
-	mat2x2 c = { { 1.0, 0.0 }, { 0.0, 1.0 } };
-`;
+// `
+// 	mat2x2 a = mat2( vec2( 1.0, 0.0 ), vec2( 0.0, 1.0 ) );
+// 	mat2x2 b = { vec2( 1.0, 0.0 ), vec2( 0.0, 1.0 ) };
+// 	mat2x2 c = { { 1.0, 0.0 }, { 0.0, 1.0 } };
+// `;
 
-`
-float a[2] = { 3.4, 4.2, 5.0 }; // illegal
-vec2 b = { 1.0, 2.0, 3.0 }; // illegal
-mat3x3 c = { vec3(0.0), vec3(1.0), vec3(2.0), vec3(3.0) }; // illegal
-mat2x2 d = { 1.0, 0.0, 0.0, 1.0 }; // illegal, can't flatten nesting
-struct {
- float a;
- int b;
-} e = { 1.2, 2, 3 }; // illegal
-`;
+// `
+// float a[2] = { 3.4, 4.2, 5.0 }; // illegal
+// vec2 b = { 1.0, 2.0, 3.0 }; // illegal
+// mat3x3 c = { vec3(0.0), vec3(1.0), vec3(2.0), vec3(3.0) }; // illegal
+// mat2x2 d = { 1.0, 0.0, 0.0, 1.0 }; // illegal, can't flatten nesting
+// struct {
+//  float a;
+//  int b;
+// } e = { 1.2, 2, 3 }; // illegal
+// `;
 
 });
 
 
-test('Vec/matrix operators', function () {
+test.only('Vec/matrix operators', function () {
 	test('vec + number', function () {
 		var src = `
-			vec3 v, u;
-			float f;
-			v = u + f;
+			vec3 v = vec3(1,2,3), u = vec3(4,5,6);
+			float f = 0.0;
+			v = u + f + v;
 		`;
 
-		var equiv = `
-			v.x = u.x + f;
-			v.y = u.y + f;
-			v.z = u.z + f;
-		`;
+		// var equiv = `
+		// 	v.x = u.x + f;
+		// 	v.y = u.y + f;
+		// 	v.z = u.z + f;
+		// `;
 
-		var res = `
-			var v = vec3(), u = vec3();
-			var f = 0;
-			v = u.add(f);
-		`;
+		// var res = `
+		// 	var v = [1, 2, 3], u = [4, 5, 6];
+		// 	var f = 0;
+		// 	v = u.add(f);
+		// `;
 
-		assert.equal(clean(compile(src)), clean(res));
+		assert.deepEqual(eval(src, {debug: false}), [5, 7, 9]);
+		assert.deepEqual(eval(src, {optimize: false, debug: false}), [5, 7, 9]);
 	});
 
 	test('vec + vec', function () {
 		var src = `
-			vec3 v, u, w;
+			vec3 v = vec4(mat2x2(1)).xxz, u = vec3(2), w;
 			w = v + u;
 		`;
 
-		var equiv = `
-			w.x = v.x + u.x;
-			w.y = v.y + u.y;
-			w.z = v.z + u.z;
-		`;
+		// var equiv = `
+		// 	w.x = v.x + u.x;
+		// 	w.y = v.y + u.y;
+		// 	w.z = v.z + u.z;
+		// `;
 
-		var res = `
-			var v = vec3(), u = vec3(), w = vec3();
-			w = v.add(u);
-		`;
+		// var res = `
+		// 	var v = vec3(), u = vec3(), w = vec3();
+		// 	w = v.add(u);
+		// `;
 
-		assert.equal(clean(compile(src)), clean(res));
+		assert.deepEqual(eval(src, {debug: false}), [3, 3, 2]);
+		assert.deepEqual(eval(src, {debug: false, optimize: false}), [3, 3, 2]);
 	});
 
-	test('vec * mat & mat * vec', function () {
+	test('vec * mat, mat * vec', function () {
 		var src = `
 			vec3 v, u;
 			mat3 m;
@@ -794,129 +796,136 @@ test.skip('Functions', function () {
 });
 
 test.skip('Builtins', function () {
-	`
-	if (intensity < 0.0)
-	 discard;
-	`
-	`
-	// In the vertex language, the built-ins are intrinsically declared as:
-	in int gl_VertexID;
-	in int gl_InstanceID;
-	out gl_PerVertex {
-	 vec4 gl_Position;
-	 float gl_PointSize;
-	 float gl_ClipDistance[];
-	};
+	// `
+	// if (intensity < 0.0)
+	//  discard;
+	// `
+	// `
+	// // In the vertex language, the built-ins are intrinsically declared as:
+	// in int gl_VertexID;
+	// in int gl_InstanceID;
+	// out gl_PerVertex {
+	//  vec4 gl_Position;
+	//  float gl_PointSize;
+	//  float gl_ClipDistance[];
+	// };
 
 
-	// In the geometry language, the built-in variables are intrinsically declared as:
-	in gl_PerVertex {
-	 vec4 gl_Position;
-	 float gl_PointSize;
-	 float gl_ClipDistance[];
-	} gl_in[];
-	in int gl_PrimitiveIDIn;
-	in int gl_InvocationID;
-	out gl_PerVertex {
-	 vec4 gl_Position;
-	 float gl_PointSize;
-	 float gl_ClipDistance[];
-	};
-	out int gl_PrimitiveID;
-	out int gl_Layer;
-	out int gl_ViewportIndex;
+	// // In the geometry language, the built-in variables are intrinsically declared as:
+	// in gl_PerVertex {
+	//  vec4 gl_Position;
+	//  float gl_PointSize;
+	//  float gl_ClipDistance[];
+	// } gl_in[];
+	// in int gl_PrimitiveIDIn;
+	// in int gl_InvocationID;
+	// out gl_PerVertex {
+	//  vec4 gl_Position;
+	//  float gl_PointSize;
+	//  float gl_ClipDistance[];
+	// };
+	// out int gl_PrimitiveID;
+	// out int gl_Layer;
+	// out int gl_ViewportIndex;
 
 
-	// In the fragment language, built-in variables are intrinsically declared as:
-	in vec4 gl_FragCoord;
-	in bool gl_FrontFacing;
-	in float gl_ClipDistance[];
-	in vec2 gl_PointCoord;
-	in int gl_PrimitiveID;
-	in int gl_SampleID;
-	in vec2 gl_SamplePosition;
-	in int gl_SampleMaskIn[];
-	in int gl_Layer;
-	in int gl_ViewportIndex;
-	out float gl_FragDepth;
-	out int gl_SampleMask[];
+	// // In the fragment language, built-in variables are intrinsically declared as:
+	// in vec4 gl_FragCoord;
+	// in bool gl_FrontFacing;
+	// in float gl_ClipDistance[];
+	// in vec2 gl_PointCoord;
+	// in int gl_PrimitiveID;
+	// in int gl_SampleID;
+	// in vec2 gl_SamplePosition;
+	// in int gl_SampleMaskIn[];
+	// in int gl_Layer;
+	// in int gl_ViewportIndex;
+	// out float gl_FragDepth;
+	// out int gl_SampleMask[];
 
 
-	//
-	// Implementation-dependent constants. The example values below
-	// are the minimum values allowed for these maximums.
-	//
-	const ivec3 gl_MaxComputeWorkGroupCount = { 65535, 65535, 65535 };
-	const ivec3 gl_MaxComputeWorkGroupSize = { 1024, 1024, 64 };
-	const int gl_MaxComputeUniformComponents = 1024;
-	const int gl_MaxComputeTextureImageUnits = 16;
-	const int gl_MaxComputeImageUniforms = 8;
-	const int gl_MaxComputeAtomicCounters = 8;
-	const int gl_MaxComputeAtomicCounterBuffers = 8;
-	const int gl_MaxVertexAttribs = 16;
-	const int gl_MaxVertexUniformComponents = 1024;
-	const int gl_MaxVaryingComponents = 60;
-	const int gl_MaxVertexOutputComponents = 64;
-	const int gl_MaxGeometryInputComponents = 64;
-	const int gl_MaxGeometryOutputComponents = 128;
-	const int gl_MaxFragmentInputComponents = 128;
-	const int gl_MaxVertexTextureImageUnits = 16;
-	const int gl_MaxCombinedTextureImageUnits = 96;
-	const int gl_MaxTextureImageUnits = 16;
-	const int gl_MaxImageUnits = 8;
-	const int gl_MaxCombinedImageUnitsAndFragmentOutputs = 8; // deprecated
-	const int gl_MaxCombinedShaderOutputResources = 8;
-	const int gl_MaxImageSamples = 0;
-	const int gl_MaxVertexImageUniforms = 0;
-	const int gl_MaxTessControlImageUniforms = 0;
-	const int gl_MaxTessEvaluationImageUniforms = 0;
-	const int gl_MaxGeometryImageUniforms = 0;
-	const int gl_MaxFragmentImageUniforms = 8;
-	const int gl_MaxCombinedImageUniforms = 8;
-	const int gl_MaxFragmentUniformComponents = 1024;
-	const int gl_MaxDrawBuffers = 8;
-	const int gl_MaxClipDistances = 8;
-	const int gl_MaxGeometryTextureImageUnits = 16;
-	const int gl_MaxGeometryOutputVertices = 256;
-	const int gl_MaxGeometryTotalOutputComponents = 1024;
-	const int gl_MaxGeometryUniformComponents = 1024;
-	const int gl_MaxGeometryVaryingComponents = 64; // deprecated
-	const int gl_MaxTessControlInputComponents = 128;
-	const int gl_MaxTessControlOutputComponents = 128;
-	const int gl_MaxTessControlTextureImageUnits = 16;
-	const int gl_MaxTessControlUniformComponents = 1024;
-	const int gl_MaxTessControlTotalOutputComponents = 4096;
-	const int gl_MaxTessEvaluationInputComponents = 128;
-	const int gl_MaxTessEvaluationOutputComponents = 128;
-	const int gl_MaxTessEvaluationTextureImageUnits = 16;
-	const int gl_MaxTessEvaluationUniformComponents = 1024;
-	const int gl_MaxTessPatchComponents = 120;
-	const int gl_MaxPatchVertices = 32;
-	const int gl_MaxTessGenLevel = 64;
-	const int gl_MaxViewports = 16;
-	const int gl_MaxVertexUniformVectors = 256;
-	const int gl_MaxFragmentUniformVectors = 256;
-	const int gl_MaxVaryingVectors = 15;
-	const int gl_MaxVertexAtomicCounters = 0;
-	const int gl_MaxTessControlAtomicCounters = 0;
-	const int gl_MaxTessEvaluationAtomicCounters = 0;
-	const int gl_MaxGeometryAtomicCounters = 0;
-	const int gl_MaxFragmentAtomicCounters = 8;
-	const int gl_MaxCombinedAtomicCounters = 8;
-	const int gl_MaxAtomicCounterBindings = 1;
-	const int gl_MaxVertexAtomicCounterBuffers = 0;
-	const int gl_MaxTessControlAtomicCounterBuffers = 0;
-	const int gl_MaxTessEvaluationAtomicCounterBuffers = 0;
-	const int gl_MaxGeometryAtomicCounterBuffers = 0;
-	const int gl_MaxFragmentAtomicCounterBuffers = 1;
-	const int gl_MaxCombinedAtomicCounterBuffers = 1;
-	const int gl_MaxAtomicCounterBufferSize = 32;
-	const int gl_MinProgramTexelOffset = -8;
-	const int gl_MaxProgramTexelOffset = 7;
-	const int gl_MaxTransformFeedbackBuffers = 4;
-	const int gl_MaxTransformFeedbackInterleavedComponents = 64;
-	`
+	// //
+	// // Implementation-dependent constants. The example values below
+	// // are the minimum values allowed for these maximums.
+	// //
+	// const ivec3 gl_MaxComputeWorkGroupCount = { 65535, 65535, 65535 };
+	// const ivec3 gl_MaxComputeWorkGroupSize = { 1024, 1024, 64 };
+	// const int gl_MaxComputeUniformComponents = 1024;
+	// const int gl_MaxComputeTextureImageUnits = 16;
+	// const int gl_MaxComputeImageUniforms = 8;
+	// const int gl_MaxComputeAtomicCounters = 8;
+	// const int gl_MaxComputeAtomicCounterBuffers = 8;
+	// const int gl_MaxVertexAttribs = 16;
+	// const int gl_MaxVertexUniformComponents = 1024;
+	// const int gl_MaxVaryingComponents = 60;
+	// const int gl_MaxVertexOutputComponents = 64;
+	// const int gl_MaxGeometryInputComponents = 64;
+	// const int gl_MaxGeometryOutputComponents = 128;
+	// const int gl_MaxFragmentInputComponents = 128;
+	// const int gl_MaxVertexTextureImageUnits = 16;
+	// const int gl_MaxCombinedTextureImageUnits = 96;
+	// const int gl_MaxTextureImageUnits = 16;
+	// const int gl_MaxImageUnits = 8;
+	// const int gl_MaxCombinedImageUnitsAndFragmentOutputs = 8; // deprecated
+	// const int gl_MaxCombinedShaderOutputResources = 8;
+	// const int gl_MaxImageSamples = 0;
+	// const int gl_MaxVertexImageUniforms = 0;
+	// const int gl_MaxTessControlImageUniforms = 0;
+	// const int gl_MaxTessEvaluationImageUniforms = 0;
+	// const int gl_MaxGeometryImageUniforms = 0;
+	// const int gl_MaxFragmentImageUniforms = 8;
+	// const int gl_MaxCombinedImageUniforms = 8;
+	// const int gl_MaxFragmentUniformComponents = 1024;
+	// const int gl_MaxDrawBuffers = 8;
+	// const int gl_MaxClipDistances = 8;
+	// const int gl_MaxGeometryTextureImageUnits = 16;
+	// const int gl_MaxGeometryOutputVertices = 256;
+	// const int gl_MaxGeometryTotalOutputComponents = 1024;
+	// const int gl_MaxGeometryUniformComponents = 1024;
+	// const int gl_MaxGeometryVaryingComponents = 64; // deprecated
+	// const int gl_MaxTessControlInputComponents = 128;
+	// const int gl_MaxTessControlOutputComponents = 128;
+	// const int gl_MaxTessControlTextureImageUnits = 16;
+	// const int gl_MaxTessControlUniformComponents = 1024;
+	// const int gl_MaxTessControlTotalOutputComponents = 4096;
+	// const int gl_MaxTessEvaluationInputComponents = 128;
+	// const int gl_MaxTessEvaluationOutputComponents = 128;
+	// const int gl_MaxTessEvaluationTextureImageUnits = 16;
+	// const int gl_MaxTessEvaluationUniformComponents = 1024;
+	// const int gl_MaxTessPatchComponents = 120;
+	// const int gl_MaxPatchVertices = 32;
+	// const int gl_MaxTessGenLevel = 64;
+	// const int gl_MaxViewports = 16;
+	// const int gl_MaxVertexUniformVectors = 256;
+	// const int gl_MaxFragmentUniformVectors = 256;
+	// const int gl_MaxVaryingVectors = 15;
+	// const int gl_MaxVertexAtomicCounters = 0;
+	// const int gl_MaxTessControlAtomicCounters = 0;
+	// const int gl_MaxTessEvaluationAtomicCounters = 0;
+	// const int gl_MaxGeometryAtomicCounters = 0;
+	// const int gl_MaxFragmentAtomicCounters = 8;
+	// const int gl_MaxCombinedAtomicCounters = 8;
+	// const int gl_MaxAtomicCounterBindings = 1;
+	// const int gl_MaxVertexAtomicCounterBuffers = 0;
+	// const int gl_MaxTessControlAtomicCounterBuffers = 0;
+	// const int gl_MaxTessEvaluationAtomicCounterBuffers = 0;
+	// const int gl_MaxGeometryAtomicCounterBuffers = 0;
+	// const int gl_MaxFragmentAtomicCounterBuffers = 1;
+	// const int gl_MaxCombinedAtomicCounterBuffers = 1;
+	// const int gl_MaxAtomicCounterBufferSize = 32;
+	// const int gl_MinProgramTexelOffset = -8;
+	// const int gl_MaxProgramTexelOffset = 7;
+	// const int gl_MaxTransformFeedbackBuffers = 4;
+	// const int gl_MaxTransformFeedbackInterleavedComponents = 64;
+	// `
 });
+
+
+//array opertators
+//  field selector .
+// equality == !=
+// assignment =
+// indexing (arrays only) [ ]
 
 
 

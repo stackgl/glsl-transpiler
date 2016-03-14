@@ -34,8 +34,8 @@ module.exports = function eval (str, opt) {
 	}
 
 	var stdlib = glsl.stringifyStdlib();
-	str += stdlib;
-	if (opt.debug) console.log(debugStr, stdlib);
+	str = stdlib + '\n' + str;
+	if (opt.debug) console.log(str);
 	var fn = new Function(str);
 
 	return fn();
