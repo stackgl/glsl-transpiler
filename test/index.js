@@ -541,7 +541,7 @@ test('Components access', function () {
 		`;
 
 		var res = `
-		var b = [vec4(), vec4()];
+		var b = [[0, 0, 0, 0], [0, 0, 0, 0]];
 		var c = [b, b, b];
 		var d = [c, c, c, c];
 		`;
@@ -549,8 +549,25 @@ test('Components access', function () {
 		assert.equal(clean(glsl.compile(src)), clean(res));
 	});
 
-
-	`b[++x].a.length();`;
+	test('Calculated access', function () {
+		assert.equal(clean(compile(`
+			vec4 b[2];
+			float x = +1.0;
+			b[++x].prop;
+			b[x++].a;
+			b[--x].x;
+			b[x--].xy.length();
+			b.yx;
+		`)), clean(`
+			var b = [[0, 0, 0, 0], [0, 0, 0, 0]];
+			var x = +1.0;
+			b[++x].prop;
+			b[x++][3];
+			b[--x][0];
+			2;
+			[b[1], b[0]];
+		`));
+	});
 
 
 	`
