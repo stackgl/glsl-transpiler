@@ -642,6 +642,11 @@ test.only('Vec/matrix operators', function () {
 			float f = 0.0;
 			v = u + f + v;
 		`;
+		var src2 = `
+			mat2 v = mat2(1,2,3,4), u = mat2(5,6,7,8);
+			float f = 1.0;
+			v += f + u;
+		`;
 
 		// var equiv = `
 		// 	v.x = u.x + f;
@@ -657,6 +662,8 @@ test.only('Vec/matrix operators', function () {
 
 		assert.deepEqual(eval(src, {debug: false}), [5, 7, 9]);
 		assert.deepEqual(eval(src, {optimize: false, debug: false}), [5, 7, 9]);
+		assert.deepEqual(eval(src2, {optimize: false, debug: false}), [7,9,11,13]);
+		assert.deepEqual(eval(src2, {optimize: true, debug: false}), [7,9,11,13]);
 	});
 
 	test('vec + vec', function () {
@@ -682,30 +689,31 @@ test.only('Vec/matrix operators', function () {
 
 	test('vec * mat, mat * vec', function () {
 		var src = `
-			vec3 v, u;
-			mat3 m;
+			vec3 v = vec3(1), u = vec3(2);
+			mat3 m = mat3(2);
 			u = v * m;
 			u = m * v;
 		`;
 
-		var equiv = `
-			u.x = dot(v, m[0]); // m[0] is the left column of m
-			u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
-			u.z = dot(v, m[2]);
+		// var equiv = `
+		// 	u.x = dot(v, m[0]); // m[0] is the left column of m
+		// 	u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
+		// 	u.z = dot(v, m[2]);
 
-			u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
-			u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
-			u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
-		`;
+		// 	u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
+		// 	u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
+		// 	u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
+		// `;
 
-		var res = `
-			var v = vec3(), u = vec3();
-			var m = mat3();
-			u = v.multiply(m);
-			u = m.multiply(v);
-		`;
+		// var res = `
+		// 	var v = vec3(), u = vec3();
+		// 	var m = mat3();
+		// 	u = v.multiply(m);
+		// 	u = m.multiply(v);
+		// `;
 
-		assert.equal(clean(compile(src)), clean(res));
+		assert.deepEqual(eval('mat 3 m = mat3()', {debug: false}), [3, 3, 2]);
+		assert.deepEqual(eval(src, {debug: false, optimize: false}), [3, 3, 2]);
 	});
 
 	test('Matrix multiplication', function () {
