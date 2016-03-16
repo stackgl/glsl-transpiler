@@ -583,28 +583,6 @@ test('Matrix constructors', function () {
 	});
 });
 
-test('Swizzles', function () {
-	test('vec2', function () {
-		assert.deepEqual(eval('vec2(1, 2).x;'), 1);
-		assert.deepEqual(eval('vec2(1, 2).xy;'), [1,2]);
-		assert.deepEqual(eval('vec2(1, 2).yy;'), [2,2]);
-	});
-	test('vec3', function () {
-		assert.deepEqual(eval('vec3(1, 2, 3).x;'), 1);
-		assert.deepEqual(eval('vec3(1, 2, 3).xy;'), [1,2]);
-		assert.deepEqual(eval('vec3(1, 2, 3).xyz;'), [1,2,3]);
-		assert.deepEqual(eval('vec3(1, 2, 3).zzz;'), [3,3,3]);
-	});
-	test('vec4', function () {
-		assert.deepEqual(eval('vec4(1, 2, 3, 4).x;'), 1);
-		assert.deepEqual(eval('vec4(1, 2, 3, 4).xy;'), [1,2]);
-		assert.deepEqual(eval('vec4(1, 2, 3, 4).xyz;'), [1,2,3]);
-		assert.deepEqual(eval('vec4(1, 2, 3, 4).xyzw;'), [1,2,3,4]);
-		assert.deepEqual(eval('vec4(1, 2, 3, 4).wwww;'), [4,4,4,4]);
-		assert.deepEqual(eval('vec4(1, 2, 3, 4).wzyx;'), [4,3,2,1]);
-	});
-});
-
 test('Math', function () {
 	var mat4 = stdlib.mat4;
 	var vec4 = stdlib.vec4;
