@@ -24,12 +24,21 @@ test('Episodes', function () {
 	var glsl = GLSL({
 	});
 
+	test('for (int i = 0; i < 10; i++) { if (i > 4) ; }', function () {
+		assert.equal(clean(compile(this.title)), clean(`
+			for (var i = 0; i < 10; i++) {
+				if (i > 4) {
+				};
+			};
+			`));
+	});
+
 	test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title, {optimize: true})),
 			clean(`
 			var x = 0;
-			var uv = [0, 0], position = vec2.multiply([], [0, 0].fill(fn(x)), [uv[0], -uv[1]]);
+			var uv = [0, 0], position = [uv[0], -uv[1]].map(function (x, i) {return x * fn(x);});
 			`)
 			//ideal:
 			// var fnx = fn(x)
@@ -132,125 +141,125 @@ test('Episodes', function () {
 test('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
-	precision mediump float;
-	attribute vec2 uv, xy = vec2(1);
-	attribute vec4 color;
-	varying vec4 fColor, twoColors[2];
-	uniform vec2 uScreenSize = vec2(1,1);
-	float coeff = 1.0, coeff2 = coeff + 1.0, a[2], b[3][2] = float[3](a, a, a);
+		precision mediump float;
+		attribute vec2 uv, xy = vec2(1);
+		attribute vec4 color;
+		varying vec4 fColor, twoColors[2];
+		uniform vec2 uScreenSize = vec2(1,1);
+		float coeff = 1.0, coeff2 = coeff + 1.0, a[2], b[3][2] = float[3](a, a, a);
 
-	int count (float num);
+		int count (float num);
 
-	void main (void) {
-		fColor = color;
-		vec2 position = coeff * vec2(uv.x, -uv.y);
-		position.x *= uScreenSize.y / uScreenSize.x;
-		xy.xy *= uv.yx;
-		gl_Position = vec4(position.yx / 2.0, 0, 1);
-		gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();
-		return;
-	}
-
-	/* just a test function */
-	int count (in float num) {
-		int sum = 0;
-		for (int i = 0; i < 10; i++) {
-			sum += i;
-			if (i > 4) continue;
-			else break;
-
-			discard;
+		void main (void) {
+			fColor = color;
+			vec2 position = coeff * vec2(uv.x, -uv.y);
+			position.x *= uScreenSize.y / uScreenSize.x;
+			xy.xy *= uv.yx;
+			gl_Position = vec4(position.yx / 2.0, 0, 1);
+			gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();
+			return;
 		}
-		int i = 0;
-		while (i < 10) {
-			--sum;
+
+		/* just a test function */
+		int count (in float num) {
+			int sum = 0;
+			for (int i = 0; i < 10; i++) {
+				sum += i;
+				if (i > 4) continue;
+				else break;
+
+				discard;
+			}
+			int i = 0;
+			while (i < 10) {
+				--sum;
+			}
+			do {
+				sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+			}
+			while (i < 10);
+			return sum;
 		}
-		do {
-			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
-		}
-		while (i < 10);
-		return sum;
-	}
-	`;
+		`;
 
 	var result = `
-	var uv = [0, 0], xy = [1, 1];
-	var color = [0, 0, 0, 0];
-	var fColor = [0, 0, 0, 0], twoColors = [[0, 0, 0, 0], [0, 0, 0, 0]];
-	var uScreenSize = [1, 1];
-	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
+		var uv = [0, 0], xy = [1, 1];
+		var color = [0, 0, 0, 0];
+		var fColor = [0, 0, 0, 0], twoColors = [[0, 0, 0, 0], [0, 0, 0, 0]];
+		var uScreenSize = [1, 1];
+		var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
-	function main () {
-		fColor = color;
-		var position = [coeff * uv[0], coeff * -uv[1]];
-		position[0] *= uScreenSize[1] / uScreenSize[0];
-		xy = [xy[0] * uv[1], xy[1] * uv[0]];
-		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
-		gl_FragColor[0] = gl_FragCoord[0] / 4;
-		return;
-	};
+		function main () {
+			fColor = color;
+			var position = [coeff * uv[0], coeff * -uv[1]];
+			position[0] *= uScreenSize[1] / uScreenSize[0];
+			xy = [xy[0] * uv[1], xy[1] * uv[0]];
+			gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
+			gl_FragColor[0] = gl_FragCoord[0] / 4;
+			return;
+		};
 
-	function count (num) {
-		var sum = 0;
-		for (var i = 0; i < 10; i++) {
-			sum += i;
-			if (i > 4) {
-				continue;
-			} else {
-				break;
+		function count (num) {
+			var sum = 0;
+			for (var i = 0; i < 10; i++) {
+				sum += i;
+				if (i > 4) {
+					continue;
+				} else {
+					break;
+				};
+
+				discard();
 			};
-
-			discard();
-		};
-		var i = 0;
-		while (i < 10) {
-			--sum;
-		};
-		do {
-			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
-		} while (i < 10);
-		return sum;
-	};`;
+			var i = 0;
+			while (i < 10) {
+				--sum;
+			};
+			do {
+				sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+			} while (i < 10);
+			return sum;
+		};`;
 
 	var shortResult = `
-	var uv = attributes['uv'], xy = attributes['xy'];
-	var color = attributes['color'];
-	var fColor = varying['fColor'], twoColors = varying['twoColors'];
-	var uScreenSize = uniforms['uScreenSize'];
-	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
+		var uv = attributes['uv'], xy = attributes['xy'];
+		var color = attributes['color'];
+		var fColor = varying['fColor'], twoColors = varying['twoColors'];
+		var uScreenSize = uniforms['uScreenSize'];
+		var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
-	function main () {
-		fColor = color;
-		var position = [coeff * uv[0], coeff * -uv[1]];
-		position[0] *= uScreenSize[1] / uScreenSize[0];
-		xy = [xy[0] * uv[1], xy[1] * uv[0]];
-		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
-		gl_FragColor[0] = gl_FragCoord[0] / 4;
-		return;
-	};
+		function main () {
+			fColor = color;
+			var position = [coeff * uv[0], coeff * -uv[1]];
+			position[0] *= uScreenSize[1] / uScreenSize[0];
+			xy = [xy[0] * uv[1], xy[1] * uv[0]];
+			gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
+			gl_FragColor[0] = gl_FragCoord[0] / 4;
+			return;
+		};
 
-	function count (num) {
-		var sum = 0;
-		for (var i = 0; i < 10; i++) {
-			sum += i;
-			if (i > 4) {
-				continue;
-			} else {
-				break;
+		function count (num) {
+			var sum = 0;
+			for (var i = 0; i < 10; i++) {
+				sum += i;
+				if (i > 4) {
+					continue;
+				} else {
+					break;
+				};
+
+				discard();
 			};
-
-			discard();
+			var i = 0;
+			while (i < 10) {
+				--sum;
+			};
+			do {
+				sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
+			} while (i < 10);
+			return sum;
 		};
-		var i = 0;
-		while (i < 10) {
-			--sum;
-		};
-		do {
-			sum += i < 5 ? (i > 2 ? 1 : 2) : 0;
-		} while (i < 10);
-		return sum;
-	};
-	`;
+		`;
 
 
 	test('Direct', function () {
@@ -635,17 +644,12 @@ test('Components access', function () {
 });
 
 
-test.only('Vec/matrix operators', function () {
+test('Vec/matrix operators', function () {
 	test('vec + number', function () {
 		var src = `
 			vec3 v = vec3(1,2,3), u = vec3(4,5,6);
 			float f = 0.0;
 			v = u + f + v;
-		`;
-		var src2 = `
-			mat2 v = mat2(1,2,3,4), u = mat2(5,6,7,8);
-			float f = 1.0;
-			v += f + u;
 		`;
 
 		// var equiv = `
@@ -662,8 +666,17 @@ test.only('Vec/matrix operators', function () {
 
 		assert.deepEqual(eval(src, {debug: false}), [5, 7, 9]);
 		assert.deepEqual(eval(src, {optimize: false, debug: false}), [5, 7, 9]);
-		assert.deepEqual(eval(src2, {optimize: false, debug: false}), [7,9,11,13]);
+	});
+
+	test('mat + mat', function () {
+		var src2 = `
+			mat2 v = mat2(1,2,3,4), u = mat2(5,6,7,8);
+			float f = 1.0;
+			v += f + u;
+		`;
+
 		assert.deepEqual(eval(src2, {optimize: true, debug: false}), [7,9,11,13]);
+		assert.deepEqual(eval(src2, {optimize: false, debug: false}), [7,9,11,13]);
 	});
 
 	test('vec + vec', function () {
