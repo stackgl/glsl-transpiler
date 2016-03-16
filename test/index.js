@@ -723,24 +723,24 @@ test.only('Vec/matrix operators', function () {
 
 	test('mat * mat', function () {
 		var src = `
-			mat2 m = mat2(1), n = mat2(2), r;
+			mat3 m = mat3(1), n = mat3(2), r;
 			r = m * n;
 		`;
 
-		var equiv = `
-		r[0].x = m[0].x * n[0].x + m[1].x * n[0].y + m[2].x * n[0].z;
-		r[1].x = m[0].x * n[1].x + m[1].x * n[1].y + m[2].x * n[1].z;
-		r[2].x = m[0].x * n[2].x + m[1].x * n[2].y + m[2].x * n[2].z;
-		r[0].y = m[0].y * n[0].x + m[1].y * n[0].y + m[2].y * n[0].z;
-		r[1].y = m[0].y * n[1].x + m[1].y * n[1].y + m[2].y * n[1].z;
-		r[2].y = m[0].y * n[2].x + m[1].y * n[2].y + m[2].y * n[2].z;
-		r[0].z = m[0].z * n[0].x + m[1].z * n[0].y + m[2].z * n[0].z;
-		r[1].z = m[0].z * n[1].x + m[1].z * n[1].y + m[2].z * n[1].z;
-		r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
-		`;
+		// var equiv = `
+		// r[0].x = m[0].x * n[0].x + m[1].x * n[0].y + m[2].x * n[0].z;
+		// r[1].x = m[0].x * n[1].x + m[1].x * n[1].y + m[2].x * n[1].z;
+		// r[2].x = m[0].x * n[2].x + m[1].x * n[2].y + m[2].x * n[2].z;
+		// r[0].y = m[0].y * n[0].x + m[1].y * n[0].y + m[2].y * n[0].z;
+		// r[1].y = m[0].y * n[1].x + m[1].y * n[1].y + m[2].y * n[1].z;
+		// r[2].y = m[0].y * n[2].x + m[1].y * n[2].y + m[2].y * n[2].z;
+		// r[0].z = m[0].z * n[0].x + m[1].z * n[0].y + m[2].z * n[0].z;
+		// r[1].z = m[0].z * n[1].x + m[1].z * n[1].y + m[2].z * n[1].z;
+		// r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
+		// `;
 
-		assert.deepEqual(eval(src, {debug: false}), [2, 0, 0, 2]);
-		assert.deepEqual(eval(src, {debug: false, optimize: false}), [2, 0, 0, 2]);
+		assert.deepEqual(eval(src, {debug: false}), [2, 0, 0, 0, 2, 0, 0, 0, 2]);
+		assert.deepEqual(eval(src, {debug: false, optimize: false}), [2, 0, 0, 0, 2, 0, 0, 0, 2]);
 	});
 
 	test.skip('vector/matrix.length() → .length', function () {

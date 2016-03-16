@@ -1,6 +1,6 @@
 var test = require('tst');
 var inherits = require('inherits');
-var lib = require('../stdlib');
+var lib = require('../lib/stdlib');
 var glMat = require('gl-matrix');
 var ndarray = require('ndarray');
 
@@ -319,7 +319,7 @@ test('TypedArray vs wrapped array', function () {
 });
 
 
-test.only('multiplication', function () {
+test('multiplication', function () {
 	//task: determine which way of multiplying things is the best
 	//for the formula v1.yxzw *= v2.xyzw + fn(coef);
 	//result: plain array is the fastest, after (10% slower) - Float32Array, then - gl-matrix.
@@ -544,6 +544,41 @@ test.only('multiplication', function () {
 					v[3] += c;
 					return v;
 				})([v1[1], v1[0], v1[2], v1[3]], coefPow5), v2);
+		}
+	});
+});
+
+
+test.only('cost of anonymous function', function () {
+	//what is component access rate to anonymous function?
+	//result: one anonymous fn costs 200 simple sums or 13 map calls
+
+	var max = 10e3;
+	var a = [1, 2, 3], b = [1, 2, 3];
+	function get(who, what) {
+		return who[what];
+	}
+	test('fn', function () {
+		for (var i = 0; i < max; i++) {
+			for (var j = 0; j < 1; j++) {
+				var x = (function (a, b) {
+					return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+				})(a, b);
+			}
+		}
+	});
+	test('sum', function () {
+		for (var i = 0; i < max; i++) {
+			for (var j = 0; j < 200; j++) {
+				var x = [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+			}
+		}
+	});
+	test('map', function () {
+		for (var i = 0; i < max; i++) {
+			for (var j = 0; j < 13; j++) {
+				var x = a.map(function (x, i) { return x + get(b, i)});
+			}
 		}
 	});
 });
