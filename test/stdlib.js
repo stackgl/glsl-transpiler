@@ -1022,9 +1022,17 @@ test.only('Matrix functions', function () {
 		`), 1);
 	});
 
-	// mat2 inverse (mat2 m)
-	// mat3 inverse (mat3 m)
-	// mat4 inverse (mat4 m)
+	test('mat inverse (mat m)', function () {
+		assert.deepEqual(eval(`
+			inverse(mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1));
+		`), [1,0,0,0,0,1,0,0,0,0,1,0,-1,-2,-3,1]);
+		assert.deepEqual(eval(`
+			inverse(mat3(1, 0, 0, 0, 1, 0, 1, 2, 1));
+		`), [1,0,0,0,1,0,-1,-2,1]);
+		assert.deepEqual(eval(`
+			inverse(mat2(1, 0, 0, 1));
+		`), [1, 0, 0, 1]);
+	});
 });
 
 
