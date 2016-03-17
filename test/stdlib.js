@@ -986,18 +986,23 @@ test.skip('Packing/unpacking', function () {
 	// vec2 unpackHalf2x16 (uint v)
 });
 
-test.skip('Matrix functions', function () {
-	// mat matrixCompMult (mat x, mat y)
+test.only('Matrix functions', function () {
+	test('mat matrixCompMult (mat x, mat y)', function () {
+		assert.deepEqual(eval(`
+			mat3 m = mat3(1, 1, 1, 2, 2, 2, 3, 3, 3);
+			mat3 n = mat3(vec3(4), vec3(5), vec3(6));
+			matrixCompMult(m, n);
+		`, {optimize: true, debug: false}), [4, 4, 4, 10, 10, 10, 18, 18, 18]);
+	});
 
-	// mat2 outerProduct (vec2 c, vec2 r)
-	// mat3 outerProduct (vec3 c, vec3 r)
-	// mat4 outerProduct (vec4 c, vec4 r)
-	// mat2x3 outerProduct (vec3 c, vec2 r)
-	// mat3x2 outerProduct (vec2 c, vec3 r)
-	// mat2x4 outerProduct (vec4 c, vec2 r)
-	// mat4x2 outerProduct (vec2 c, vec4 r)
-	// mat3x4 outerProduct (vec4 c, vec3 r)
-	// mat4x3 outerProduct (vec3 c, vec4 r)
+	test('matN outerProduct (vecN, vecN)', function () {
+		assert.deepEqual(eval(`
+			outerProduct(vec3(1, 2, 3), vec3(1));
+		`, {debug:false}), [1, 1, 1, 2, 2, 2, 3, 3, 3]);
+		assert.deepEqual(eval(`
+			outerProduct(vec2(1, 2), vec2(3, 4));
+		`, {debug:false}), [3, 4, 6, 8]);
+	});
 
 	// mat2 transpose (mat2 m)
 	// mat3 transpose (mat3 m)
