@@ -1004,19 +1004,23 @@ test.only('Matrix functions', function () {
 		`, {debug:false}), [3, 4, 6, 8]);
 	});
 
-	// mat2 transpose (mat2 m)
-	// mat3 transpose (mat3 m)
-	// mat4 transpose (mat4 m)
-	// mat2x3 transpose (mat3x2 m)
-	// mat3x2 transpose (mat2x3 m)
-	// mat2x4 transpose (mat4x2 m)
-	// mat4x2 transpose (mat2x4 m)
-	// mat3x4 transpose (mat4x3 m)
-	// mat4x3 transpose (mat3x4 m)
+	test('matN transpose (matN m)', function () {
+		assert.deepEqual(eval(`
+			transpose(mat3(1,2,3,4,5,6,7,8,9));
+		`, {debug:false}), [1,4,7,2,5,8,3,6,9]);
+	});
 
-	// float determinant (mat2 m)
-	// float determinant (mat3 m)
-	// float determinant (mat4 m)
+	test('determinant (mat m)', function () {
+		assert.equal(eval(`
+			determinant(mat2(1, 2, 3, 4));
+		`), -2);
+		assert.equal(eval(`
+			determinant(mat3(1, 0, 0, 0, 1, 0, 1, 2, 1));
+		`), 1);
+		assert.equal(eval(`
+			determinant(mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1));
+		`), 1);
+	});
 
 	// mat2 inverse (mat2 m)
 	// mat3 inverse (mat3 m)
