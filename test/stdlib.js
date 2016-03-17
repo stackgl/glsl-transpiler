@@ -532,7 +532,6 @@ test('Matrix constructors', function () {
 	// takes the upper-left 2x2 of the mat4x4, last row is 0,0
 	test.skip('mat2x3(mat4x2);', function () {
 		var m = mat2x3(mat4x2(vec2(1), vec2(2), vec2(3), vec2(4)));
-
 		assert.equal(m.length(), 2);
 		assert.equal(m[0][0], 1);
 		assert.equal(m[0][1], 1);
@@ -545,41 +544,13 @@ test('Matrix constructors', function () {
 	// puts the mat3x3 in the upper-left, sets the lower right component to 1, and the rest to 0
 	test('mat4x4(mat3x3);', function () {
 		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3))).length();'), 4);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][0];'), 1);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][1];'), 1);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][2];'), 1);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[0][3];'), 0);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][0];'), 2);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][1];'), 2);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][2];'), 2);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[1][3];'), 0);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][0];'), 3);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][1];'), 3);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][2];'), 3);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[2][3];'), 0);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][0];'), 0);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][1];'), 0);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][2];'), 0);
-		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)))[3][3];'), 1);
+		assert.deepEqual(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)));'), [1,1,1,0, 2,2,2,0, 3,3,3,0, 0,0,0,1]);
+		assert.deepEqual(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)));', {optimize: false, debug:false}), [1,1,1,0, 2,2,2,0, 3,3,3,0, 0,0,0,1]);
 	});
 	test('mat4x4(mat2);', function () {
 		assert.equal(eval('mat4(mat2(vec2(1), vec2(2))).length();'), 4);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[0][0];'), 1);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[0][1];'), 1);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[0][2];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[0][3];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[1][0];'), 2);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[1][1];'), 2);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[1][2];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[1][3];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[2][0];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[2][1];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[2][2];'), 1);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[2][3];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[3][0];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[3][1];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[3][2];'), 0);
-		assert.equal(eval('mat4(mat2(vec2(1), vec2(2)))[3][3];'), 1);
+		assert.deepEqual(eval('mat4(mat2(vec3(1), vec3(2)));'), [1,1,0,0, 2,2,0,0, 0,0,1,0, 0,0,0,1]);
+		assert.deepEqual(eval('mat4(mat2(vec3(1), vec3(2)));', {optimize: false}), [1,1,0,0, 2,2,0,0, 0,0,1,0, 0,0,0,1]);
 	});
 });
 
