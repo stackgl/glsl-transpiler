@@ -1030,8 +1030,8 @@ test('Matrix functions', function () {
 			inverse(mat3(1, 0, 0, 0, 1, 0, 1, 2, 1));
 		`), [1,0,0,0,1,0,-1,-2,1]);
 		assert.deepEqual(eval(`
-			inverse(mat2(1, 0, 0, 1));
-		`), [1, 0, 0, 1]);
+			inverse(mat2(1, 2, 3, 4));
+		`), [-2, 1, 1.5, -0.5]);
 	});
 });
 
