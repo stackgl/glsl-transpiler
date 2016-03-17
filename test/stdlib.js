@@ -986,7 +986,7 @@ test.skip('Packing/unpacking', function () {
 	// vec2 unpackHalf2x16 (uint v)
 });
 
-test.only('Matrix functions', function () {
+test('Matrix functions', function () {
 	test('mat matrixCompMult (mat x, mat y)', function () {
 		assert.deepEqual(eval(`
 			mat3 m = mat3(1, 1, 1, 2, 2, 2, 3, 3, 3);
