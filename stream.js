@@ -42,7 +42,7 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 	if (typeof chunk === 'string') {
 		//FIXME: there is a problem of invalid input chunks; gotta wait till some sensible thing is accumulated and then parse.
 		var tree = parse(tokenize(chunk));
-		cb(null, this.glsl.stringify(tree));
+		cb(null, this.glsl.process(tree));
 
 		this.tree = tree;
 	}
@@ -58,7 +58,7 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 
 		else {
 			if (chunk.type === 'stmt')	{
-				cb(null, this.glsl.stringify(chunk));
+				cb(null, this.glsl.process(chunk));
 			}
 			else {
 				//detect entering function mode to avoid reacting on stmts

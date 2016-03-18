@@ -14,7 +14,7 @@ module.exports = function eval (str, opt) {
 
 	//take last statement as a result
 	try {
-		str = glsl.stringify(glsl.parse(str));
+		str = glsl.process(glsl.parse(str));
 		debugStr = str;
 		strLines = str.trim().split(/\n/);
 		var lastStr = strLines[strLines.length - 1];
@@ -28,7 +28,7 @@ module.exports = function eval (str, opt) {
 		strLines.unshift('float _');
 		strLines[strLines.length - 1] = '_ = ' + strLines[strLines.length - 1];
 		str = strLines.join(';\n') + ';';
-		str = glsl.stringify(glsl.parse(str));
+		str = glsl.process(glsl.parse(str));
 		debugStr = str;
 		str += '\nreturn _;';
 	}
