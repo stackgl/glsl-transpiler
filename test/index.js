@@ -931,7 +931,7 @@ test.skip('Builtins', function () {
 // indexing (arrays only) [ ]
 
 test.only('Preprocessor', function () {
-	test('#define FOO, #undef FOO', function () {
+	test('Object macros', function () {
 		assert.equal(clean(compile(`
 			#define QUATRE FOUR
 			#define FOUR (2 /* two */ + 2)
@@ -947,7 +947,21 @@ test.only('Preprocessor', function () {
 		`));
 	});
 
-	test('#define FN(), #undef FN()', function () {
+	test('Function macros', function () {
+		assert.equal(clean(compile(`
+			#define lang_init()  c_init()
+			int x = lang_init();
+			int y = lang_init;
+			#undef lang_init
+			int z = lang_init();
+		`)), clean(`
+			var x = c_init();
+			var y = lang_init;
+			var z = lang_init();
+		`));
+	});
+
+	test('Macro arguments', function () {
 
 	});
 
