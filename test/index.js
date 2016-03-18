@@ -652,18 +652,6 @@ test('Vec/matrix operators', function () {
 			v = u + f + v;
 		`;
 
-		// var equiv = `
-		// 	v.x = u.x + f;
-		// 	v.y = u.y + f;
-		// 	v.z = u.z + f;
-		// `;
-
-		// var res = `
-		// 	var v = [1, 2, 3], u = [4, 5, 6];
-		// 	var f = 0;
-		// 	v = u.add(f);
-		// `;
-
 		assert.deepEqual(eval(src, {debug: false}), [5, 7, 9]);
 		assert.deepEqual(eval(src, {optimize: false, debug: false}), [5, 7, 9]);
 	});
@@ -685,17 +673,6 @@ test('Vec/matrix operators', function () {
 			w = v + u;
 		`;
 
-		// var equiv = `
-		// 	w.x = v.x + u.x;
-		// 	w.y = v.y + u.y;
-		// 	w.z = v.z + u.z;
-		// `;
-
-		// var res = `
-		// 	var v = vec3(), u = vec3(), w = vec3();
-		// 	w = v.add(u);
-		// `;
-
 		assert.deepEqual(eval(src, {debug: false}), [3, 3, 2]);
 		assert.deepEqual(eval(src, {debug: false, optimize: false}), [3, 3, 2]);
 	});
@@ -706,13 +683,6 @@ test('Vec/matrix operators', function () {
 			mat3 m = mat3(2);
 			u = v * m;
 		`;
-
-		// var equiv = `
-		// 	u.x = dot(v, m[0]); // m[0] is the left column of m
-		// 	u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
-		// 	u.z = dot(v, m[2]);
-
-		// `;
 
 		assert.deepEqual(eval(src, {debug: false}), [4, 4, 2]);
 		assert.deepEqual(eval(src, {debug: false, optimize: false}), [4, 4, 2]);
@@ -725,10 +695,6 @@ test('Vec/matrix operators', function () {
 			u = m * v;
 		`;
 
-		// 	u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
-		// 	u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
-		// 	u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
-
 		assert.deepEqual(eval(src, {debug: false}), [4, 4, 2]);
 		assert.deepEqual(eval(src, {debug: false, optimize: false}), [4, 4, 2]);
 	});
@@ -739,18 +705,6 @@ test('Vec/matrix operators', function () {
 			mat3 m = mat3(1), n = mat3(2), r;
 			r = m * n;
 		`;
-
-		// var equiv = `
-		// r[0].x = m[0].x * n[0].x + m[1].x * n[0].y + m[2].x * n[0].z;
-		// r[1].x = m[0].x * n[1].x + m[1].x * n[1].y + m[2].x * n[1].z;
-		// r[2].x = m[0].x * n[2].x + m[1].x * n[2].y + m[2].x * n[2].z;
-		// r[0].y = m[0].y * n[0].x + m[1].y * n[0].y + m[2].y * n[0].z;
-		// r[1].y = m[0].y * n[1].x + m[1].y * n[1].y + m[2].y * n[1].z;
-		// r[2].y = m[0].y * n[2].x + m[1].y * n[2].y + m[2].y * n[2].z;
-		// r[0].z = m[0].z * n[0].x + m[1].z * n[0].y + m[2].z * n[0].z;
-		// r[1].z = m[0].z * n[1].x + m[1].z * n[1].y + m[2].z * n[1].z;
-		// r[2].z = m[0].z * n[2].x + m[1].z * n[2].y + m[2].z * n[2].z;
-		// `;
 
 		assert.deepEqual(eval(src, {debug: false}), [2, 0, 0, 0, 2, 0, 0, 0, 2]);
 		assert.deepEqual(eval(src, {debug: false, optimize: false}), [2, 0, 0, 0, 2, 0, 0, 0, 2]);
@@ -822,7 +776,7 @@ test.skip('Functions', function () {
 		assert.equal(clean(compile(src)), clean(res));
 	});
 
-	test('Interface', function () {
+	test.skip('Interface', function () {
 		//as far functions are hoisted, we can not care really much about
 		var src = `
 		vec4 f(in vec4 x);
@@ -837,6 +791,10 @@ test.skip('Functions', function () {
 			x;
 		};
 		`;
+	});
+
+	test('Override', function () {
+
 	});
 });
 
@@ -971,6 +929,35 @@ test.skip('Builtins', function () {
 // equality == !=
 // assignment =
 // indexing (arrays only) [ ]
+
+test.only('Preprocessor', function () {
+	test('#define FOO, #undef FOO', function () {
+		assert.equal(clean(compile(`
+			#define QUATRE FOUR
+			#define FOUR (2 /* two */ + 2)
+			int x = QUATRE;
+			#undef FOUR
+			int y = QUATRE;
+			#define FOUR 16
+			int z = QUATRE;
+		`)), clean(`
+			var x = 4;
+			var y = FOUR;
+			var z = 16;
+		`));
+	});
+
+	test('#define FN(), #undef FN()', function () {
+
+	});
+
+	// #define f(x) x x
+	// f (1
+	// #undef f
+	// #define f 2
+	// f)
+	//→ 1 2 1 2
+});
 
 
 

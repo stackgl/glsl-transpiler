@@ -144,18 +144,14 @@ test('Primitives', function () {
 test('Vector constructors', function () {
 	test('vec3()', function () {
 		assert.equal(eval('+vec3().length();'), 3);
-		assert.equal(eval('+vec3()[0];'), 0);
-		assert.equal(eval('+vec3()[1];'), 0);
-		assert.equal(eval('+vec3()[2];'), 0);
+		assert.deepEqual(eval('+vec3();'), [0, 0, 0]);
 		assert.equal(eval('vec3()[3];'), undefined);
 	});
 
 	// initializes each component of the vec3 with the float
 	test('vec3(float)', function () {
 		assert.equal(eval('+vec3(2.2).length();'), 3);
-		assert.equal(eval('vec3(2.2)[0];'), 2.2);
-		assert.equal(eval('vec3(2.2)[1];'), 2.2);
-		assert.equal(eval('vec3(2.2)[2];'), 2.2);
+		assert.deepEqual(eval('vec3(2.2);'), [2.2, 2.2, 2.2]);
 		assert.equal(eval('vec3(2.2)[3];'), undefined);
 	});
 
@@ -417,8 +413,6 @@ test('Matrix constructors', function () {
 		assert.equal(eval('dmat4(dvec4(), dvec4(1.2), dvec4(-2).zzzz, dvec4(0,1,2,3).wzyx)[3][3];'), 0);
 	});
 
-	// first column
-	// second column
 	test('mat2(float, float, float, float);', function () {
 		assert.equal(eval('mat2(0,1.2,-3,3.3).length();'), 2);
 		assert.equal(eval('mat2(0,1.2,-3,3.3)[0][0];'), 0);
@@ -442,22 +436,7 @@ test('Matrix constructors', function () {
 
 	test('mat4(float × 16)', function () {
 		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1).length();'), 4);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[0][0];'), 0);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[0][1];'), 1.2);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[0][2];'), -3);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[0][3];'), 3);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[1][0];'), 1);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[1][1];'), 2);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[1][2];'), 3);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[1][3];'), 4);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[2][0];'), 5);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[2][1];'), 6);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[2][2];'), 7);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[2][3];'), 8);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[3][0];'), 0);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[3][1];'), 0);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[3][2];'), -1);
-		assert.equal(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1)[3][3];'), -1);
+		assert.deepEqual(eval('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1);'), [0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1]);
 	});
 
 	test.skip('mat2x3(vec2, float, vec2, float);', function () {
@@ -869,8 +848,6 @@ test('Math', function () {
 });
 
 test('Vector relational functions', function () {
-
-
 	test('bvec lessThan (vec x, vec y)', function () {
 		var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
 		assert.almost(eval(`lessThan(vec2(${x}), vec2(${y}));`), [x < y, x < y]);
