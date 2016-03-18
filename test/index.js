@@ -930,7 +930,7 @@ test.skip('Builtins', function () {
 // assignment =
 // indexing (arrays only) [ ]
 
-test.only('Preprocessor', function () {
+test('Preprocessor', function () {
 	test('Object macros', function () {
 		assert.equal(clean(compile(`
 			#define QUATRE FOUR
@@ -961,8 +961,88 @@ test.only('Preprocessor', function () {
 		`));
 	});
 
-	test('Macro arguments', function () {
+	test.skip('Macro arguments', function () {
+		// assert.equal(clean(compile(`
+		// #define min(X, Y)  ((X) < (Y) ? (X) : (Y))
+		// x = min(a, b);          //  x = ((a) < (b) ? (a) : (b));
+		// y = min(1, 2);          //  y = ((1) < (2) ? (1) : (2));
+		// z = min(a + 28, *p);    //  z = ((a + 28) < (*p) ? (a + 28) : (*p));
 
+		// min (min (a, b), c) // ((((a) < (b) ? (a) : (b))) < (c)
+		// ? (((a) < (b) ? (a) : (b)))
+		// : (c))
+
+		// min(, b)        // ((   ) < (b) ? (   ) : (b))
+		// min(a, )        // ((a  ) < ( ) ? (a  ) : ( ))
+		// min(,)          // ((   ) < ( ) ? (   ) : ( ))
+		// min((,),)       // (((,)) < ( ) ? ((,)) : ( ))
+
+		// min()      error--> macro "min" requires 2 arguments, but only 1 given
+		// min(,,)    error--> macro "min" passed 3 arguments, but takes just 2
+
+		// #define foo(x) x, "x"
+		// foo(bar)        ==> bar, "x"
+		// `)), clean(`
+		// `));
+	});
+
+	test.skip('Stringification', function () {
+		// #define WARN_IF(EXP) \
+		// do { if (EXP) \
+		//      fprintf (stderr, "Warning: " #EXP "\n"); } \
+		// while (0)
+		// WARN_IF (x == 0);
+		//   ==> do { if (x == 0)
+		//         fprintf (stderr, "Warning: " "x == 0" "\n"); } while (0);
+
+		// #define xstr(s) str(s)
+		// #define str(s) #s
+		// #define foo 4
+		// str (foo)
+		//   ==> "foo"
+		// xstr (foo)
+		//   ==> xstr (4)
+		//   ==> str (4)
+		//   ==> "4"
+	});
+
+	test.skip('Concatenation', function () {
+			// #define COMMAND(NAME)  { #NAME, NAME ## _command }
+
+	  //    struct command commands[] =
+	  //    {
+	  //      COMMAND (quit),
+	  //      COMMAND (help),
+	  //      ...
+	  //    };
+
+	  //     struct command
+	  //    {
+	  //      char *name;
+	  //      void (*function) (void);
+	  //    };
+
+	  //    struct command commands[] =
+	  //    {
+	  //      { "quit", quit_command },
+	  //      { "help", help_command },
+	  //      ...
+	  //    };
+	});
+
+	test('Variadic macros', function () {
+		// #define eprintf(...) fprintf (stderr, __VA_ARGS__)
+		//  eprintf ("%s:%d: ", input_file, lineno)
+  //         ==>  fprintf (stderr, "%s:%d: ", input_file, lineno)
+
+	  // #define eprintf(args...) fprintf (stderr, args) ← replaces VA_ARGS
+
+	  // #define eprintf(format, ...) fprintf (stderr, format, __VA_ARGS__)
+
+		// eprintf ("success!\n")
+		// ==> fprintf(stderr, "success!\n", );
+
+		 // #define eprintf(format, args...) fprintf (stderr, format , ##args)
 	});
 
 	// #define f(x) x x

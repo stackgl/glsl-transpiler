@@ -144,7 +144,7 @@ test('Primitives', function () {
 test('Vector constructors', function () {
 	test('vec3()', function () {
 		assert.equal(eval('+vec3().length();'), 3);
-		assert.deepEqual(eval('+vec3();'), [0, 0, 0]);
+		assert.deepEqual(eval('vec3();'), [0, 0, 0]);
 		assert.equal(eval('vec3()[3];'), undefined);
 	});
 
