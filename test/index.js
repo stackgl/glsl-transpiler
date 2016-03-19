@@ -138,7 +138,7 @@ test('Episodes', function () {
 });
 
 
-test('Interface', function () {
+test.only('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 		precision mediump float;
@@ -263,7 +263,7 @@ test('Interface', function () {
 
 
 	test('Direct', function () {
-		// assert.equal(clean(compile(source)).split('\n')[33], clean(result).split('\n')[33]);
+		// assert.equal(clean(compile(source)).split('\n')[34], clean(result).split('\n')[34]);
 		assert.equal(clean(compile(source)), clean(result));
 	});
 
