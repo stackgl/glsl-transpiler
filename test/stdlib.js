@@ -110,7 +110,7 @@ test('Primitives', function () {
 
 	// converts a Boolean value to a float
 	test('float(bool)', function () {
-		assert.equal(eval('+float(true);'), 1);
+		assert.equal(eval('+float(true);', {debug: false}), 1);
 		assert.equal(eval('+float(false);'), 0);
 	});
 
@@ -185,9 +185,7 @@ test('Vector constructors', function () {
 	// initializes an ivec3 with 3 ints
 	test('ivec3(int, int, int)', function () {
 		assert.equal(eval('ivec3(1.2, 3.3, 5).length();'), 3);
-		assert.equal(eval('ivec3(1.2, 3.3, 5)[0];'), 1);
-		assert.equal(eval('ivec3(1.2, 3.3, 5)[1];'), 3);
-		assert.equal(eval('ivec3(1.2, 3.3, 5)[2];'), 5);
+		assert.deepEqual(eval('ivec3(1.2, 3.3, 5);', {debug: false}), [1,3,5]);
 		assert.equal(eval('ivec3(1.2, 3.3, 5)[3];'), undefined);
 	});
 
@@ -203,10 +201,8 @@ test('Vector constructors', function () {
 	// drops the third component of a vec3
 	test('vec2(vec3)', function () {
 		assert.equal(eval('vec2(vec3(0, 4, 1.2)).length();'), 2);
-		assert.equal(eval('vec2(vec3(0, 4, 1.2))[0];'), 0);
-		assert.equal(eval('vec2(vec3(0, 4, 1.2))[1];'), 4);
+		assert.deepEqual(eval('vec2(vec3(0, 4, 1.2));', {debug: false}), [0, 4]);
 		assert.equal(eval('vec2(vec3(0, 4, 1.2))[2];'), undefined);
-		assert.equal(eval('vec2(vec3(0, 4, 1.2))[3];'), undefined);
 	});
 
 	// drops the fourth component of a vec4
@@ -261,7 +257,7 @@ test('Vector constructors', function () {
 	});
 });
 
-test('Matrix constructors', function () {
+test.only('Matrix constructors', function () {
 	// To initialize the diagonal of a matrix with all other elements set to zero:
 	test('mat2(float)', function () {
 		assert.equal(eval('mat2(1.2).length();'), 2);

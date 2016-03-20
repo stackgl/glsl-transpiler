@@ -138,7 +138,7 @@ test('Episodes', function () {
 });
 
 
-test.only('Interface', function () {
+test('Interface', function () {
 	//examplary source, containing all possible tokens
 	var source = `
 		precision mediump float;
@@ -930,7 +930,7 @@ test.skip('Builtins', function () {
 // assignment =
 // indexing (arrays only) [ ]
 
-test('Preprocessor', function () {
+test.skip('Preprocessor', function () {
 	test('Object macros', function () {
 		assert.equal(clean(compile(`
 			#define QUATRE FOUR
