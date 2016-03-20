@@ -90,7 +90,7 @@ test.only('Episodes', function () {
 		assert.equal(
 			clean(glsl.compile(this.title)),
 			clean(`
-			gl_Position = [gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0]];
+			gl_Position = [gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0], gl_Position[2], gl_Position[3]];
 			`)
 		);
 	});
@@ -106,7 +106,7 @@ test.only('Episodes', function () {
 		);
 	});
 
-	test.only('vec3 x = mat3(2)[1];', function () {
+	test('vec3 x = mat3(2)[1];', function () {
 		assert.equal(
 			clean(glsl(this.title)),
 			clean(`
@@ -132,6 +132,38 @@ test.only('Episodes', function () {
 			var v = [0, 0, 0, 0];
 			var c = 0;
 			gl_FragColor = [0, 0, 0, 0];
+			`)
+		);
+	});
+
+	test('gl_Position.x = gl_Position.y / gl_Position.x;', function () {
+		assert.equal(
+			clean(glsl(this.title)),
+			clean(`
+			gl_Position[0] = gl_Position[1] / gl_Position[0];
+			`)
+		);
+	});
+
+	test.skip('st.prop = val', function () {
+
+	});
+
+	test('vec4 v = vec4(1, 2, 3, 4); v.wy *= v.zx;', function () {
+		//gl_Position = [null, 1, null, 0].map(function (idx, i) {
+		//	return idx == null ? gl_position[i] : this[idx];
+		//}, gl_Position.wy * gl_Position.zx)
+		assert.deepEqual(
+			eval(this.title),
+			[1, 2, 3, 12]
+		);
+	});
+
+	test('gl_Position.yx = gl_Position.xy / gl_Position.yx;', function () {
+		assert.equal(
+			clean(glsl(this.title)),
+			clean(`
+			gl_Position = [gl_Position[1] / gl_Position[0], gl_Position[2], gl_Position[3]];
 			`)
 		);
 	});
@@ -262,7 +294,7 @@ test('Interface', function () {
 		`;
 
 
-	test('Direct', function () {
+	test.only('Direct', function () {
 		// assert.equal(clean(compile(source)).split('\n')[34], clean(result).split('\n')[34]);
 		assert.equal(clean(compile(source)), clean(result));
 	});
