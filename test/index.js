@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test('Episodes', function () {
+test.only('Episodes', function () {
 	var glsl = GLSL({
 	});
 

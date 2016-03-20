@@ -257,7 +257,7 @@ test('Vector constructors', function () {
 	});
 });
 
-test.only('Matrix constructors', function () {
+test('Matrix constructors', function () {
 	// To initialize the diagonal of a matrix with all other elements set to zero:
 	test('mat2(float)', function () {
 		assert.equal(eval('mat2(1.2).length();'), 2);
