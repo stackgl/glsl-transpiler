@@ -106,7 +106,7 @@ test.only('Episodes', function () {
 		);
 	});
 
-	test('vec3 x = mat3(2)[1];', function () {
+	test.only('vec3 x = mat3(2)[1];', function () {
 		assert.equal(
 			clean(glsl(this.title)),
 			clean(`
