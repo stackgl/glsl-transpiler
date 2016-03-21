@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test.only('Episodes', function () {
+test('Episodes', function () {
 	var glsl = GLSL({
 	});
 
@@ -38,7 +38,7 @@ test.only('Episodes', function () {
 			clean(compile(this.title, {optimize: true})),
 			clean(`
 			var x = 0;
-			var uv = [0, 0], position = [uv[0], -uv[1]].map(function (x, i) {return x * fn(x);});
+			var uv = [0, 0], position = [uv[0], -uv[1]].map(function (_) {return this * _;}, fn(x));
 			`)
 			//ideal:
 			// var fnx = fn(x)
@@ -81,7 +81,7 @@ test.only('Episodes', function () {
 			clean(glsl.compile(this.title)),
 			clean(`
 			var v = [1, 1];
-			[1 + v[1], 1 + v[0]];
+			[v[1] + 1, v[0] + 1];
 			`)
 		);
 	});
@@ -101,7 +101,7 @@ test.only('Episodes', function () {
 			clean(`
 			var v = [0, 0, 0, 0];
 			var c = 0;
-			gl_FragColor = [c * v[3], c * v[2], c * v[1], c * v[0]];
+			gl_FragColor = [v[3] * c, v[2] * c, v[1] * c, v[0] * c];
 			`)
 		);
 	});
