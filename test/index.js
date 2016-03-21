@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test('Episodes', function () {
+test.only('Episodes', function () {
 	var glsl = GLSL({
 	});
 
@@ -175,6 +175,16 @@ test('Episodes', function () {
 			gl_FragColor[0] = gl_FragCoord[0] / 4;
 			`)
 		);
+	});
+
+	test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1);', function () {
+		assert.equal(
+			clean(glsl(this.title)),
+			clean(`
+			var p = [0, 0];
+			gl_Position = [p[1] / 2.0, p[0] / 2.0, 0, 1];
+			`)
+		)
 	});
 });
 
