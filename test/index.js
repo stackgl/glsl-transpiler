@@ -20,7 +20,7 @@ function clean (str) {
 }
 
 
-test.only('Episodes', function () {
+test('Episodes', function () {
 	var glsl = GLSL({
 	});
 
@@ -81,7 +81,7 @@ test.only('Episodes', function () {
 			clean(glsl.compile(this.title)),
 			clean(`
 			var v = [1, 1];
-			[v[1] + 1, v[0] + 1];
+			[1 + v[1], 1 + v[0]];
 			`)
 		);
 	});
@@ -101,7 +101,7 @@ test.only('Episodes', function () {
 			clean(`
 			var v = [0, 0, 0, 0];
 			var c = 0;
-			gl_FragColor = [v[3] * c, v[2] * c, v[1] * c, v[0] * c];
+			gl_FragColor = [c * v[3], c * v[2], c * v[1], c * v[0]];
 			`)
 		);
 	});
@@ -163,7 +163,16 @@ test.only('Episodes', function () {
 		assert.equal(
 			clean(glsl(this.title)),
 			clean(`
-			gl_Position = [gl_Position[1] / gl_Position[0], gl_Position[2], gl_Position[3]];
+			gl_Position = [gl_Position[1] / gl_Position[0], gl_Position[0] / gl_Position[1], gl_Position[2], gl_Position[3]];
+			`)
+		);
+	});
+
+	test('gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();', function () {
+		assert.equal(
+			clean(glsl(this.title)),
+			clean(`
+			gl_FragColor[0] = gl_FragCoord[0] / 4;
 			`)
 		);
 	});
@@ -294,9 +303,9 @@ test('Interface', function () {
 		`;
 
 
-	test.only('Direct', function () {
-		// assert.equal(clean(compile(source)).split('\n')[34], clean(result).split('\n')[34]);
-		assert.equal(clean(compile(source)), clean(result));
+	test('Direct', function () {
+		assert.equal(clean(compile(source)).split('\n')[7], clean(result).split('\n')[7]);
+		// assert.equal(clean(compile(source)), clean(result));
 	});
 
 	test('Stream', function (done) {
