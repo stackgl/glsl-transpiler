@@ -519,7 +519,7 @@ test('Matrix constructors', function () {
 	// puts the mat3x3 in the upper-left, sets the lower right component to 1, and the rest to 0
 	test('mat4x4(mat3x3);', function () {
 		assert.equal(eval('mat4(mat3(vec3(1), vec3(2), vec3(3))).length();'), 4);
-		assert.deepEqual(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)));'), [1,1,1,0, 2,2,2,0, 3,3,3,0, 0,0,0,1]);
+		assert.deepEqual(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)));', {debug: false}), [1,1,1,0, 2,2,2,0, 3,3,3,0, 0,0,0,1]);
 		assert.deepEqual(eval('mat4(mat3(vec3(1), vec3(2), vec3(3)));', {optimize: false, debug:false}), [1,1,1,0, 2,2,2,0, 3,3,3,0, 0,0,0,1]);
 	});
 	test('mat4x4(mat2);', function () {
