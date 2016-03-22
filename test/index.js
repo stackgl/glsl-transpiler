@@ -799,7 +799,7 @@ test('Swizzles', function () {
 	});
 });
 
-test.only('Functions', function () {
+test('Functions', function () {
 	test.skip('Arguments', function () {
 		var src = `
 			vec4 f(in vec4 x, out vec4 y); // (A)
@@ -827,7 +827,7 @@ test.only('Functions', function () {
 		assert.equal(clean(compile(src)), clean(res));
 	});
 
-	test.only('Override', function () {
+	test('Override', function () {
 		//as far functions are hoisted, we can not care really much about
 		var src = `
 		// vec4 f(in vec4 x);
@@ -846,7 +846,7 @@ test.only('Functions', function () {
 		`;
 
 		var res = `
-		function f_float (x) {
+		function f (x) {
 			return [x, x, x, x];
 		};
 		function f_float_float (x, y) {
@@ -855,10 +855,6 @@ test.only('Functions', function () {
 		`;
 
 		assert.equal(clean(compile(src)), clean(res));
-	});
-
-	test('Override', function () {
-
 	});
 });
 
