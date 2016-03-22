@@ -391,29 +391,29 @@ test.skip('main function', function() {
 
 test('primitive variable declarations', function() {
 	test('should default ints to 0', function() {
-	assert.equal(
-		clean(compile('void main() { int test; }')),
-		clean('function main () {\nvar test = 0;\n};'));
-	assert.equal(
-		clean(compile('void main() { int test, foo; }')),
-		clean('function main () {\nvar test = 0, foo = 0;\n};'));
+		assert.equal(
+			clean(compile('void main() { int test; }')),
+			clean('function main () {\nvar test = 0;\n};'));
+		assert.equal(
+			clean(compile('void main() { int test, foo; }')),
+			clean('function main () {\nvar test = 0, foo = 0;\n};'));
 	});
 
 	test('should default floats to 0.0', function() {
-	assert.equal(
-		clean(compile('void main() { float test; }')),
-		clean('function main () {\nvar test = 0;\n};'));
-	assert.equal(
-		clean(compile('void main() { float test, foo; }')),
+		assert.equal(
+			clean(compile('void main() { float test; }')),
+			clean('function main () {\nvar test = 0;\n};'));
+		assert.equal(
+			clean(compile('void main() { float test, foo; }')),
 		clean('function main () {\nvar test = 0, foo = 0;\n};'));
 	});
 
 	test('should default bools to 0 (false)', function() {
-	assert.equal(
-		clean(compile('void main() { bool test; }')),
-		clean('function main () {\nvar test = false;\n};'));
-	assert.equal(
-		clean(compile('void main() { bool test, foo; }')),
+		assert.equal(
+			clean(compile('void main() { bool test; }')),
+			clean('function main () {\nvar test = false;\n};'));
+		assert.equal(
+			clean(compile('void main() { bool test, foo; }')),
 		clean('function main () {\nvar test = false, foo = false;\n};'));
 	});
 });
@@ -799,26 +799,26 @@ test('Swizzles', function () {
 	});
 });
 
-test.skip('Functions', function () {
-	test('Arguments', function () {
+test.only('Functions', function () {
+	test.skip('Arguments', function () {
 		var src = `
-		vec4 f(in vec4 x, out vec4 y); // (A)
-		vec4 f(in vec4 x, out uvec4 y); // (B) okay, different argument type
-		vec4 f(in ivec4 x, out dvec4 y); // (C) okay, different argument type
-		int f(in vec4 x, out vec4 y); // error, only return type differs
-		vec4 f(in vec4 x, in vec4 y); // error, only qualifier differs
-		vec4 f(const in vec4 x, out vec4 y); // error, only qualifier differs
+			vec4 f(in vec4 x, out vec4 y); // (A)
+			vec4 f(in vec4 x, out uvec4 y); // (B) okay, different argument type
+			vec4 f(in ivec4 x, out dvec4 y); // (C) okay, different argument type
+			int f(in vec4 x, out vec4 y); // error, only return type differs
+			vec4 f(in vec4 x, in vec4 y); // error, only qualifier differs
+			vec4 f(const in vec4 x, out vec4 y); // error, only qualifier differs
 
-		f(vec4, vec4); // exact match of vec4 f(in vec4 x, out vec4 y)
-		f(vec4, uvec4); // exact match of vec4 f(in vec4 x, out uvec4 y)
-		f(vec4, ivec4); // matched to vec4 f(in vec4 x, out vec4 y)
-		// (C) not relevant, can't convert vec4 to
-		// ivec4. (A) better than (B) for 2nd
-		// argument (rule 3), same on first argument.
-		f(ivec4, vec4); // NOT matched. All three match by implicit
-		// conversion. (C) is better than (A) and (B)
-		// on the first argument. (A) is better than
-		// (B) and (C).
+			f(vec4, vec4); // exact match of vec4 f(in vec4 x, out vec4 y)
+			f(vec4, uvec4); // exact match of vec4 f(in vec4 x, out uvec4 y)
+			f(vec4, ivec4); // matched to vec4 f(in vec4 x, out vec4 y)
+			// (C) not relevant, can't convert vec4 to
+			// ivec4. (A) better than (B) for 2nd
+			// argument (rule 3), same on first argument.
+			f(ivec4, vec4); // NOT matched. All three match by implicit
+			// conversion. (C) is better than (A) and (B)
+			// on the first argument. (A) is better than
+			// (B) and (C).
 		`;
 
 		var res = `
@@ -827,21 +827,34 @@ test.skip('Functions', function () {
 		assert.equal(clean(compile(src)), clean(res));
 	});
 
-	test.skip('Interface', function () {
+	test.only('Override', function () {
 		//as far functions are hoisted, we can not care really much about
 		var src = `
-		vec4 f(in vec4 x);
+		// vec4 f(in vec4 x);
+		// vec4 f(in ivec4 x);
+		// vec4 f(in dvec4 x);
+		vec4 f(in float x);
+		vec4 f(in float x, in float y);
 
-		vec4 f(in vec4 x) {
-			x;
+		vec4 f(in float x) {
+			return vec4(x);
+		}
+
+		vec4 f(in float x, in float y) {
+			return vec4(x, x, y, y);
 		}
 		`;
 
 		var res = `
-		function f(x) {
-			x;
+		function f_float (x) {
+			return [x, x, x, x];
+		};
+		function f_float_float (x, y) {
+			return [x, x, y, y];
 		};
 		`;
+
+		assert.equal(clean(compile(src)), clean(res));
 	});
 
 	test('Override', function () {
