@@ -186,6 +186,10 @@ test('Episodes', function () {
 			`)
 		)
 	});
+
+	test('int f(float x) {return 1;}; int f(double x) {return 2;}; double x; f(x);', function () {
+		assert.equal(eval(this.title, {debug:false}), 2);
+	});
 });
 
 
@@ -855,6 +859,56 @@ test('Functions', function () {
 		`;
 
 		assert.equal(clean(compile(src)), clean(res));
+	});
+
+
+	test('Arguments matching', function () {
+		assert.deepEqual(eval(`
+			float f (float x) {
+				return 1.0;
+			}
+
+			int f (int x) {
+				return 2;
+			}
+
+			int f (int x, float y) {
+				return 3;
+			}
+
+			double f (double x) {
+				return 4.0;
+			}
+
+			vec2 f (float x, float y) {
+				return vec2(5, 5);
+			}
+
+			ivec2 f (int x, int y) {
+				return ivec2(6, 6);
+			}
+
+			dvec2 f (double x, double y) {
+				return ivec2(7, 7);
+			}
+
+			ivec2 f (ivec2 x) {
+				return ivec2(8, 8);
+			}
+
+			vec2 f (vec2 x) {
+				return vec2(9, 9);
+			}
+
+
+			void main (void) {
+				double dx;
+				mat3 res = mat3(f(1.0), f(1), f(1, 2.0), f(dx), f(1.0, 2.0)[0], f(1, 2)[0], f(dx, dx)[0], f(ivec2(1))[1], f(vec2(1))[1]);
+				return res;
+			};
+
+			main();
+		`, {debug: false}), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 	});
 });
 

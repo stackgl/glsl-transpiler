@@ -24,7 +24,7 @@ module.exports = function eval (str, opt) {
 		str = strLines.join('\n');
 	} catch (e) {
 		//NOTE: if initial string is like int x = ...; then it is evaled badly.
-		strLines = str.trim().split(/\s*;\s*/).slice(0,-1);
+		strLines = str.trim().split(/\s*[;]\s*/).slice(0,-1);
 		strLines.unshift('float _');
 		strLines[strLines.length - 1] = '_ = ' + strLines[strLines.length - 1];
 		str = strLines.join(';\n') + ';';
