@@ -1044,11 +1044,11 @@ test.skip('Builtins', function () {
 // assignment =
 // indexing (arrays only) [ ]
 
-test.skip('Preprocessor', function () {
+test.only('Preprocessor', function () {
 	test('Object macros', function () {
 		assert.equal(clean(compile(`
 			#define QUATRE FOUR
-			#define FOUR (2 /* two */ + 2)
+			#define FOUR 4
 			int x = QUATRE;
 			#undef FOUR
 			int y = QUATRE;
@@ -1075,29 +1075,37 @@ test.skip('Preprocessor', function () {
 		`));
 	});
 
-	test.skip('Macro arguments', function () {
-		// assert.equal(clean(compile(`
-		// #define min(X, Y)  ((X) < (Y) ? (X) : (Y))
-		// x = min(a, b);          //  x = ((a) < (b) ? (a) : (b));
-		// y = min(1, 2);          //  y = ((1) < (2) ? (1) : (2));
-		// z = min(a + 28, *p);    //  z = ((a + 28) < (*p) ? (a + 28) : (*p));
-
-		// min (min (a, b), c) // ((((a) < (b) ? (a) : (b))) < (c)
-		// ? (((a) < (b) ? (a) : (b)))
-		// : (c))
-
-		// min(, b)        // ((   ) < (b) ? (   ) : (b))
-		// min(a, )        // ((a  ) < ( ) ? (a  ) : ( ))
-		// min(,)          // ((   ) < ( ) ? (   ) : ( ))
-		// min((,),)       // (((,)) < ( ) ? ((,)) : ( ))
+	test.only('Macro arguments', function () {
+		assert.equal(clean(compile(`
+			#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
+			x = min(a, b);
+			y = min(1, 2);
+			z = min(a + 28, p);
+			min (min (a, b), c);
+		`)), clean(`
+			x = ((a) < (b) ? (a) : (b));
+			y = ((1) < (2) ? (1) : (2));
+			z = ((a + 28) < (p) ? (a + 28) : (p));
+			((((a) < (b) ? (a) : (b))) < (c) ? (((a) < (b) ? (a) : (b))) : (c));
+		`));
+		// min(, b);
+		// min(a, );
+		// min(,);
+		// min((,),);
+		// ((   ) < (b) ? (   ) : (b));
+		// ((a  ) < ( ) ? (a  ) : ( ));
+		// ((   ) < ( ) ? (   ) : ( ));
+		// (((,)) < ( ) ? ((,)) : ( ));
 
 		// min()      error--> macro "min" requires 2 arguments, but only 1 given
 		// min(,,)    error--> macro "min" passed 3 arguments, but takes just 2
 
-		// #define foo(x) x, "x"
-		// foo(bar)        ==> bar, "x"
-		// `)), clean(`
-		// `));
+		assert.equal(clean(compile(`
+			#define foo(x) x, "x"
+			foo(bar);
+		`)), clean(`
+			bar, "x";
+		`));
 	});
 
 	test.skip('Stringification', function () {
@@ -1121,42 +1129,42 @@ test.skip('Preprocessor', function () {
 	});
 
 	test.skip('Concatenation', function () {
-			// #define COMMAND(NAME)  { #NAME, NAME ## _command }
+		// #define COMMAND(NAME)  { #NAME, NAME ## _command }
 
-	  //    struct command commands[] =
-	  //    {
-	  //      COMMAND (quit),
-	  //      COMMAND (help),
-	  //      ...
-	  //    };
+		//    struct command commands[] =
+		//    {
+		//      COMMAND (quit),
+		//      COMMAND (help),
+		//      ...
+		//    };
 
-	  //     struct command
-	  //    {
-	  //      char *name;
-	  //      void (*function) (void);
-	  //    };
+		//     struct command
+		//    {
+		//      char *name;
+		//      void (*function) (void);
+		//    };
 
-	  //    struct command commands[] =
-	  //    {
-	  //      { "quit", quit_command },
-	  //      { "help", help_command },
-	  //      ...
-	  //    };
+		//    struct command commands[] =
+		//    {
+		//      { "quit", quit_command },
+		//      { "help", help_command },
+		//      ...
+		//    };
 	});
 
 	test('Variadic macros', function () {
 		// #define eprintf(...) fprintf (stderr, __VA_ARGS__)
 		//  eprintf ("%s:%d: ", input_file, lineno)
-  //         ==>  fprintf (stderr, "%s:%d: ", input_file, lineno)
+		//         ==>  fprintf (stderr, "%s:%d: ", input_file, lineno)
 
-	  // #define eprintf(args...) fprintf (stderr, args) ← replaces VA_ARGS
+		// #define eprintf(args...) fprintf (stderr, args) ← replaces VA_ARGS
 
-	  // #define eprintf(format, ...) fprintf (stderr, format, __VA_ARGS__)
+		// #define eprintf(format, ...) fprintf (stderr, format, __VA_ARGS__)
 
 		// eprintf ("success!\n")
 		// ==> fprintf(stderr, "success!\n", );
 
-		 // #define eprintf(format, args...) fprintf (stderr, format , ##args)
+		// #define eprintf(format, args...) fprintf (stderr, format , ##args)
 	});
 
 	// #define f(x) x x

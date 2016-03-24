@@ -67,7 +67,8 @@ var result = compile(tree);
 
 | Property | Default | Description |
 |---|:---:|---|
-| `optimize` | `true` | Enable simple optimizations, for example `mat2(vec2(1, 2), vec2(3, 4))[0][1]` with the flag on will be transformed to `2`, and without to `[[1, 2], [3, 4]][0][1]`. |
+| `optimize` | `true` | Enable optimizations, for example `mat2(vec2(1, 2), vec2(3, 4))[0][1]` unoptimized transforms to `[[1, 2], [3, 4]][0][1]` and optimized to `2`. |
+| `preprocess` | `true` | Apply preprocessor. |
 | `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
 | `replaceAttribute` | `false` | Same as `replaceUniform`, but for attribute declarations. |
 | `replaceVarying` | `false` | Same as `replaceUniform`, but for varying declarations. |
