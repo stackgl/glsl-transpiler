@@ -16,7 +16,7 @@ var eval = require('./eval');
 
 //clean empty strings
 function clean (str) {
-	return str.trim().replace(/^\s*\n/gm, '').replace(/^\s*/gm, '');
+	return str.trim().replace(/^\s*\n/gm, '').replace(/^\s*/gm, '').replace(/(\s)\s+/g, '$1');
 }
 
 
@@ -1108,14 +1108,16 @@ test.only('Preprocessor', function () {
 		`));
 	});
 
-	test.skip('Stringification', function () {
-		// #define WARN_IF(EXP) \
-		// do { if (EXP) \
-		//      fprintf (stderr, "Warning: " #EXP "\n"); } \
-		// while (0)
-		// WARN_IF (x == 0);
-		//   ==> do { if (x == 0)
-		//         fprintf (stderr, "Warning: " "x == 0" "\n"); } while (0);
+	test('Stringification', function () {
+		assert.equal(clean(compile(`
+			#define WARN_IF(EXP) \
+			do { if (EXP) \
+				fprintf (stderr, "Warning: " #EXP "!"); } \
+			while (0)
+			WARN_IF (x == 0);
+		`)), clean(`
+			do { if (x == 0) fprintf (stderr, "Warning: " "x == 0" "!"); } while (0);
+		`));
 
 		// #define xstr(s) str(s)
 		// #define str(s) #s
