@@ -1075,7 +1075,7 @@ test.only('Preprocessor', function () {
 		`));
 	});
 
-	test.only('Macro arguments', function () {
+	test('Macro arguments', function () {
 		assert.equal(clean(compile(`
 			#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
 			x = min(a, b);
