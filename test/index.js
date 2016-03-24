@@ -1108,26 +1108,27 @@ test.only('Preprocessor', function () {
 		`));
 	});
 
-	test('Stringification', function () {
-		assert.equal(clean(compile(`
-			#define WARN_IF(EXP) \
-			do { if (EXP) \
-				fprintf (stderr, "Warning: " #EXP "!"); } \
-			while (0)
-			WARN_IF (x == 0);
-		`)), clean(`
-			do { if (x == 0) fprintf (stderr, "Warning: " "x == 0" "!"); } while (0);
-		`));
+	test.only('Stringification', function () {
+		// assert.equal(clean(compile(`
+		// 	#define WARN_IF(EXP) \
+		// 	do { if (EXP) \
+		// 		fprintf (stderr, "Warning: " #EXP "!"); } \
+		// 	while (0)
+		// 	WARN_IF (x == 0);
+		// `)), clean(`
+		// 	do { if (x == 0) fprintf (stderr, "Warning: " "x == 0" "!"); } while (0);
+		// `));
 
-		// #define xstr(s) str(s)
-		// #define str(s) #s
-		// #define foo 4
-		// str (foo)
-		//   ==> "foo"
-		// xstr (foo)
-		//   ==> xstr (4)
-		//   ==> str (4)
-		//   ==> "4"
+		assert.equal(clean(compile(`
+		#define xstr(s) str(s)
+		#define str(s) #s
+		#define foo 4
+		str (foo);
+		xstr (foo);
+		`)), clean(`
+		"foo";
+		"4";
+		`));
 	});
 
 	test.skip('Concatenation', function () {
