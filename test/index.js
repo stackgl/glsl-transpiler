@@ -1088,6 +1088,7 @@ test.only('Preprocessor', function () {
 			z = ((a + 28) < (p) ? (a + 28) : (p));
 			((((a) < (b) ? (a) : (b))) < (c) ? (((a) < (b) ? (a) : (b))) : (c));
 		`));
+
 		// min(, b);
 		// min(a, );
 		// min(,);
@@ -1108,7 +1109,7 @@ test.only('Preprocessor', function () {
 		`));
 	});
 
-	test.only('Stringification', function () {
+	test('Stringification', function () {
 		// assert.equal(clean(compile(`
 		// 	#define WARN_IF(EXP) \
 		// 	do { if (EXP) \
