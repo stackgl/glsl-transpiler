@@ -1,11 +1,11 @@
-> _glsl-js_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
+> _glsl-transpiler_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
 
 ## Usage
 
-[![npm install glsl-js](https://nodei.co/npm/glsl-js.png?mini=true)](https://npmjs.org/package/glsl-js/)
+[![npm install glsl-transpiler](https://nodei.co/npm/glsl-transpiler.png?mini=true)](https://npmjs.org/package/glsl-transpiler/)
 
 ```js
-var Compiler = require('glsl-js');
+var Compiler = require('glsl-transpiler');
 
 var compile = Compiler({
 	replaceUniform: function (name) {
@@ -51,12 +51,12 @@ function main () {
 
 ## API
 
-### glsl-js
+### glsl-transpiler
 
-To apply compilation to glsl AST or string, require `glsl-js`:
+To apply compilation to glsl AST or string, require `glsl-transpiler`:
 
 ```js
-var GLSL = require('glsl-js');
+var GLSL = require('glsl-transpiler');
 
 var source = glslify('./source.glsl');
 var compile = GLSL(options?);
@@ -74,12 +74,12 @@ var result = compile(tree);
 | `replaceVarying` | `false` | Same as `replaceUniform`, but for varying declarations. |
 
 
-### glsl-js/stream
+### glsl-transpiler/stream
 
-_glsl-js_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
+_glsl-transpiler_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
 
 ```js
-var compile = require('glsl-js/stream');
+var compile = require('glsl-transpiler/stream');
 var parse = require('glsl-parser/stream');
 var tokenize = require('glsl-tokenizer/stream');
 

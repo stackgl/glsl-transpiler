@@ -1,7 +1,7 @@
 {
-  "name": "glsl-js",
-  "version": "2.4.0",
-  "description": "glsl to js compiler",
+  "name": "glsl-transpiler",
+  "version": "1.0.0",
+  "description": "Transpile GLSL to JS",
   "main": "index.js",
   "dependencies": {
     "array-flatten": "^2.0.0",
@@ -34,15 +34,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dfcreative/glsl-js.git"
+    "url": "git+https://github.com/stackgl/glsl-transpiler.git"
   },
   "keywords": [
     "headless-gl",
     "gl",
     "glsl",
+    "glsl.js",
+    "glsl-js",
+    "transpiler",
     "stackgl",
     "js",
-    "fake-gl",
+    "nogl",
     "opengl",
     "shaders",
     "webgl",
@@ -51,7 +54,7 @@
   "author": "Deema Yvanow <dfcreative@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dfcreative/glsl-js/issues"
+    "url": "https://github.com/stackgl/glsl-transpiler/issues"
   },
-  "homepage": "https://github.com/dfcreative/glsl-js#readme"
+  "homepage": "https://github.com/stackgl/glsl-transpiler#readme"
 }
