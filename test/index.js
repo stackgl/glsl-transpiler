@@ -1039,7 +1039,15 @@ test.skip('Builtins', function () {
 // assignment =
 // indexing (arrays only) [ ]
 
-test('Preprocessor', function () {
+test.only('Preprocessor', function () {
+	test('Transform macro to commented', function () {
+		assert.equal(clean(compile(`
+			#extension A
+		`)), clean(`
+			/* #extension A */
+		`));
+	});
+
 	test('Object macros', function () {
 		assert.equal(clean(compile(`
 			#define QUATRE FOUR
