@@ -12,12 +12,7 @@ var isBrowser = require('is-browser');
 var StringStream = require('stream-array');
 var Sink = require('stream').Writable;
 var eval = require('./eval');
-
-
-//clean empty strings
-function clean (str) {
-	return str.trim().replace(/^\s*\n/gm, '').replace(/^\s*/gm, '').replace(/(\s)\s+/g, '$1');
-}
+var clean = require('cln');
 
 
 test('Episodes', function () {
@@ -1044,7 +1039,7 @@ test.skip('Builtins', function () {
 // assignment =
 // indexing (arrays only) [ ]
 
-test.only('Preprocessor', function () {
+test('Preprocessor', function () {
 	test('Object macros', function () {
 		assert.equal(clean(compile(`
 			#define QUATRE FOUR
@@ -1088,95 +1083,7 @@ test.only('Preprocessor', function () {
 			z = ((a + 28) < (p) ? (a + 28) : (p));
 			((((a) < (b) ? (a) : (b))) < (c) ? (((a) < (b) ? (a) : (b))) : (c));
 		`));
-
-		// min(, b);
-		// min(a, );
-		// min(,);
-		// min((,),);
-		// ((   ) < (b) ? (   ) : (b));
-		// ((a  ) < ( ) ? (a  ) : ( ));
-		// ((   ) < ( ) ? (   ) : ( ));
-		// (((,)) < ( ) ? ((,)) : ( ));
-
-		// min()      error--> macro "min" requires 2 arguments, but only 1 given
-		// min(,,)    error--> macro "min" passed 3 arguments, but takes just 2
-
-		assert.equal(clean(compile(`
-			#define foo(x) x, "x"
-			foo(bar);
-		`)), clean(`
-			bar, "x";
-		`));
 	});
-
-	test('Stringification', function () {
-		// assert.equal(clean(compile(`
-		// 	#define WARN_IF(EXP) \
-		// 	do { if (EXP) \
-		// 		fprintf (stderr, "Warning: " #EXP "!"); } \
-		// 	while (0)
-		// 	WARN_IF (x == 0);
-		// `)), clean(`
-		// 	do { if (x == 0) fprintf (stderr, "Warning: " "x == 0" "!"); } while (0);
-		// `));
-
-		assert.equal(clean(compile(`
-		#define xstr(s) str(s)
-		#define str(s) #s
-		#define foo 4
-		str (foo);
-		xstr (foo);
-		`)), clean(`
-		"foo";
-		"4";
-		`));
-	});
-
-	test.skip('Concatenation', function () {
-		// #define COMMAND(NAME)  { #NAME, NAME ## _command }
-
-		//    struct command commands[] =
-		//    {
-		//      COMMAND (quit),
-		//      COMMAND (help),
-		//      ...
-		//    };
-
-		//     struct command
-		//    {
-		//      char *name;
-		//      void (*function) (void);
-		//    };
-
-		//    struct command commands[] =
-		//    {
-		//      { "quit", quit_command },
-		//      { "help", help_command },
-		//      ...
-		//    };
-	});
-
-	test('Variadic macros', function () {
-		// #define eprintf(...) fprintf (stderr, __VA_ARGS__)
-		//  eprintf ("%s:%d: ", input_file, lineno)
-		//         ==>  fprintf (stderr, "%s:%d: ", input_file, lineno)
-
-		// #define eprintf(args...) fprintf (stderr, args) ← replaces VA_ARGS
-
-		// #define eprintf(format, ...) fprintf (stderr, format, __VA_ARGS__)
-
-		// eprintf ("success!\n")
-		// ==> fprintf(stderr, "success!\n", );
-
-		// #define eprintf(format, args...) fprintf (stderr, format , ##args)
-	});
-
-	// #define f(x) x x
-	// f (1
-	// #undef f
-	// #define f 2
-	// f)
-	//→ 1 2 1 2
 });
 
 
