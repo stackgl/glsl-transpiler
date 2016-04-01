@@ -97,7 +97,8 @@ fs.createReadStream('./source.glsl')
 ## Related
 
 > [gl-shader-output](https://github.com/dfcreative/gl-shader-output) — eval fragment shader on rectangular vertex input.<br/>
-> [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.</br>
-> [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.</br>
-> [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.</br>
-> [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.</br>
+> [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.<br/>
+> [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.<br/>
+> [glsl spec](https://www.opengl.org/documentation/glsl/) — openGL Shader Language specification.<br/>
+> [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.<br/>
+> [js2glsl](https://github.com/jdavidberger/js2glsl) — transform js subset to glsl.<br/>

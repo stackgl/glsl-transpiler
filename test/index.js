@@ -92,7 +92,7 @@ test('Episodes', function () {
 
 	test('uniform vec4 v; uniform float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			var v = [0, 0, 0, 0];
 			var c = 0;
@@ -103,7 +103,7 @@ test('Episodes', function () {
 
 	test('vec3 x = mat3(2)[1];', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			var x = [0, 2, 0];
 			`)
@@ -112,7 +112,7 @@ test('Episodes', function () {
 
 	test('mat3 x = mat3(2);', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			var x = [2, 0, 0, 0, 2, 0, 0, 0, 2];
 			`)
@@ -133,7 +133,7 @@ test('Episodes', function () {
 
 	test('gl_Position.x = gl_Position.y / gl_Position.x;', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			gl_Position[0] = gl_Position[1] / gl_Position[0];
 			`)
@@ -156,7 +156,7 @@ test('Episodes', function () {
 
 	test('gl_Position.yx = gl_Position.xy / gl_Position.yx;', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			gl_Position = [gl_Position[1] / gl_Position[0], gl_Position[0] / gl_Position[1], gl_Position[2], gl_Position[3]];
 			`)
@@ -165,7 +165,7 @@ test('Episodes', function () {
 
 	test('gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			gl_FragColor[0] = gl_FragCoord[0] / 4;
 			`)
@@ -174,7 +174,7 @@ test('Episodes', function () {
 
 	test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1);', function () {
 		assert.equal(
-			clean(glsl(this.title)),
+			clean(glsl.compile(this.title)),
 			clean(`
 			var p = [0, 0];
 			gl_Position = [p[1] / 2.0, p[0] / 2.0, 0, 1];
@@ -184,6 +184,28 @@ test('Episodes', function () {
 
 	test('int f(float x) {return 1;}; int f(double x) {return 2;}; double x; f(x);', function () {
 		assert.equal(eval(this.title, {debug:false}), 2);
+	});
+
+	test('main, then again main', function () {
+		var compile = GLSL();
+		assert.equal(clean(compile(`
+			void main () {
+
+			};
+		`)), clean(`
+			function main () {
+
+			};
+		`));
+		assert.equal(clean(compile(`
+			void main () {
+
+			};
+		`)), clean(`
+			function main () {
+
+			};
+		`));
 	});
 });
 
@@ -1039,7 +1061,7 @@ test.skip('Builtins', function () {
 // assignment =
 // indexing (arrays only) [ ]
 
-test.only('Preprocessor', function () {
+test('Preprocessor', function () {
 	test('Transform macro to commented', function () {
 		assert.equal(clean(compile(`
 			#extension A
