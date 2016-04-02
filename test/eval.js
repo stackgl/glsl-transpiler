@@ -9,7 +9,7 @@ module.exports = function eval (str, opt) {
 
 	opt = opt || {};
 
-	var glsl = GLSL(opt).glsl;
+	var glsl = GLSL(opt).compiler;
 	var debugStr = '';
 
 	//take last statement as a result

@@ -28,7 +28,7 @@ function GlslJsStream (options) {
 	});
 
 	//glsl compiler
-	this.glsl = GLSL(options).glsl;
+	this.compiler = GLSL(options).compiler;
 };
 
 inherits(GlslJsStream, Transform);
@@ -42,7 +42,7 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 	if (typeof chunk === 'string') {
 		//FIXME: there is a problem of invalid input chunks; gotta wait till some sensible thing is accumulated and then parse.
 		var tree = parse(tokenize(chunk));
-		cb(null, this.glsl.process(tree));
+		cb(null, this.compiler.process(tree));
 
 		this.tree = tree;
 	}
@@ -58,7 +58,7 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 
 		else {
 			if (chunk.type === 'stmt')	{
-				cb(null, this.glsl.process(chunk));
+				cb(null, this.compiler.process(chunk));
 			}
 			else {
 				//detect entering function mode to avoid reacting on stmts

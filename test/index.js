@@ -16,7 +16,7 @@ var clean = require('cln');
 
 
 test('Episodes', function () {
-	var glsl = GLSL({
+	var compile = GLSL({
 	});
 
 	test('for (int i = 0; i < 10; i++) { if (i > 4) ; }', function () {
@@ -43,7 +43,7 @@ test('Episodes', function () {
 
 	test('vec2 position; position *= 1.0 + vec2();', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var position = [0, 0];
 			position = [position[0], position[1]];
@@ -53,7 +53,7 @@ test('Episodes', function () {
 
 	test('vec2 position; position = position * (1.0 + vec2());', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var position = [0, 0];
 			position = [position[0], position[1]];
@@ -63,7 +63,7 @@ test('Episodes', function () {
 
 	test('vec2 v = vec2(1, 1); v.x;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var v = [1, 1];
 			v[0];
@@ -73,7 +73,7 @@ test('Episodes', function () {
 
 	test('vec2 v = vec2(1, 1); v.yx + 1;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var v = [1, 1];
 			[v[1] + 1, v[0] + 1];
@@ -83,7 +83,7 @@ test('Episodes', function () {
 
 	test('gl_Position.xy += gl_Position.yx;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			gl_Position = [gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0], gl_Position[2], gl_Position[3]];
 			`)
@@ -92,7 +92,7 @@ test('Episodes', function () {
 
 	test('uniform vec4 v; uniform float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var v = [0, 0, 0, 0];
 			var c = 0;
@@ -103,7 +103,7 @@ test('Episodes', function () {
 
 	test('vec3 x = mat3(2)[1];', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var x = [0, 2, 0];
 			`)
@@ -112,7 +112,7 @@ test('Episodes', function () {
 
 	test('mat3 x = mat3(2);', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var x = [2, 0, 0, 0, 2, 0, 0, 0, 2];
 			`)
@@ -122,7 +122,7 @@ test('Episodes', function () {
 	//constants propagation is unimplemented
 	test.skip('vec4 v; float c; gl_FragColor = vec4(v.wzyx) * c;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var v = [0, 0, 0, 0];
 			var c = 0;
@@ -133,7 +133,7 @@ test('Episodes', function () {
 
 	test('gl_Position.x = gl_Position.y / gl_Position.x;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			gl_Position[0] = gl_Position[1] / gl_Position[0];
 			`)
@@ -156,7 +156,7 @@ test('Episodes', function () {
 
 	test('gl_Position.yx = gl_Position.xy / gl_Position.yx;', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			gl_Position = [gl_Position[1] / gl_Position[0], gl_Position[0] / gl_Position[1], gl_Position[2], gl_Position[3]];
 			`)
@@ -165,7 +165,7 @@ test('Episodes', function () {
 
 	test('gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			gl_FragColor[0] = gl_FragCoord[0] / 4;
 			`)
@@ -174,7 +174,7 @@ test('Episodes', function () {
 
 	test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1);', function () {
 		assert.equal(
-			clean(glsl.compile(this.title)),
+			clean(compile(this.title)),
 			clean(`
 			var p = [0, 0];
 			gl_Position = [p[1] / 2.0, p[0] / 2.0, 0, 1];
@@ -365,22 +365,22 @@ test('Interface', function () {
 	});
 
 	test('Detect attributes, uniforms, varying', function () {
-		var glsl = new GLSL({
+		var compiler = new GLSL({
 			replaceAttribute: function (name) { return `attributes['${name}']`;},
 			replaceUniform: function (name) { return `uniforms['${name}']`;},
 			replaceVarying: function (name) { return `varying['${name}']`;}
-		}).glsl;
+		}).compiler;
 
-		var result = glsl.compile(source);
+		var result = compiler.compile(source);
 
 		// assert.equal(clean(result).split('\n')[5], clean(shortResult).split('\n')[5]);
 		assert.equal(clean(result), clean(shortResult));
 
-		assert.deepEqual(Object.keys(glsl.attributes), ['uv', 'xy', 'color']);
+		assert.deepEqual(Object.keys(compiler.attributes), ['uv', 'xy', 'color']);
 
-		assert.deepEqual(Object.keys(glsl.varying), ['fColor', 'twoColors']);
+		assert.deepEqual(Object.keys(compiler.varyings), ['fColor', 'twoColors']);
 
-		assert.deepEqual(Object.keys(glsl.uniforms), ['uScreenSize']);
+		assert.deepEqual(Object.keys(compiler.uniforms), ['uScreenSize']);
 	});
 });
 
@@ -405,7 +405,7 @@ test.skip('main function', function() {
 	});
 
 	test('should generate asm.js boilerplate', function() {
-		compare(glsl.compile('void main() {}'), BOILERPLATE);
+		compare(compile('void main() {}'), BOILERPLATE);
 	});
 });
 
@@ -542,7 +542,7 @@ test('primitive variable initializers', function() {
 
 
 test('Structures', function () {
-	var glsl = GLSL();
+	var compile = GLSL();
 
 	test('Nested', function () {
 		var src = `
@@ -586,7 +586,7 @@ test('Structures', function () {
 
 
 test('Components access', function () {
-	var glsl = GLSL();
+	var compile = GLSL();
 
 	test('Array constructs', function () {
 		var src = `
@@ -607,7 +607,7 @@ test('Components access', function () {
 		b = [g, g + 1.0, g + 2.0];
 		`;
 
-		assert.equal(clean(glsl.compile(src)), clean(res));
+		assert.equal(clean(compile(src)), clean(res));
 	});
 
 	test('Arrays of arrays', function () {
@@ -627,7 +627,7 @@ test('Components access', function () {
 		var d = [c, c, c, c];
 		`;
 
-		assert.equal(clean(glsl.compile(src)), clean(res));
+		assert.equal(clean(compile(src)), clean(res));
 	});
 
 	test('Calculated access', function () {

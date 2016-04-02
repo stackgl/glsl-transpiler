@@ -31,7 +31,7 @@ compile(`
 	});
 `)
 
-//↓ ↓ ↓
+//☟
 
 `
 var uv = attributes.uv;
@@ -60,7 +60,23 @@ var GLSL = require('glsl-transpiler');
 
 var source = glslify('./source.glsl');
 var compile = GLSL(options?);
-var result = compile(tree);
+
+//compile source code
+var result = compile(source);
+
+
+//get collected info
+var compiler = compile.compiler;
+compiler.attributes;
+compiler.uniforms;
+compiler.varyings;
+compiler.structs;
+compiler.functions;
+compiler.scopes;
+
+
+//clean collected info
+compiler.reset();
 ```
 
 ### Options
@@ -68,7 +84,7 @@ var result = compile(tree);
 | Property | Default | Description |
 |---|:---:|---|
 | `optimize` | `true` | Enable expressions optimizations. |
-| `preprocess` | `true` | Apply preprocessing. |
+| `preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function taking src argument and returning the result to set own preprocessing. |
 | `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
 | `replaceAttribute` | `false` | Same as `replaceUniform`, but for attribute declarations. |
 | `replaceVarying` | `false` | Same as `replaceUniform`, but for varying declarations. |
