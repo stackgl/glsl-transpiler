@@ -207,6 +207,16 @@ test('Episodes', function () {
 			};
 		`));
 	});
+
+	test('attribute float x, y; uniform float z;', function () {
+		var compile = GLSL({
+			attribute: false
+		});
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var z = 0;
+		`))
+	})
 });
 
 
@@ -366,9 +376,9 @@ test('Interface', function () {
 
 	test('Detect attributes, uniforms, varying', function () {
 		var compiler = new GLSL({
-			replaceAttribute: function (name) { return `attributes['${name}']`;},
-			replaceUniform: function (name) { return `uniforms['${name}']`;},
-			replaceVarying: function (name) { return `varying['${name}']`;}
+			attribute: function (name) { return `attributes['${name}']`;},
+			uniform: function (name) { return `uniforms['${name}']`;},
+			varying: function (name) { return `varying['${name}']`;}
 		}).compiler;
 
 		var result = compiler.compile(source);

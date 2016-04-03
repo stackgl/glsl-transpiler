@@ -8,10 +8,10 @@
 var Compiler = require('glsl-transpiler');
 
 var compile = Compiler({
-	replaceUniform: function (name) {
+	uniform: function (name) {
 		return `uniforms.${name}`;
 	},
-	replaceAttribute: function (name) {
+	attribute: function (name) {
 		return `attributes.${name}`;
 	}
 });
@@ -85,9 +85,9 @@ compiler.reset();
 |---|:---:|---|
 | `optimize` | `true` | Enable expressions optimizations. |
 | `preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function taking src argument and returning the result to set own preprocessing. |
-| `replaceUniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
-| `replaceAttribute` | `false` | Same as `replaceUniform`, but for attribute declarations. |
-| `replaceVarying` | `false` | Same as `replaceUniform`, but for varying declarations. |
+| `uniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
+| `attribute` | `false` | Same as `uniform`, but for attribute declarations. |
+| `varying` | `false` | Same as `uniform`, but for varying declarations. |
 
 
 ### glsl-transpiler/stream
