@@ -189,7 +189,7 @@ test('Episodes', function () {
 	test('main, then again main', function () {
 		var compile = GLSL();
 		assert.equal(clean(compile(`
-			void main () {
+			void main (void) {
 
 			};
 		`)), clean(`
@@ -198,7 +198,7 @@ test('Episodes', function () {
 			};
 		`));
 		assert.equal(clean(compile(`
-			void main () {
+			void main (void) {
 
 			};
 		`)), clean(`
@@ -216,7 +216,15 @@ test('Episodes', function () {
 		assert.equal(clean(compile(this.title)), clean(`
 			var z = 0;
 		`))
-	})
+	});
+
+	test('uniform sampler2D s;', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var s = [];
+		`))
+	});
 });
 
 
