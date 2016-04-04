@@ -896,23 +896,411 @@ test('Vector relational functions', function () {
 });
 
 test.skip('Textures', function () {
-	// vec4 texture2D(sampler2D sampler, vec2 coord )
-	// vec4 texture2D(sampler2D sampler, vec2 coord, float bias)
-	// vec4 textureCube(samplerCube sampler, vec3 coord)
-	// vec4 texture2DProj(sampler2D sampler, vec3 coord )
-	// vec4 texture2DProj(sampler2D sampler, vec3 coord, float bias)
-	// vec4 texture2DProj(sampler2D sampler, vec4 coord)
-	// vec4 texture2DProj(sampler2D sampler, vec4 coord, float bias)
-	// vec4 texture2DLodEXT(sampler2D sampler, vec2 coord, float lod)
-	// vec4 texture2DProjLodEXT(sampler2D sampler, vec3 coord, float lod)
-	// vec4 texture2DProjLodEXT(sampler2D sampler, vec4 coord, float lod)
-	// vec4 textureCubeLodEXT(samplerCube sampler, vec3 coord, float lod)
-	// vec4 texture2DGradEXT(sampler2D sampler, vec2 P, vec2 dPdx, vec2 dPdy)
-	// vec4 texture2DProjGradEXT(sampler2D sampler, vec3 P, vec2 dPdx, vec2 dPdy)
-	// vec4 texture2DProjGradEXT(sampler2D sampler, vec4 P, vec2 dPdx, vec2 dPdy)
-	// vec4 textureCubeGradEXT(samplerCube sampler, vec3 P, vec3 dPdx, vec3 dPdy)
+	// int textureSize (gsampler1D sampler, int lod)
+	// ivec2 textureSize (gsampler2D sampler, int lod)
+	// ivec3 textureSize (gsampler3D sampler, int lod)
+	// ivec2 textureSize (gsamplerCube sampler, int lod)
+	// int textureSize (sampler1DShadow sampler, int lod)
+	// ivec2 textureSize (sampler2DShadow sampler, int lod)
+	// ivec2 textureSize (samplerCubeShadow sampler, int lod)
+	// ivec3 textureSize (gsamplerCubeArray sampler, int lod)
+	// ivec3 textureSize (samplerCubeArrayShadow sampler, int lod)
+	// ivec2 textureSize (gsampler2DRect sampler)
+	// ivec2 textureSize (sampler2DRectShadow sampler)
+	// ivec2 textureSize (gsampler1DArray sampler, int lod)
+	// ivec3 textureSize (gsampler2DArray sampler, int lod)
+	// ivec2 textureSize (sampler1DArrayShadow sampler, int lod)
+	// ivec3 textureSize (sampler2DArrayShadow sampler, int lod)
+	// int textureSize (gsamplerBuffer sampler)
+	// ivec2 textureSize (gsampler2DMS sampler)
+	// ivec3 textureSize (gsampler2DMSArray sampler)
+
+	// vec2 textureQueryLod(gsampler1D sampler, float P)
+	// vec2 textureQueryLod(gsampler2D sampler, vec2 P)
+	// vec2 textureQueryLod(gsampler3D sampler, vec3 P)
+	// vec2 textureQueryLod(gsamplerCube sampler, vec3 P)
+	// vec2 textureQueryLod(gsampler1DArray sampler, float P)
+	// vec2 textureQueryLod(gsampler2DArray sampler, vec2 P)
+	// vec2 textureQueryLod(gsamplerCubeArray sampler, vec3 P)
+	// vec2 textureQueryLod(sampler1DShadow sampler, float P)
+	// vec2 textureQueryLod(sampler2DShadow sampler, vec2 P)
+	// vec2 textureQueryLod(samplerCubeShadow sampler, vec3 P)
+	// vec2 textureQueryLod(sampler1DArrayShadow sampler, float P)
+	// vec2 textureQueryLod(sampler2DArrayShadow sampler, vec2 P)
+	// vec2 textureQueryLod(samplerCubeArrayShadow sampler, vec3 P)
+
+	// int textureQueryLevels(gsampler1D sampler)
+	// int textureQueryLevels(gsampler2D sampler)
+	// int textureQueryLevels(gsampler3D sampler)
+	// int textureQueryLevels(gsamplerCube sampler)
+	// int textureQueryLevels(gsampler1DArray sampler)
+	// int textureQueryLevels(gsampler2DArray sampler)
+	// int textureQueryLevels(gsamplerCubeArray sampler)
+	// int textureQueryLevels(sampler1DShadow sampler)
+	// int textureQueryLevels(sampler2DShadow sampler)
+	// int textureQueryLevels(samplerCubeShadow sampler)
+	// int textureQueryLevels(sampler1DArrayShadow sampler)
+	// int textureQueryLevels(sampler2DArrayShadow sampler)
+	// int textureQueryLevels(samplerCubeArrayShadow sampler)
+
+	// gvec4 texture (gsampler1D sampler, float P [, float bias] )
+	// gvec4 texture (gsampler2D sampler, vec2 P [, float bias] )
+	// gvec4 texture (gsampler3D sampler, vec3 P [, float bias] )
+	// gvec4 texture (gsamplerCube sampler, vec3 P [, float bias] )
+	// float texture (sampler1DShadow sampler, vec3 P [, float bias] )
+	// float texture (sampler2DShadow sampler, vec3 P [, float bias] )
+	// float texture (samplerCubeShadow sampler, vec4 P [, float bias] )
+	// gvec4 texture (gsampler1DArray sampler, vec2 P [, float bias] )
+	// gvec4 texture (gsampler2DArray sampler, vec3 P [, float bias] )
+	// gvec4 texture (gsamplerCubeArray sampler, vec4 P [, float bias] )
+	// float texture (sampler1DArrayShadow sampler, vec3 P
+	// [, float bias] )
+	// float texture (sampler2DArrayShadow sampler, vec4 P)
+	// gvec4 texture (gsampler2DRect sampler, vec2 P)
+	// float texture (sampler2DRectShadow sampler, vec3 P)
+	// float texture (gsamplerCubeArrayShadow sampler, vec4 P,
+	// float compare)
+
+	// gvec4 textureProj (gsampler1D sampler, vec2 P [, float bias] )
+	// gvec4 textureProj (gsampler1D sampler, vec4 P [, float bias] )
+	// gvec4 textureProj (gsampler2D sampler, vec3 P [, float bias] )
+	// gvec4 textureProj (gsampler2D sampler, vec4 P [, float bias] )
+	// gvec4 textureProj (gsampler3D sampler, vec4 P [, float bias] )
+	// float textureProj (sampler1DShadow sampler, vec4 P
+	// [, float bias] )
+	// float textureProj (sampler2DShadow sampler, vec4 P
+	// [, float bias] )
+	// gvec4 textureProj (gsampler2DRect sampler, vec3 P)
+	// gvec4 textureProj (gsampler2DRect sampler, vec4 P)
+	// float textureProj (sampler2DRectShadow sampler, vec4 P)
+
+	// gvec4 textureLod (gsampler1D sampler, float P, float lod)
+	// gvec4 textureLod (gsampler2D sampler, vec2 P, float lod)
+	// gvec4 textureLod (gsampler3D sampler, vec3 P, float lod)
+	// gvec4 textureLod (gsamplerCube sampler, vec3 P, float lod)
+	// float textureLod (sampler1DShadow sampler, vec3 P, float lod)
+	// float textureLod (sampler2DShadow sampler, vec3 P, float lod)
+	// gvec4 textureLod (gsampler1DArray sampler, vec2 P, float lod)
+	// gvec4 textureLod (gsampler2DArray sampler, vec3 P, float lod)
+	// float textureLod (sampler1DArrayShadow sampler, vec3 P,
+	// float lod)
+	// gvec4 textureLod (gsamplerCubeArray sampler, vec4 P, float lod)
+
+	// gvec4 textureOffset (gsampler1D sampler, float P,
+	// int offset [, float bias] )
+	// gvec4 textureOffset (gsampler2D sampler, vec2 P,
+	// ivec2 offset [, float bias] )
+	// gvec4 textureOffset (gsampler3D sampler, vec3 P,
+	// ivec3 offset [, float bias] )
+	// gvec4 textureOffset (gsampler2DRect sampler, vec2 P,
+	// ivec2 offset )
+	// float textureOffset (sampler2DRectShadow sampler, vec3 P,
+	// ivec2 offset )
+	// float textureOffset (sampler1DShadow sampler, vec3 P,
+	// int offset [, float bias] )
+	// float textureOffset (sampler2DShadow sampler, vec3 P,
+	// ivec2 offset [, float bias] )
+	// gvec4 textureOffset (gsampler1DArray sampler, vec2 P,
+	// int offset [, float bias] )
+	// gvec4 textureOffset (gsampler2DArray sampler, vec3 P,
+	// ivec2 offset [, float bias] )
+	// float textureOffset (sampler1DArrayShadow sampler, vec3 P,
+	// int offset [, float bias] )
+	// float textureOffset (sampler2DArrayShadow sampler, vec4 P,
+	// ivec2 offset )
+
+	// gvec4 texelFetch (gsampler1D sampler, int P, int lod)
+	// gvec4 texelFetch (gsampler2D sampler, ivec2 P, int lod)
+	// gvec4 texelFetch (gsampler3D sampler, ivec3 P, int lod)
+	// gvec4 texelFetch (gsampler2DRect sampler, ivec2 P)
+	// gvec4 texelFetch (gsampler1DArray sampler, ivec2 P, int lod)
+	// gvec4 texelFetch (gsampler2DArray sampler, ivec3 P, int lod)
+	// gvec4 texelFetch (gsamplerBuffer sampler, int P)
+	// gvec4 texelFetch (gsampler2DMS sampler, ivec2 P, int sample)
+	// gvec4 texelFetch (gsampler2DMSArray sampler, ivec3 P,
+	// int sample)
+
+	// gvec4 texelFetchOffset (gsampler1D sampler, int P, int lod,
+	// int offset)
+	// gvec4 texelFetchOffset (gsampler2D sampler, ivec2 P, int lod,
+	// ivec2 offset)
+	// gvec4 texelFetchOffset (gsampler3D sampler, ivec3 P, int lod,
+	// ivec3 offset)
+	// gvec4 texelFetchOffset (gsampler2DRect sampler, ivec2 P,
+	// ivec2 offset)
+	// gvec4 texelFetchOffset (gsampler1DArray sampler, ivec2 P, int lod,
+	// int offset)
+	// gvec4 texelFetchOffset (gsampler2DArray sampler, ivec3 P, int lod,
+	// ivec2 offset)
+
+	// gvec4 textureProjOffset (gsampler1D sampler, vec2 P,
+	// int offset [, float bias] )
+	// gvec4 textureProjOffset (gsampler1D sampler, vec4 P,
+	// int offset [, float bias] )
+	// gvec4 textureProjOffset (gsampler2D sampler, vec3 P,
+	// ivec2 offset [, float bias] )
+	// gvec4 textureProjOffset (gsampler2D sampler, vec4 P,
+	// ivec2 offset [, float bias] )
+	// gvec4 textureProjOffset (gsampler3D sampler, vec4 P,
+	// ivec3 offset [, float bias] )
+	// gvec4 textureProjOffset (gsampler2DRect sampler, vec3 P,
+	// ivec2 offset )
+	// gvec4 textureProjOffset (gsampler2DRect sampler, vec4 P,
+	// ivec2 offset )
+	// float textureProjOffset (sampler2DRectShadow sampler, vec4 P,
+	// ivec2 offset )
+	// float textureProjOffset (sampler1DShadow sampler, vec4 P,
+	// int offset [, float bias] )
+	// float textureProjOffset (sampler2DShadow sampler, vec4 P,
+	// ivec2 offset [, float bias] )
+
+	// gvec4 textureProjLod (gsampler1D sampler, vec2 P, float lod)
+	// gvec4 textureProjLod (gsampler1D sampler, vec4 P, float lod)
+	// gvec4 textureProjLod (gsampler2D sampler, vec3 P, float lod)
+	// gvec4 textureProjLod (gsampler2D sampler, vec4 P, float lod)
+	// gvec4 textureProjLod (gsampler3D sampler, vec4 P, float lod)
+	// float textureProjLod (sampler1DShadow sampler, vec4 P, float lod)
+	// float textureProjLod (sampler2DShadow sampler, vec4 P, float lod)
+
+	// gvec4 textureProjLodOffset (gsampler1D sampler, vec2 P,
+	// float lod, int offset)
+	// gvec4 textureProjLodOffset (gsampler1D sampler, vec4 P,
+	// float lod, int offset)
+	// gvec4 textureProjLodOffset (gsampler2D sampler, vec3 P,
+	// float lod, ivec2 offset)
+	// gvec4 textureProjLodOffset (gsampler2D sampler, vec4 P,
+	// float lod, ivec2 offset)
+	// gvec4 textureProjLodOffset (gsampler3D sampler, vec4 P,
+	// float lod, ivec3 offset)
+	// float textureProjLodOffset (sampler1DShadow sampler, vec4 P,
+	// float lod, int offset)
+	// float textureProjLodOffset (sampler2DShadow sampler, vec4 P,
+	// float lod, ivec2 offset)
+
+	// gvec4 textureGrad (gsampler1D sampler, float P,
+	// float dPdx, float dPdy)
+	// gvec4 textureGrad (gsampler2D sampler, vec2 P,
+	// vec2 dPdx, vec2 dPdy)
+	// gvec4 textureGrad (gsampler3D sampler, vec3 P,
+	// vec3 dPdx, vec3 dPdy)
+	// gvec4 textureGrad (gsamplerCube sampler, vec3 P,
+	// vec3 dPdx, vec3 dPdy)
+	// gvec4 textureGrad (gsampler2DRect sampler, vec2 P,
+	// vec2 dPdx, vec2 dPdy)
+	// float textureGrad (sampler2DRectShadow sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy)
+	// float textureGrad (sampler1DShadow sampler, vec3 P,
+	// float dPdx, float dPdy)
+	// float textureGrad (sampler2DShadow sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy)
+	// float textureGrad (samplerCubeShadow sampler, vec4 P,
+	// vec3 dPdx, vec3 dPdy)
+	// gvec4 textureGrad (gsampler1DArray sampler, vec2 P,
+	// float dPdx, float dPdy)
+	// gvec4 textureGrad (gsampler2DArray sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy)
+	// float textureGrad (sampler1DArrayShadow sampler, vec3 P,
+	// float dPdx, float dPdy)
+	// float textureGrad (sampler2DArrayShadow sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy)
+	// gvec4 textureGrad (gsamplerCubeArray sampler, vec4 P,
+	// vec3 dPdx, vec3 dPdy)
+
+	// gvec4 textureGradOffset (gsampler1D sampler, float P,
+	// float dPdx, float dPdy, int offset)
+	// gvec4 textureGradOffset (gsampler2D sampler, vec2 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// gvec4 textureGradOffset (gsampler3D sampler, vec3 P,
+	// vec3 dPdx, vec3 dPdy, ivec3 offset)
+	// gvec4 textureGradOffset (gsampler2DRect sampler, vec2 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// float textureGradOffset (sampler2DRectShadow sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// float textureGradOffset (sampler1DShadow sampler, vec3 P,
+	// float dPdx, float dPdy, int offset )
+	// float textureGradOffset (sampler2DShadow sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// gvec4 textureGradOffset (gsampler1DArray sampler, vec2 P,
+	// float dPdx, float dPdy, int offset)
+	// gvec4 textureGradOffset (gsampler2DArray sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// float textureGradOffset (sampler1DArrayShadow sampler, vec3 P,
+	// float dPdx, float dPdy, int offset)
+	// float textureGradOffset (sampler2DArrayShadow sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+
+	// gvec4 textureProjGrad (gsampler1D sampler, vec2 P,
+	// float dPdx, float dPdy)
+	// gvec4 textureProjGrad (gsampler1D sampler, vec4 P,
+	// float dPdx, float dPdy)
+	// gvec4 textureProjGrad (gsampler2D sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy)
+	// gvec4 textureProjGrad (gsampler2D sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy)
+	// gvec4 textureProjGrad (gsampler3D sampler, vec4 P,
+	// vec3 dPdx, vec3 dPdy)
+	// gvec4 textureProjGrad (gsampler2DRect sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy)
+	// gvec4 textureProjGrad (gsampler2DRect sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy)
+	// float textureProjGrad (sampler2DRectShadow sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy)
+	// float textureProjGrad (sampler1DShadow sampler, vec4 P,
+	// float dPdx, float dPdy)
+	// float textureProjGrad (sampler2DShadow sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy)
+
+	// gvec4 textureProjGradOffset (gsampler1D sampler, vec2 P,
+	// float dPdx, float dPdy, int offset)
+	// gvec4 textureProjGradOffset (gsampler1D sampler, vec4 P,
+	// float dPdx, float dPdy, int offset)
+	// gvec4 textureProjGradOffset (gsampler2D sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// gvec4 textureProjGradOffset (gsampler2D sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// gvec4 textureProjGradOffset (gsampler2DRect sampler, vec3 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// gvec4 textureProjGradOffset (gsampler2DRect sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// float textureProjGradOffset (sampler2DRectShadow sampler,
+	// vec4 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+	// gvec4 textureProjGradOffset (gsampler3D sampler, vec4 P,
+	// vec3 dPdx, vec3 dPdy, ivec3 offset)
+	// float textureProjGradOffset (sampler1DShadow sampler, vec4 P,
+	// float dPdx, float dPdy, int offset)
+	// float textureProjGradOffset (sampler2DShadow sampler, vec4 P,
+	// vec2 dPdx, vec2 dPdy, ivec2 offset)
+
+	// gvec4 textureGather (gsampler2D sampler, vec2 P
+	// [, int comp])
+	// gvec4 textureGather (gsampler2DArray sampler,
+	// vec3 P [, int comp])
+	// gvec4 textureGather (gsamplerCube sampler,
+	// vec3 P [, int comp])
+	// gvec4 textureGather (gsamplerCubeArray sampler,
+	// vec4 P[, int comp])
+	// gvec4 textureGather (gsampler2DRect sampler,
+	// vec2 P[, int comp])
+	// vec4 textureGather (sampler2DShadow sampler,
+	// vec2 P, float refZ)
+	// vec4 textureGather (sampler2DArrayShadow sampler,
+	// vec3 P, float refZ)
+	// vec4 textureGather (samplerCubeShadow sampler,
+	// vec3 P, float refZ)
+	// vec4 textureGather (samplerCubeArrayShadow
+	// sampler,
+	// vec4 P, float refZ)
+	// vec4 textureGather (sampler2DRectShadow sampler,
+	// vec2 P, float refZ)
+
+	// gvec4 textureGatherOffset (
+	// gsampler2D sampler,
+	// vec2 P, ivec2 offset
+	// [, int comp])
+	// gvec4 textureGatherOffset (
+	// gsampler2DArray sampler,
+	// vec3 P, ivec2 offset
+	// [, int comp])
+	// gvec4 textureGatherOffset (
+	// gsampler2DRect sampler,
+	// vec2 P, ivec2 offset
+	// [, int comp])
+	// vec4 textureGatherOffset (
+	// sampler2DShadow sampler,
+	// vec2 P, float refZ, ivec2 offset)
+	// vec4 textureGatherOffset (
+	// sampler2DArrayShadow sampler,
+	// vec3 P, float refZ, ivec2 offset)
+	// vec4 textureGatherOffset (
+	// sampler2DRectShadow sampler,
+	// vec2 P, float refZ, ivec2 offset)
+
+	// gvec4 textureGatherOffsets (
+	// gsampler2D sampler,
+	// vec2 P, ivec2 offsets[4]
+	// [, int comp])
+	// gvec4 textureGatherOffsets (
+	// gsampler2DArray sampler,
+	// vec3 P, ivec2 offsets[4]
+	// [, int comp])
+	// gvec4 textureGatherOffsets (
+	// gsampler2DRect sampler,
+	// vec2 P, ivec2 offsets[4]
+	// [, int comp])
+	// vec4 textureGatherOffsets (
+	// sampler2DShadow sampler,
+	// vec2 P, float refZ, ivec2
+	// offsets[4])
+	// vec4 textureGatherOffsets (
+	// sampler2DArrayShadow sampler,
+	// vec3 P, float refZ, ivec2
+	// offsets[4])
+	// vec4 textureGatherOffsets (
+	// sampler2DRectShadow sampler,
+	// vec2 P, float refZ, ivec2
+	// offsets[4])
 });
 
+
+test.skip('Textures compat', function () {
+	// vec4 texture1D (sampler1D sampler,
+	// float coord [, float bias] )
+	// vec4 texture1DProj (sampler1D sampler,
+	// vec2 coord [, float bias] )
+	// vec4 texture1DProj (sampler1D sampler,
+	// vec4 coord [, float bias] )
+	// vec4 texture1DLod (sampler1D sampler,
+	// float coord, float lod)
+	// vec4 texture1DProjLod (sampler1D sampler,
+	// vec2 coord, float lod)
+	// vec4 texture1DProjLod (sampler1D sampler,
+	// vec4 coord, float lod)
+
+	// vec4 texture2D (sampler2D sampler,
+	// vec2 coord [, float bias] )
+	// vec4 texture2DProj (sampler2D sampler,
+	// vec3 coord [, float bias] )
+	// vec4 texture2DProj (sampler2D sampler,
+	// vec4 coord [, float bias] )
+	// vec4 texture2DLod (sampler2D sampler,
+	// vec2 coord, float lod)
+	// vec4 texture2DProjLod (sampler2D sampler,
+	// vec3 coord, float lod)
+	// vec4 texture2DProjLod (sampler2D sampler,
+	// vec4 coord, float lod)
+
+	// vec4 texture3D (sampler3D sampler,
+	// vec3 coord [, float bias] )
+	// vec4 texture3DProj (sampler3D sampler,
+	// vec4 coord [, float bias] )
+	// vec4 texture3DLod (sampler3D sampler,
+	// vec3 coord, float lod)
+	// vec4 texture3DProjLod (sampler3D sampler,
+	// vec4 coord, float lod)
+
+	// vec4 textureCube (samplerCube sampler,
+	// vec3 coord [, float bias] )
+	// vec4 textureCubeLod (samplerCube sampler,
+	// vec3 coord, float lod)
+
+	// vec4 shadow1D (sampler1DShadow sampler,
+	// vec3 coord [, float bias] )
+	// vec4 shadow2D (sampler2DShadow sampler,
+	// vec3 coord [, float bias] )
+	// vec4 shadow1DProj (sampler1DShadow sampler,
+	// vec4 coord [, float bias] )
+	// vec4 shadow2DProj (sampler2DShadow sampler,
+	// vec4 coord [, float bias] )
+	// vec4 shadow1DLod (sampler1DShadow sampler,
+	// vec3 coord, float lod)
+	// vec4 shadow2DLod (sampler2DShadow sampler,
+	// vec3 coord, float lod)
+	// vec4 shadow1DProjLod(sampler1DShadow sampler,
+	// vec4 coord, float lod)
+	// vec4 shadow2DProjLod(sampler2DShadow sampler,
+	// vec4 coord, float lod)
+});
 
 
 test.skip('Packing/unpacking', function () {

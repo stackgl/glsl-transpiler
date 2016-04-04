@@ -206,6 +206,15 @@ test('Episodes', function () {
 
 			};
 		`));
+		assert.equal(clean(compile(`
+			void main () {
+
+			};
+		`)), clean(`
+			function main () {
+
+			};
+		`));
 	});
 
 	test('attribute float x, y; uniform float z;', function () {
@@ -222,7 +231,7 @@ test('Episodes', function () {
 		var compile = GLSL();
 
 		assert.equal(clean(compile(this.title)), clean(`
-			var s = [];
+			var s = sampler.s;
 		`))
 	});
 });
