@@ -4,7 +4,7 @@
 
 var GLSL = require('../');
 
-module.exports = function eval (str, opt) {
+module.exports = function eval (str, opt, data) {
 	var strLines;
 
 	opt = opt || {};
@@ -36,7 +36,7 @@ module.exports = function eval (str, opt) {
 	var stdlib = glsl.stringifyStdlib();
 	str = stdlib + '\n' + str;
 	if (opt.debug) console.log(str);
-	var fn = new Function(str);
+	var fn = new Function('_', str);
 
-	return fn();
+	return fn(data);
 }

@@ -1243,7 +1243,8 @@ test.skip('Textures', function () {
 });
 
 
-test.skip('Textures compat', function () {
+test('Textures compat', function () {
+	test('texture1D');
 	// vec4 texture1D (sampler1D sampler,
 	// float coord [, float bias] )
 	// vec4 texture1DProj (sampler1D sampler,
@@ -1257,6 +1258,20 @@ test.skip('Textures compat', function () {
 	// vec4 texture1DProjLod (sampler1D sampler,
 	// vec4 coord, float lod)
 
+	test('texture2D', function () {
+		assert.deepEqual(eval(`
+			uniform sampler2D t;
+			textureSize(t);
+			texture2D(t, vec2(0, 0));
+		`, {
+			uniform: function (name, variable) {
+				if (variable.type === 'sampler2D') return `_.${name}`
+			},
+			debug: false
+		}, {
+			t: []
+		}), [0, 0, 0, 0]);
+	});
 	// vec4 texture2D (sampler2D sampler,
 	// vec2 coord [, float bias] )
 	// vec4 texture2DProj (sampler2D sampler,
@@ -1270,6 +1285,7 @@ test.skip('Textures compat', function () {
 	// vec4 texture2DProjLod (sampler2D sampler,
 	// vec4 coord, float lod)
 
+	test('texture3D');
 	// vec4 texture3D (sampler3D sampler,
 	// vec3 coord [, float bias] )
 	// vec4 texture3DProj (sampler3D sampler,
@@ -1279,11 +1295,13 @@ test.skip('Textures compat', function () {
 	// vec4 texture3DProjLod (sampler3D sampler,
 	// vec4 coord, float lod)
 
+	test('textureCube');
 	// vec4 textureCube (samplerCube sampler,
 	// vec3 coord [, float bias] )
 	// vec4 textureCubeLod (samplerCube sampler,
 	// vec3 coord, float lod)
 
+	test('shadow1D');
 	// vec4 shadow1D (sampler1DShadow sampler,
 	// vec3 coord [, float bias] )
 	// vec4 shadow2D (sampler2DShadow sampler,
