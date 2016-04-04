@@ -1,6 +1,6 @@
 {
   "name": "glsl-transpiler",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Transpile GLSL to JS",
   "main": "index.js",
   "dependencies": {
