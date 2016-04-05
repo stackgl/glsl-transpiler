@@ -19,6 +19,12 @@ test('Episodes', function () {
 	var compile = GLSL({
 	});
 
+	test('console.log(123);', function () {
+		assert.equal(clean(compile(this.title)), clean(`
+			console.log(123);
+		`));
+	});
+
 	test('for (int i = 0; i < 10; i++) { if (i > 4) ; }', function () {
 		assert.equal(clean(compile(this.title)), clean(`
 			for (var i = 0; i < 10; i++) {
