@@ -19,6 +19,18 @@ test('Episodes', function () {
 	var compile = GLSL({
 	});
 
+	test('vec2 c() {return vec2();}; void a() {vec4 b = vec4(c(), 0, 0);}', function () {
+		assert.equal(clean(compile(this.title)), clean(`
+			function c () {
+				return [0, 0];
+			};
+
+			function a () {
+				var b = c().concat([0, 0]);
+			};
+		`));
+	});
+
 	test('vec3 x; x += 1;', function () {
 		assert.deepEqual(eval(this.title, {debug: false}), [1, 1, 1]);
 	})
