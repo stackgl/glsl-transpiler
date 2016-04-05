@@ -88,6 +88,7 @@ compiler.reset();
 | `uniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
 | `attribute` | `false` | Same as `uniform`, but for attribute declarations. |
 | `varying` | `false` | Same as `uniform`, but for varying declarations. |
+| `debug` | `false` | Enable debugging facilities: `print(anything);` will log to console a string of transpiled code with it’s type separated by colon, `show(anything);` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime. |
 
 
 ### glsl-transpiler/stream

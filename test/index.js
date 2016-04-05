@@ -19,6 +19,10 @@ test('Episodes', function () {
 	var compile = GLSL({
 	});
 
+	test('vec3 x; x += 1;', function () {
+		assert.deepEqual(eval(this.title, {debug: false}), [1, 1, 1]);
+	})
+
 	test('console.log(123);', function () {
 		assert.equal(clean(compile(this.title)), clean(`
 			console.log(123);
