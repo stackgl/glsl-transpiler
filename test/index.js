@@ -13,6 +13,7 @@ var StringStream = require('stream-array');
 var Sink = require('stream').Writable;
 var eval = require('./eval');
 var clean = require('cln');
+var glslify = require('glslify-promise');
 
 
 test('Episodes', function () {
@@ -255,6 +256,22 @@ test('Episodes', function () {
 		assert.equal(clean(compile(this.title)), clean(`
 			var s = sampler.s;
 		`))
+	});
+});
+
+
+test.only('Real cases', function () {
+	test('source1', function () {
+		glslify(__dirname + '/source1.glsl')
+		.then(function (res) {
+			compile(res);
+		});
+	});
+	test('source2', function () {
+		glslify(__dirname + '/source2.glsl')
+		.then(function (res) {
+			compile(res);
+		});
 	});
 });
 
