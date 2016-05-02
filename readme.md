@@ -120,3 +120,4 @@ fs.createReadStream('./source.glsl')
 > [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.<br/>
 > [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.<br/>
 > [js2glsl](https://github.com/jdavidberger/js2glsl) — transform js subset to glsl.<br/>
+> [glsl-simulator](https://github.com/burg/glsl-simulator) — OpenGL1.0 simulation in js.<br/>
