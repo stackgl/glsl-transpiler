@@ -9,7 +9,7 @@ var tokenize = require('glsl-tokenizer/string');
 var glmat = require('gl-matrix');
 var almost = require('almost-equal');
 var eval = require('./eval');
-
+var ndarray = require('ndarray');
 
 /**
  * Add almost method
@@ -1259,18 +1259,22 @@ test('Textures compat', function () {
 	// vec4 coord, float lod)
 
 	test('texture2D', function () {
+		var data = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+		data.width = 2;
+		data.height = 2;
+
 		assert.deepEqual(eval(`
 			uniform sampler2D t;
-			textureSize(t);
-			texture2D(t, vec2(0, 0));
+			texture2D(t, vec2(0.2, 0.8));
 		`, {
 			uniform: function (name, variable) {
 				if (variable.type === 'sampler2D') return `_.${name}`
 			},
 			debug: false
 		}, {
-			t: []
-		}), [0, 0, 0, 0]);
+			// t: ndarray(data, [2,2,4])
+			t: data
+		}), [0, 0, 1, 0]);
 	});
 	// vec4 texture2D (sampler2D sampler,
 	// vec2 coord [, float bias] )

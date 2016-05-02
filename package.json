@@ -15,12 +15,19 @@
     "almost-equal": "^1.1.0",
     "cln": "^1.0.0",
     "gl-matrix": "^2.3.2",
+    "glslify": "^5.0.2",
     "glslify-promise": "^1.0.2",
+    "glslify-sync": "^2.0.0",
     "is-browser": "^2.0.1",
     "ndarray": "^1.0.18",
     "stream-array": "^1.1.1",
     "string-to-stream": "^1.0.1",
     "tst": "^1.2.1"
+  },
+  "browserify": {
+    "transform": [
+      "glslify"
+    ]
   },
   "files": [
     "index.js",
