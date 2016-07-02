@@ -257,6 +257,24 @@ test('Episodes', function () {
 			var s;
 		`))
 	});
+
+	test('vec2 x, z = (x*2.0+1.0)*x;', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var x = [0, 0], z = [(x[0] * 2.0 + 1.0) * x[0], (x[1] * 2.0 + 1.0) * x[1]];
+		`))
+	});
+
+	test('vec3 permute(vec3 x) { return mod289((x*34.0+1.0)*x);}', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			function permute (x) {
+				return mod289([(x[0] * 34.0 + 1.0) * x[0], (x[1] * 34.0 + 1.0) * x[1], (x[2] * 34.0 + 1.0) * x[2]]);
+			};
+		`))
+	});
 });
 
 
