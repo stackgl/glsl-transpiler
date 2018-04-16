@@ -1,3 +1,4 @@
+'use strict'
 /**
  * Transform glsl to js.
  *

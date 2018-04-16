@@ -1,3 +1,4 @@
+'use strict'
 /**
  * Convert stream of AST nodes to strings.
  *
