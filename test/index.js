@@ -850,6 +850,16 @@ test('Vec/matrix operators', function () {
 		assert.deepEqual(eval(src, {debug: false, optimize: false}), [4, 4, 2]);
 	});
 
+	test('mat * vec + vec', function () {
+		var src = `
+			vec2 v = vec2(2, 1), u;
+			mat2 m = mat2(2);
+			u = m * v + v;
+		`;
+		assert.deepEqual(eval(src, {debug: false}), [6, 3]);
+		assert.deepEqual(eval(src, {debug: false, optimize: false}), [6, 3]);
+	});
+
 
 	test('mat * mat', function () {
 		var src = `
