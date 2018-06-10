@@ -1,50 +1,50 @@
-> _glsl-transpiler_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
+_glsl-transpiler_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
 
 ## Usage
 
 [![npm install glsl-transpiler](https://nodei.co/npm/glsl-transpiler.png?mini=true)](https://npmjs.org/package/glsl-transpiler/)
 
 ```js
-var Compiler = require('glsl-transpiler');
+var Compiler = require('glsl-transpiler')
 
 var compile = Compiler({
 	uniform: function (name) {
-		return `uniforms.${name}`;
+		return `uniforms.${name}`
 	},
 	attribute: function (name) {
-		return `attributes.${name}`;
+		return `attributes.${name}`
 	}
-});
+})
 
 compile(`
-	precision mediump float;
-	attribute vec2 uv;
-	attribute vec4 color;
-	varying vec4 fColor;
-	uniform vec2 uScreenSize;
+	precision mediump float
+	attribute vec2 uv
+	attribute vec4 color
+	varying vec4 fColor
+	uniform vec2 uScreenSize
 
 	void main (void) {
-		fColor = color;
-		vec2 position = vec2(uv.x, -uv.y) * 1.0;
-		position.x *= uScreenSize.y / uScreenSize.x;
-		gl_Position = vec4(position, 0, 1);
-	});
+		fColor = color
+		vec2 position = vec2(uv.x, -uv.y) * 1.0
+		position.x *= uScreenSize.y / uScreenSize.x
+		gl_Position = vec4(position, 0, 1)
+	}
 `)
 
-//☟
+// result:
 
 `
-var uv = attributes.uv;
-var color = attributes.color;
-var fColor = [0, 0, 0, 0];
-var uScreenSize = uniforms.uScreenSize;
+var uv = attributes.uv
+var color = attributes.color
+var fColor = [0, 0, 0, 0]
+var uScreenSize = uniforms.uScreenSize
 
 function main () {
-	fColor = color;
-	var position = [uv[0], -uv[1]];
-	position[0] *= uScreenSize[1] / uScreenSize[0];
-	gl_Position = [position[0], position[1], 0, 1];
-};
+	fColor = color
+	var position = [uv[0], -uv[1]]
+	position[0] *= uScreenSize[1] / uScreenSize[0]
+	gl_Position = [position[0], position[1], 0, 1]
+}
 `
 ```
 
@@ -56,27 +56,27 @@ function main () {
 To apply compilation to glsl AST or string, require `glsl-transpiler`:
 
 ```js
-var GLSL = require('glsl-transpiler');
+var GLSL = require('glsl-transpiler')
 
-var source = glslify('./source.glsl');
-var compile = GLSL(options?);
+var source = glslify('./source.glsl')
+var compile = GLSL(options?)
 
 //compile source code
-var result = compile(source);
+var result = compile(source)
 
 
 //get collected info
-var compiler = compile.compiler;
-compiler.attributes;
-compiler.uniforms;
-compiler.varyings;
-compiler.structs;
-compiler.functions;
-compiler.scopes;
+var compiler = compile.compiler
+compiler.attributes
+compiler.uniforms
+compiler.varyings
+compiler.structs
+compiler.functions
+compiler.scopes
 
 
 //clean collected info
-compiler.reset();
+compiler.reset()
 ```
 
 ### Options
@@ -85,10 +85,10 @@ compiler.reset();
 |---|:---:|---|
 | `optimize` | `true` | Enable expressions optimizations. |
 | `preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function taking src argument and returning the result to set own preprocessing. |
-| `uniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]'; }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
+| `uniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]' }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
 | `attribute` | `false` | Same as `uniform`, but for attribute declarations. |
 | `varying` | `false` | Same as `uniform`, but for varying declarations. |
-| `debug` | `false` | Enable debugging facilities: `print(anything);` will log to console a string of transpiled code with it’s type separated by colon, `show(anything);` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime. |
+| `debug` | `false` | Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime. |
 
 Note that `texture2D` function expects whether ndarray instance or defined `width` and `height` parameters on passed array.
 
@@ -98,9 +98,9 @@ Note that `texture2D` function expects whether ndarray instance or defined `widt
 _glsl-transpiler_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
 
 ```js
-var compile = require('glsl-transpiler/stream');
-var parse = require('glsl-parser/stream');
-var tokenize = require('glsl-tokenizer/stream');
+var compile = require('glsl-transpiler/stream')
+var parse = require('glsl-parser/stream')
+var tokenize = require('glsl-tokenizer/stream')
 
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
@@ -109,8 +109,8 @@ fs.createReadStream('./source.glsl')
 .once('end', function () {
 	//this.source contains the actual version of the compiled code
 	//and gets updated on each input chunk of data.
-	console.log(this.source);
-});
+	console.log(this.source)
+})
 ```
 
 ## Related
