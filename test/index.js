@@ -7,13 +7,10 @@ var ParseStream = require('glsl-parser/stream');
 var CompileStream = require('../stream');
 var test = require('tst');
 var assert = require('assert');
-var fs = require('fs');
-var isBrowser = require('is-browser');
 var StringStream = require('stream-array');
 var Sink = require('stream').Writable;
 var eval = require('./eval');
 var clean = require('cln');
-var glslify = require('glslify-promise');
 var glslifySync = require('glslify');
 
 test('Episodes', function () {
@@ -488,7 +485,7 @@ test.skip('main function', function() {
 	});
 
 	test('should generate asm.js boilerplate', function() {
-		compare(compile('void main() {}'), BOILERPLATE);
+		// compare(compile('void main() {}'), BOILERPLATE);
 	});
 });
 
@@ -849,7 +846,6 @@ test('Vec/matrix operators', function () {
 			mat3 m = mat3(2);
 			u = m * v;
 		`;
-
 		assert.deepEqual(eval(src, {debug: false}), [4, 4, 2]);
 		assert.deepEqual(eval(src, {debug: false, optimize: false}), [4, 4, 2]);
 	});

@@ -840,7 +840,6 @@ test('Math', function () {
 	// vec2 interpolateAtOffset (vec2 interpolant, vec2 offset)
 	// vec3 interpolateAtOffset (vec3 interpolant, vec2 offset)
 	// vec4 interpolateAtOffset (vec4 interpolant, vec2 offset)
-
 });
 
 test('Vector relational functions', function () {
