@@ -272,6 +272,17 @@ test('Episodes', function () {
 			};
 		`))
 	});
+
+	test('if (true) {} else {x = 1.;}', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			if (true) {
+			} else {
+			x = 1.;
+			};
+		`))
+	});
 });
 
 
