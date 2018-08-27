@@ -81,14 +81,14 @@ compiler.reset()
 
 ### Options
 
-| Property | Default | Description |
-|---|:---:|---|
-| `optimize` | `true` | Enable expressions optimizations. |
-| `preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function taking src argument and returning the result to set own preprocessing. |
-| `uniform` | `false` | A function replacing each uniform declaration. Ex: `function (name, node) { return 'uniforms["' + name + '"]' }` will render each uniform declaration as `var <name> = uniforms["<name>"]`. |
-| `attribute` | `false` | Same as `uniform`, but for attribute declarations. |
-| `varying` | `false` | Same as `uniform`, but for varying declarations. |
-| `debug` | `false` | Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime. |
+Property | Default | Description
+---|:---:|---
+`optimize` | `true` | Enable expressions optimizations.
+`preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function `function (srcString) { return resultString; }` to set own preprocessing.
+`uniform` | `false` | A function replacing each uniform declaration. Eg: `function (name, node) { return 'uniforms["' + name + '"]' }` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
+`attribute` | `false` | Same as `uniform`, but for attribute declarations.
+`varying` | `false` | Same as `uniform`, but for varying declarations.
+`debug` | `false` | Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime.
 
 Note that `texture2D` function expects whether ndarray instance or defined `width` and `height` parameters on passed array.
 

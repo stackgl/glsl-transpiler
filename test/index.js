@@ -283,6 +283,14 @@ test('Episodes', function () {
 			};
 		`))
 	});
+
+	test.skip('attribute float sign;', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var sign = 0;
+		`))
+	})
 });
 
 

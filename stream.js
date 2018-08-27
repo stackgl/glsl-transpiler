@@ -42,7 +42,7 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 	//if string passed - tokenize and parse it
 	if (typeof chunk === 'string') {
 		//FIXME: there is a problem of invalid input chunks; gotta wait till some sensible thing is accumulated and then parse.
-		var tree = parse(tokenize(chunk));
+		var tree = parse(tokenize(chunk, {version: '300 es'}));
 		cb(null, this.compiler.process(tree));
 
 		this.tree = tree;
