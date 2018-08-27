@@ -1,6 +1,6 @@
 'use strict'
 
-const Compiler = require('../glsl-transpiler')
+const Compiler = require('../')
 
 // import CodeMirror from 'codemirror'
 // import 'codemirror/mode/javascript'

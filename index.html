@@ -7013,57 +7013,6 @@ function hasOwnProperty(obj, prop) {
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":32,"_process":12,"inherits":31}],34:[function(require,module,exports){
 'use strict'
-
-var Compiler = require('../glsl-transpiler')
-
-// import CodeMirror from 'codemirror'
-// import 'codemirror/mode/javascript'
-// import 'codemirror/lib/codemirror.css'
-
-// var myCodeMirror = CodeMirror(document.body, {
-//   value: "function myScript(){return 100;}\n",
-//   mode:  "javascript"
-// });
-
-document.body.style.margin = 0
-
-var input = document.body.appendChild(document.createElement('textarea'))
-input.setAttribute('placeholder', 'glsl...')
-input.style.width = '50vw'
-input.style.position = 'absolute'
-input.style.height = '100vh'
-input.style.boxSizing = 'border-box'
-input.style.resize = 'none'
-input.style.border = 'none'
-input.style.padding = '.5rem';
-input.style.borderRight = '1px solid #f0f1f2';
-
-var output = document.body.appendChild(document.createElement('textarea'))
-output.setAttribute('placeholder', '...js')
-output.setAttribute('disabled', true)
-output.style.width = '50vw'
-output.style.position = 'absolute'
-output.style.height = '100vh'
-output.style.right = 0
-output.style.boxSizing = 'border-box'
-output.style.resize = 'none'
-output.style.border = 'none'
-output.style.padding = '.5rem';
-output.style.background = '#fafbfc';
-
-
-input.addEventListener('change', function (e) {
-	try {
-		output.value = Compiler().compile(input.value).trim()
-		output.style.color = 'inherit'
-	}
-	catch (e) {
-		output.style.color = 'red'
-		output.value = e
-	}
-})
-},{"../glsl-transpiler":35}],35:[function(require,module,exports){
-'use strict'
 /**
  * Transform glsl to js.
  *
@@ -7081,7 +7030,7 @@ GLSL.string = function (str, opt) {
 GLSL.stream = require('./stream');
 
 module.exports = GLSL;
-},{"./lib":38,"./stream":60}],36:[function(require,module,exports){
+},{"./lib":37,"./stream":60}],35:[function(require,module,exports){
 'use strict'
 /**
  * A collection of builtins with types
@@ -7110,7 +7059,7 @@ exports.gl_Layer = 'int';
 exports.gl_ViewportIndex = 'int';
 exports.gl_FragDepth = 'float';
 exports.gl_SampleMask = 'int';
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict'
 /**
  * Descriptor of a node.
@@ -7212,7 +7161,7 @@ function Descriptor (str, options) {
 }
 
 module.exports = Descriptor;
-},{"./types":42,"xtend/mutable":59}],38:[function(require,module,exports){
+},{"./types":41,"xtend/mutable":58}],37:[function(require,module,exports){
 'use strict'
 /**
  * Transform glsl to js.
@@ -7719,6 +7668,7 @@ GLSL.prototype.transforms = {
 		var this$1 = this;
 
 		var ids = []
+
 		var lastId = 0
 
 		//get datatype - it is the 4th children of a decl
@@ -8600,7 +8550,7 @@ GLSL.prototype.stringifyStdlib = function (includes) {
 
 
 module.exports = GLSL
-},{"./builtins":36,"./descriptor":37,"./operators":39,"./parse":40,"./stdlib":41,"./types":42,"array-flatten":43,"assert":1,"events":6,"inherits":56,"prepr":58,"xtend/mutable":59}],39:[function(require,module,exports){
+},{"./builtins":35,"./descriptor":36,"./operators":38,"./parse":39,"./stdlib":40,"./types":41,"array-flatten":42,"assert":1,"events":6,"inherits":55,"prepr":57,"xtend/mutable":58}],38:[function(require,module,exports){
 'use strict'
 /**
  * Just names for operators
@@ -8891,7 +8841,7 @@ function processOperation (left, right, operator) {
 
 
 module.exports = processOperation;
-},{"./descriptor":37}],40:[function(require,module,exports){
+},{"./descriptor":36}],39:[function(require,module,exports){
 'use strict'
 /**
  * A wrapper for glsl-parser
@@ -8908,7 +8858,7 @@ function parse(arg) {
 
 	//convert string to tokens
 	if (typeof arg === 'string') {
-		arg = tokenize(arg);
+		arg = tokenize(arg, { version: '300 es' });
 	}
 
 	//convert tokens to ast
@@ -8920,7 +8870,7 @@ function parse(arg) {
 }
 
 module.exports = parse;
-},{"glsl-parser/direct":45,"glsl-tokenizer/string":55}],41:[function(require,module,exports){
+},{"glsl-parser/direct":44,"glsl-tokenizer/string":54}],40:[function(require,module,exports){
 'use strict'
 /**
  * OpenGL/WebGL environment methods.
@@ -9724,7 +9674,7 @@ exports.shadow2D =
 exports.shadow3D =
 exports.texture = texture;
 exports.textureSize = textureSize;
-},{"./operators":39}],42:[function(require,module,exports){
+},{"./operators":38}],41:[function(require,module,exports){
 'use strict'
 /**
  * Type constructors.
@@ -10490,7 +10440,7 @@ exports.iimageCube = createSampler('ivec4', 'iimageCube');
 // exports.usamplerCubeArray =
 // exports.uimageCubeArray = sampler;
 // exports.atomic_uint =
-},{"./descriptor":37}],43:[function(require,module,exports){
+},{"./descriptor":36}],42:[function(require,module,exports){
 'use strict'
 
 /**
@@ -10600,7 +10550,7 @@ function flattenDownDepth (array, result, depth) {
   return result
 }
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports = balanced;
 function balanced(a, b, str) {
   var r = range(a, b, str);
@@ -10652,7 +10602,7 @@ function range(a, b, str) {
   return result;
 }
 
-},{}],45:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var parse = require('./lib/index')
 
 module.exports = parseArray
@@ -10667,7 +10617,7 @@ function parseArray(tokens) {
   return parser(null)
 }
 
-},{"./lib/index":47}],46:[function(require,module,exports){
+},{"./lib/index":46}],45:[function(require,module,exports){
 var state
   , token
   , tokens
@@ -10936,7 +10886,7 @@ function fail(message) {
   return function() { return state.unexpected(message) }
 }
 
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = parser
 
 var full_parse_expr = require('./expr')
@@ -11928,7 +11878,7 @@ function is_precision(token) {
          token.data === 'lowp'
 }
 
-},{"./expr":46,"./scope":48}],48:[function(require,module,exports){
+},{"./expr":45,"./scope":47}],47:[function(require,module,exports){
 module.exports = scope
 
 function scope(state) {
@@ -11970,7 +11920,7 @@ proto.find = function(name, fail) {
   return null
 }
 
-},{}],49:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = tokenize
 
 var literals100 = require('./lib/literals')
@@ -12035,9 +11985,18 @@ function tokenize(opt) {
     allLiterals = literals300es
   }
 
+  // cache by name
+  var builtinsDict = {}, literalsDict = {}
+  for (var i = 0; i < allBuiltins.length; i++) {
+    builtinsDict[allBuiltins[i]] = true
+  }
+  for (var i = 0; i < allLiterals.length; i++) {
+    literalsDict[allLiterals[i]] = true
+  }
+
   return function(data) {
     tokens = []
-    if (data !== null) { return write(data.replace ? data.replace(/\r\n/g, '\n') : data) }
+    if (data !== null) { return write(data) }
     return end()
   }
 
@@ -12055,8 +12014,12 @@ function tokenize(opt) {
 
   function write(chunk) {
     i = 0
-    input += chunk
+
+    if (chunk.toString) { chunk = chunk.toString() }
+
+    input += chunk.replace(/\r\n/g, '\n')
     len = input.length
+
 
     var last
 
@@ -12317,9 +12280,9 @@ function tokenize(opt) {
   function readtoken() {
     if(/[^\d\w_]/.test(c)) {
       var contentstr = content.join('')
-      if(allLiterals.indexOf(contentstr) > -1) {
+      if(literalsDict[contentstr]) {
         mode = KEYWORD
-      } else if(allBuiltins.indexOf(contentstr) > -1) {
+      } else if(builtinsDict[contentstr]) {
         mode = BUILTIN
       } else {
         mode = IDENT
@@ -12333,8 +12296,7 @@ function tokenize(opt) {
     return i + 1
   }
 }
-
-},{"./lib/builtins":51,"./lib/builtins-300es":50,"./lib/literals":53,"./lib/literals-300es":52,"./lib/operators":54}],50:[function(require,module,exports){
+},{"./lib/builtins":50,"./lib/builtins-300es":49,"./lib/literals":52,"./lib/literals-300es":51,"./lib/operators":53}],49:[function(require,module,exports){
 // 300es builtins/reserved words that were previously valid in v100
 var v100 = require('./builtins')
 
@@ -12404,8 +12366,7 @@ module.exports = v100.concat([
   , 'textureProjGrad'
   , 'textureProjGradOffset'
 ])
-
-},{"./builtins":51}],51:[function(require,module,exports){
+},{"./builtins":50}],50:[function(require,module,exports){
 module.exports = [
   // Keep this list sorted
   'abs'
@@ -12556,8 +12517,7 @@ module.exports = [
   , 'texture2DProjGradEXT'
   , 'textureCubeGradEXT'
 ]
-
-},{}],52:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var v100 = require('./literals')
 
 module.exports = v100.slice().concat([
@@ -12574,7 +12534,6 @@ module.exports = v100.slice().concat([
   , 'mat4x2'
   , 'mat4x3'
   , 'mat4x4'
-  , 'uint'
   , 'uvec2'
   , 'uvec3'
   , 'uvec4'
@@ -12646,8 +12605,7 @@ module.exports = v100.slice().concat([
   , 'isampler2DMSArray'
   , 'usampler2DMSArray'
 ])
-
-},{"./literals":53}],53:[function(require,module,exports){
+},{"./literals":52}],52:[function(require,module,exports){
 module.exports = [
   // current
     'precision'
@@ -12670,6 +12628,7 @@ module.exports = [
   , 'inout'
   , 'float'
   , 'int'
+  , 'uint'
   , 'void'
   , 'bool'
   , 'true'
@@ -12741,8 +12700,7 @@ module.exports = [
   , 'namespace'
   , 'using'
 ]
-
-},{}],54:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 module.exports = [
     '<<='
   , '>>='
@@ -12790,8 +12748,7 @@ module.exports = [
   , '{'
   , '}'
 ]
-
-},{}],55:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 var tokenize = require('./index')
 
 module.exports = tokenizeString
@@ -12805,8 +12762,7 @@ function tokenizeString(str, opt) {
 
   return tokens
 }
-
-},{"./index":49}],56:[function(require,module,exports){
+},{"./index":48}],55:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -12831,7 +12787,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict'
 
 /**
@@ -12967,7 +12923,7 @@ parenthesis.parse = parse
 parenthesis.stringify = stringify
 
 module.exports = parenthesis
-},{}],58:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * Preprocess in C-preprocessor fashion
  * @module  prepr
@@ -13336,7 +13292,7 @@ function preprocess (what, how) {
 
 
 module.exports = preprocess;
-},{"balanced-match":44,"parenthesis":57,"xtend/mutable":59}],59:[function(require,module,exports){
+},{"balanced-match":43,"parenthesis":56,"xtend/mutable":58}],58:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -13357,7 +13313,58 @@ function extend(target) {
     return target
 }
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
+'use strict'
+
+var Compiler = require('../')
+
+// import CodeMirror from 'codemirror'
+// import 'codemirror/mode/javascript'
+// import 'codemirror/lib/codemirror.css'
+
+// var myCodeMirror = CodeMirror(document.body, {
+//   value: "function myScript(){return 100;}\n",
+//   mode:  "javascript"
+// });
+
+document.body.style.margin = 0
+
+var input = document.body.appendChild(document.createElement('textarea'))
+input.setAttribute('placeholder', 'glsl...')
+input.style.width = '50vw'
+input.style.position = 'absolute'
+input.style.height = '100vh'
+input.style.boxSizing = 'border-box'
+input.style.resize = 'none'
+input.style.border = 'none'
+input.style.padding = '.5rem';
+input.style.borderRight = '1px solid #f0f1f2';
+
+var output = document.body.appendChild(document.createElement('textarea'))
+output.setAttribute('placeholder', '...js')
+output.setAttribute('disabled', true)
+output.style.width = '50vw'
+output.style.position = 'absolute'
+output.style.height = '100vh'
+output.style.right = 0
+output.style.boxSizing = 'border-box'
+output.style.resize = 'none'
+output.style.border = 'none'
+output.style.padding = '.5rem';
+output.style.background = '#fafbfc';
+
+
+input.addEventListener('change', function (e) {
+	try {
+		output.value = Compiler().compile(input.value).trim()
+		output.style.color = 'inherit'
+	}
+	catch (e) {
+		output.style.color = 'red'
+		output.value = e
+	}
+})
+},{"../":34}],60:[function(require,module,exports){
 'use strict'
 /**
  * Convert stream of AST nodes to strings.
@@ -13402,7 +13409,7 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 	//if string passed - tokenize and parse it
 	if (typeof chunk === 'string') {
 		//FIXME: there is a problem of invalid input chunks; gotta wait till some sensible thing is accumulated and then parse.
-		var tree = parse(tokenize(chunk));
+		var tree = parse(tokenize(chunk, {version: '300 es'}));
 		cb(null, this.compiler.process(tree));
 
 		this.tree = tree;
@@ -13437,6 +13444,6 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 };
 
 module.exports = GlslJsStream;
-},{"./lib":38,"./lib/parse":40,"glsl-tokenizer/string":55,"inherits":56,"stream":27}]},{},[34]);
+},{"./lib":37,"./lib/parse":39,"glsl-tokenizer/string":54,"inherits":55,"stream":27}]},{},[59]);
 </script>
 </html>
