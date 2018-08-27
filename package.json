@@ -1,0 +1,30 @@
+{
+  "name": "glsl-transpiler-repl",
+  "version": "1.0.0",
+  "description": "REPL for glsl-transpiler",
+  "main": "index.js",
+  "dependencies": {
+    "codemirror": "^5.39.2"
+  },
+  "devDependencies": {
+    "bubleify": "^1.2.0"
+  },
+  "scripts": {
+    "build": "browserify index.js -g bubleify | indexhtmlify | metadataify > index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackgl/glsl-transpiler.git"
+  },
+  "keywords": [
+    "glsl-transpiler",
+    "glslify"
+  ],
+  "author": "Dmitry Yv <df.creative@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stackgl/glsl-transpiler/issues"
+  },
+  "homepage": "https://github.com/stackgl/glsl-transpiler#readme"
+}
