@@ -292,7 +292,7 @@ test('Episodes', function () {
 		`))
 	})
 
-	test.skip(`normalize(vec2(b));`, function () {
+	test(`normalize(vec2(b));`, function () {
 		var compile = GLSL({includes: false});
 
 		assert.equal(clean(compile(this.title)), clean(`
@@ -824,8 +824,8 @@ test('Components access', function () {
 });
 
 
-test.only('Vec/matrix operators', function () {
-	test.only('vec + number', function () {
+test('Vec/matrix operators', function () {
+	test('vec + number', function () {
 		var src = `
 			vec3 v = vec3(1,2,3), u = vec3(4,5,6);
 			float f = 0.0;
@@ -837,12 +837,6 @@ test.only('Vec/matrix operators', function () {
 			var f = 0.0;
 			v = [u[0] + f + v[0], u[1] + f + v[1], u[2] + f + v[2]];
 		`));
-		assert.equal(clean(GLSL({optimize: false}).compile(src)), clean(`
-			var v = [1, 2, 3], u = [4, 5, 6];
-			var f = 0.0;
-			v = [u[0] + f + v[0], u[1] + f + v[1], u[2] + f + v[2]];
-		`));
-
 		assert.deepEqual(eval(src, {debug: false}), [5, 7, 9]);
 		assert.deepEqual(eval(src, {optimize: false, debug: false}), [5, 7, 9]);
 	});
