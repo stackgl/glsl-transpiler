@@ -8431,7 +8431,7 @@ function Descriptor (str, options) {
 	}
 
 	//set type based on number of components.
-	if (descriptor.type == null) {
+	if (descriptor.type === undefined) {
 		if (!(descriptor+'')) {
 			descriptor.type = 'void';
 			descriptor.components = [];
@@ -8447,7 +8447,9 @@ function Descriptor (str, options) {
 			else { descriptor.type = 'mat' + Math.sqrt(l)|0; }
 		}
 	}
-	//type != null, components == null → set components as item-access
+	// null type means type can be any
+	else if (descriptor.type === null) {}
+	//type !== undefined (any), components == null → set components as item-access
 	else if (descriptor.components == null) {
 		descriptor.components = [];
 		var l = types[descriptor.type].length;
@@ -8465,7 +8467,7 @@ function Descriptor (str, options) {
 	}
 
 	//set optimize flag if all children are optimizable
-	if (descriptor.optimize == null) {
+	if (descriptor.optimize == null && descriptor.components) {
 		descriptor.optimize = descriptor.components.every(function (comp) {
 			return !!comp && comp.optimize !== false;
 		});
@@ -8727,7 +8729,7 @@ GLSL.prototype.process = function (node, arg) {
  */
 GLSL.prototype.optimizeDescriptor = function (descriptor) {
 	//try to optimize
-	if (this.optimize && descriptor.optimize !== false) {
+	if (this.optimize && descriptor.optimize !== false && descriptor.components) {
 		var complexity = descriptor.components.reduce(function (prev, curr) {
 				return prev + curr.complexity||0
 			}, 0)
@@ -9113,6 +9115,7 @@ GLSL.prototype.transforms = {
 	operator: function (node) {
 		//access operators - expand to arrays
 		if (node.data === '.') {
+			// a.x or a().x
 			var identNode = node.children[0]
 			var ident = this.process(identNode)
 			var type = ident.type
@@ -9190,9 +9193,9 @@ GLSL.prototype.transforms = {
 			return res
 		}
 
-
 		//FIXME: guess type more accurately here
 		return Descriptor(str, {
+			type: null,
 			complexity: 0
 		})
 	},
@@ -9299,7 +9302,6 @@ GLSL.prototype.transforms = {
 	assign: function (node) {
 		var result = ''
 		var operator = node.data
-
 		var right = this.process(node.children[1])
 		if (node.children[0].type === 'identifier') {
 			var left = Descriptor(node.children[0].data, {
@@ -9444,7 +9446,6 @@ GLSL.prototype.transforms = {
 		var argTypes = argValues.map(function (arg) {
 			return arg.type
 		}, this)
-
 		//if first node is an access, like a.b() - treat special access-call case
 		if (node.children[0].data === '.') {
 			var methodNode = node.children[0].children[1]
@@ -9559,8 +9560,9 @@ GLSL.prototype.transforms = {
 				}
 
 				if (!type) {
-					//Unable to guess the type of '${callName}' as it is undefined. Guess it returns the type of the first argument.
-					type = this.process(node.children[1]).type
+					// Unable to guess the type of '${callName}'
+					// keep type as null, meaning that can be any
+					type = null
 					optimize = false
 				}
 				var res = Descriptor((callName + "(" + (argValues.join(', ')) + ")"), {
@@ -9622,13 +9624,15 @@ GLSL.prototype.transforms = {
 
 		//each component therefore should be wrapped to group as well
 		//FIXME: single-multiplocation ops like (x*34.) + 1. are possible to be unwrapped, providing that they are of the most precedence.
-		last.components = last.components.map(function (comp) {
-			//if component contains no operations (we not smartly guess that each op adds to complexity) - keep component as is.
-			if (comp.complexity === 1) { return comp }
+		if (last.components) {
+			last.components = last.components.map(function (comp) {
+				//if component contains no operations (we not smartly guess that each op adds to complexity) - keep component as is.
+				if (comp.complexity === 1) { return comp }
 
-			//otherwise wrap it, as it may contain precedences etc.
-			return Descriptor('(' + comp + ')', comp)
-		})
+				//otherwise wrap it, as it may contain precedences etc.
+				return Descriptor('(' + comp + ')', comp)
+			})
+		}
 
 		return Descriptor(result, {
 			type: last.type,
@@ -9666,25 +9670,34 @@ GLSL.prototype.unswizzle = function (node) {
 	var ident = this.process(identNode)
 	var type = ident.type
 	var prop = node.children[1].data
+	var positions = this.swizzlePositions(prop)
 
-	var positions = this.swizzlePositions(prop),
-		args = positions.map(function (position) {
-			//[0, 1].yx → [0, 1]
-			// a.yx → [a[1], a[0]]
-			return ident.components[position]
-		})
+	var args = positions.map(function (position) {
+		//[0, 1].yx → [1, 0]
+		// a.yx → [a[1], a[0]]
+		return ident.components && ident.components[position] || position
+	})
+
 	//a.x → a[0]
 	if (args.length === 1) {
-		if (args[0] == null) { console.warn(("Cannot unswizzle '" + (ident.type) + "(" + ident + ")." + prop + "': " + prop + " is outside the type range.")) }
-		var result = Descriptor(args[0]||'undefined', {
-			type: 'float',
-			complexity: 1
-		})
+		var result
+		// unknown identifiers or calls often have undefined components
+		// a.z → a[2]
+		if (typeof args[0] === 'number') {
+			result = Descriptor((ident + "[" + (args[0]) + "]"), {type: null, complexity: 999})
+		}
+		else {
+			if (args[0] == null) { console.warn(("Cannot unswizzle '" + (ident.type) + "(" + ident + ")." + prop + "': " + prop + " is outside the type range.")) }
+			result = Descriptor(args[0] || "undefined", {
+				type: 'float',
+				complexity: 1
+			})
+		}
 		return result
 	}
 
 	//vec2 a.xy → a
-	if (args.length === this.types[type].length && positions.every(function (position, i) { return position === i})) {
+	if (type && args.length === this.types[type].length && positions.every(function (position, i) { return position === i})) {
 		return ident
 	}
 
@@ -9692,9 +9705,9 @@ GLSL.prototype.unswizzle = function (node) {
 
 	//a.yz → [1, 2].map(function(x) { return this[x]; }, a)
 	var result = Descriptor(("[" + (positions.join(', ')) + "].map(function (x, i) { return this[x]}, " + ident + ")"), {
-		complexity: args.length*2,
+		complexity: ident.components ? args.length*2 : 999,
 		type: ("vec" + (args.length)),
-		components: args
+		components: ident.components && args
 	})
 
 	result = this.optimizeDescriptor(result)
@@ -11009,6 +11022,12 @@ exports.textureSize = textureSize;
 
 
 var Descriptor = require('./descriptor');
+
+// null type means any type
+// we keep single argument for float operations complacency
+// that means by default that undefined types are treated as floats
+// FIXME that can be wrong in general, but easier to read
+exports.null = function (n) {}
 
 
 var floatRE = /^-?[0-9]*(?:.[0-9]+)?(?:e-?[0-9]+)?$/i;
