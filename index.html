@@ -8609,8 +8609,10 @@ GLSL.prototype.reset = function () {
 	}
 
 	//collected stdlib functions need to be included
-	this.includes = {
+	if (this.includes == null || this.includes === true) {
+		this.includes = {
 
+		}
 	}
 
 	//current scope of the node processed
@@ -9556,7 +9558,9 @@ GLSL.prototype.transforms = {
 					this.addInclude(this.stdlib[callName].include)
 
 					type = this.stdlib[callName].type
-					if (type instanceof Function) { type = type.call(this, node) }
+					if (typeof type === 'function') {
+						type = type.call(this, node)
+					}
 				}
 
 				if (!type) {
@@ -9817,11 +9821,13 @@ GLSL.prototype.processOperation = operators
 
 /**
  * Add include, pass optional prop object
+ * For example addInclude('vec3', 'add') will include `vec3` class
+ * with its `add` method
  */
 GLSL.prototype.addInclude = function (name, prop) {
 	var this$1 = this;
 
-	if (!name) { return }
+	if (!name || !this.includes) { return }
 
 	if (Array.isArray(name)) {
 		return name.forEach(function (i) {
@@ -9837,10 +9843,10 @@ GLSL.prototype.addInclude = function (name, prop) {
 	}
 
 	if (!prop) {
-		if (!this.includes[name]) { this.includes[name] = true }
+		if (this.includes[name] == null) { this.includes[name] = true }
 	}
 	else {
-		if (!this.includes[name] || this.includes[name] === true) { this.includes[name] = {} }
+		if (this.includes[name] == null || this.includes[name] === true) { this.includes[name] = {} }
 		this.includes[name][prop] = true
 	}
 }
@@ -9856,6 +9862,8 @@ GLSL.prototype.stringifyStdlib = function (includes) {
 	var methods = []
 
 	for (var meth in includes) {
+		if (!includes[meth]) { continue }
+
 		//eg vecN
 		var result = this$1.stdlib[meth].toString()
 		methods.push(result)
@@ -10282,8 +10290,15 @@ function createOperations(obj, len) {
 		}
 
 		obj[operators[operator]] = new Function ('out', 'a', 'b',
-			((comps.join(';\n')) + "\nreturn out;")
+			((comps.join('\n')) + "\nreturn out")
 		);
+
+		obj[operators[operator]].source = new String(("function " + (operators[operator]) + " (out, a, b) {\n\t\t\t" + (comps.join(';\n')) + ";\n\n\t\t\treturn out;\n\t\t}"))
+
+		obj[operators[operator]].toString =
+		obj[operators[operator]].toSource = function () {
+			return this.source
+		}
 	}
 }
 
@@ -11121,7 +11136,12 @@ function float (node) {
 	var result;
 
 	if (node instanceof String) {
-		result = node.components[0];
+		if (node.components) {
+			result = node.components[0];
+		}
+		else {
+			result = node;
+		}
 	}
 	else if (typeof node === 'object') {
 		result = this.process(node).components[0];
@@ -11167,9 +11187,11 @@ function createVec2 (type, vecType) {
 		var components = [], map = "", include;
 
 		//map type, if input args are of diff type (unlikely required)
-		if (!subType(x.components[0].type, type) || !subType(y.components[0].type, type)) {
-			map = ".map(" + type + ")";
-			include = type;
+		if (x.components && y.components) {
+			if (!subType(x.components[0].type, type) || !subType(y.components[0].type, type)) {
+				map = ".map(" + type + ")";
+				include = type;
+			}
 		}
 
 		//vec2(vec2) → vec2
@@ -11180,7 +11202,7 @@ function createVec2 (type, vecType) {
 		//vec2(vec3) → vec3.slice(0, 2)
 		if (this.types[x.type].length > 2) {
 			return Descriptor((x + ".slice(0, 2)" + map), {
-				components: x.components.slice(0, 2).map(this.types[type], this),
+				components: x.components && x.components.slice(0, 2).map(this.types[type], this),
 				type: vecType,
 				complexity: x.complexity + 2,
 				include: include
