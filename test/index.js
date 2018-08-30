@@ -284,7 +284,7 @@ test('Episodes', function () {
 		`))
 	});
 
-	test.skip('attribute float sign;', function () {
+	test('attribute float sign;', function () {
 		var compile = GLSL();
 
 		assert.equal(clean(compile(this.title)), clean(`
@@ -907,6 +907,49 @@ test('Vec/matrix operators', function () {
 
 
 test('Swizzles', function () {
+	test(`p.z;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			p[2];
+		`))
+	})
+	test(`p().z;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			p()[2];
+		`))
+	})
+	test(`p.zw;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			[2, 3].map(function (x, i) { return this[x]}, p);
+		`))
+	})
+	test(`p().zw;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			[2, 3].map(function (x, i) { return this[x]}, p());
+		`))
+	})
+	test(`float x = vec2(1, 2).x;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var x = 1;
+		`))
+	})
+	test(`float x = vec2(1, 2).xy;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var x = [1, 2];
+		`))
+	})
+
 	test('vec2', function () {
 		assert.deepEqual(eval('vec2(1, 2).x;'), 1);
 		assert.deepEqual(eval('vec2(1, 2).xy;'), [1,2]);
