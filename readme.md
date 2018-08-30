@@ -90,6 +90,7 @@ Property | Default | Description
 `varying` | `false` | Same as `uniform`, but for varying declarations.
 `comments` | `false` | TODO: preserve comments in source code.
 `sourceMap` | `false` | TODO: include source map for the transpiled code.
+`includes` | `true` | Append stdlib includes for the result. Can be bool or an object with defined stdlib functions to include, eg. `{normalize: false, min: false}`.
 `debug` | `false` | Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime.
 
 Note that `texture2D` function expects whether ndarray instance or defined `width` and `height` parameters on passed array.

@@ -291,6 +291,15 @@ test('Episodes', function () {
 			var sign = 0;
 		`))
 	})
+
+	test.skip(`normalize(vec2(b));`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			normalize([b, b]);
+		`))
+	})
+
 });
 
 
