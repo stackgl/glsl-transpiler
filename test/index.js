@@ -299,7 +299,6 @@ test('Episodes', function () {
 			normalize([b, b]);
 		`))
 	})
-
 });
 
 
@@ -917,6 +916,18 @@ test('Vec/matrix operators', function () {
 			var z = vec4(x.length, y.length, mat2[0].length, mat2.length).length;
 		`;
 	});
+
+	test(`mat * mat * mat`, function () {
+		var compile = GLSL({includes: false});
+
+		assert.equal(clean(compile(`
+		mat2 a, b, c;
+		gl_Position = a * b * c;
+		`)), clean(`
+		var a = [1, 0, 0, 1], b = [1, 0, 0, 1], c = [1, 0, 0, 1];
+		gl_Position = [(a[0] * b[0] + a[2] * b[1]) * c[0] + (a[0] * b[2] + a[2] * b[3]) * c[1], (a[1] * b[0] + a[3] * b[1]) * c[0] + (a[1] * b[2] + a[3] * b[3]) * c[1], (a[0] * b[0] + a[2] * b[1]) * c[2] + (a[0] * b[2] + a[2] * b[3]) * c[3], (a[1] * b[0] + a[3] * b[1]) * c[2] + (a[1] * b[2] + a[3] * b[3]) * c[3]];
+		`))
+	})
 });
 
 
