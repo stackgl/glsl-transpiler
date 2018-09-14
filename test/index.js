@@ -927,7 +927,7 @@ test('Vec/matrix operators', function () {
 		var a = [1, 0, 0, 1], b = [1, 0, 0, 1], c = [1, 0, 0, 1];
 		gl_Position = [(a[0] * b[0] + a[2] * b[1]) * c[0] + (a[0] * b[2] + a[2] * b[3]) * c[1], (a[1] * b[0] + a[3] * b[1]) * c[0] + (a[1] * b[2] + a[3] * b[3]) * c[1], (a[0] * b[0] + a[2] * b[1]) * c[2] + (a[0] * b[2] + a[2] * b[3]) * c[3], (a[1] * b[0] + a[3] * b[1]) * c[2] + (a[1] * b[2] + a[3] * b[3]) * c[3]];
 		`))
-	});
+	})
 
 	test(`mat * mat * mat * vec`, function () {
 		var compile = GLSL({includes: false});
@@ -941,8 +941,8 @@ test('Vec/matrix operators', function () {
 		var d = [0, 0];
 		gl_Position = [((a[0] * b[0] + a[2] * b[1]) * c[0] + (a[0] * b[2] + a[2] * b[3]) * c[1]) * d[0] + ((a[0] * b[0] + a[2] * b[1]) * c[2] + (a[0] * b[2] + a[2] * b[3]) * c[3]) * d[1], ((a[1] * b[0] + a[3] * b[1]) * c[0] + (a[1] * b[2] + a[3] * b[3]) * c[1]) * d[0] + ((a[1] * b[0] + a[3] * b[1]) * c[2] + (a[1] * b[2] + a[3] * b[3]) * c[3]) * d[1]];
 		`))
-	});
-});
+	})
+})
 
 
 test('Swizzles', function () {
