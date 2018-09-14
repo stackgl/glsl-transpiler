@@ -88,7 +88,7 @@ Property | Default | Description
 `uniform` | `false` | A function replacing each uniform declaration. Eg: `function (name, node) { return 'uniforms["' + name + '"]' }` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
 `attribute` | `false` | Same as `uniform`, but for attribute declarations.
 `varying` | `false` | Same as `uniform`, but for varying declarations.
-`version` | `'100 es'` | GLSL shader version, one of `'300 es'` or `'100 es'`.
+`version` | `100 es` | GLSL shader version, one of `'300 es'` or `'100 es'`.
 `comments` | `false` | TODO: preserve comments in source code.
 `sourceMap` | `false` | TODO: include source map for the transpiled code.
 `includes` | `true` | Append stdlib includes for the result. Can be bool or an object with defined stdlib functions to include, eg. `{normalize: false, min: false}`.
