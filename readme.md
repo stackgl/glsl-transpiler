@@ -1,4 +1,6 @@
-_glsl-transpiler_ transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
+# glsl-transpiler
+
+Transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
 
 ## Usage
 

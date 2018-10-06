@@ -317,6 +317,14 @@ test('Episodes', function () {
 			[a[2][2], a[2][3]] = [2.0, 2.0]
 		`))
 	})
+
+	test(`const float E = 2.7182817459106445e+0;`, function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			var E = 2.7182817459106445e+0;
+		`))
+	})
 });
 
 
