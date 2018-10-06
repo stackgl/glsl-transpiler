@@ -11,7 +11,7 @@ var StringStream = require('stream-array');
 var Sink = require('stream').Writable;
 var eval = require('./eval');
 var clean = require('cln');
-var glslifySync = require('glslify');
+var glsl = require('glslify');
 
 test('Episodes', function () {
 	var compile = GLSL({
@@ -323,12 +323,12 @@ test('Episodes', function () {
 test('Real cases', function () {
 	//FIXME: make parser handle things properly
 	test.skip('source1', function () {
-		var str = glslifySync('./source1.glsl');
+		var str = glsl('./source1.glsl');
 
 		compile(str);
 	});
 	test.skip('source2', function () {
-		var str = glslifySync('./source2.glsl');
+		var str = glsl('./source2.glsl');
 
 		compile(str);
 	});
