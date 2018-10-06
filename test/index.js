@@ -293,10 +293,28 @@ test('Episodes', function () {
 	})
 
 	test(`normalize(vec2(b));`, function () {
-		var compile = GLSL({includes: false});
+		var compile = GLSL({includes: false})
 
 		assert.equal(clean(compile(this.title)), clean(`
 			normalize([b, b]);
+		`))
+	})
+
+	test(`a[0].x = 0.0; a[1].y = 1.0;`, function () {
+		var compile = GLSL({includes: false})
+
+		assert.equal(clean(compile(this.title)), clean(`
+			a[0][0] = 0.0;
+			a[1][1] = 1.0;
+		`))
+	})
+
+	// TODO
+	test.skip(`a[2].zw = 2.0;`, function () {
+		var compile = GLSL({includes: false});
+
+		assert.equal(clean(compile(this.title)), clean(`
+			[a[2][2], a[2][3]] = [2.0, 2.0]
 		`))
 	})
 });
