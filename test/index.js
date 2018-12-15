@@ -268,6 +268,7 @@ test('Episodes', function () {
 
 		assert.equal(clean(compile(this.title)), clean(`
 			function permute (x) {
+				x = x.slice();
 				return mod289([(x[0] * 34.0 + 1.0) * x[0], (x[1] * 34.0 + 1.0) * x[1], (x[2] * 34.0 + 1.0) * x[2]]);
 			};
 		`))
@@ -300,6 +301,114 @@ test('Episodes', function () {
 		`))
 	})
 });
+
+test('Argument qualifiers', function() {
+
+	// clone inputs
+	test('void f(float a, vec3 b, mat4 c) { b.x = 1.0; }', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			function f (a, b, c) {
+				b = b.slice();
+				c = c.slice();
+				b[0] = 1.0;
+			};
+		`))
+	});
+
+	// output w/o return statement
+	test('void f(float a, out float b) { b = 1.0; }', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			function f (a, b) {
+				b = 1.0;
+				f.__out__ = [b];
+			};
+		`))
+	});
+
+	// output w/ return statement
+	test('void f(float a, out float b) { if (a < 0.0) { b = -1.0; return; } b = 1.0; }', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			function f (a, b) {
+				if (a < 0.0) {
+					b = -1.0;
+					f.__out__ = [b];
+					return;
+				};
+				b = 1.0;
+				f.__out__ = [b];
+			};
+		`))
+	});
+
+	// multiple outputs
+	test('float f(out float a, out vec2 b, inout vec2 c) { a = 0.1; b = vec2(2.0); c = b; return 0.0; }', function () {
+		var compile = GLSL();
+
+		assert.equal(clean(compile(this.title)), clean(`
+			function f (a, b, c) {
+				c = c.slice();
+				a = 0.1;
+				b = [2.0, 2.0];
+				c = b;
+				f.__return__ = 0.0;
+				f.__out__ = [a, b, c];
+				return f.__return__;
+			};
+		`))
+	});
+
+	// calling 
+	test(`float f(float a, out float b, out float c) { b = 1.0; c = 2.0; return a + 1.0; }
+		void main() { float x = 0.1; float y; float z; x = f(x, y, z); }`, function () {
+		var compile = GLSL();
+		assert.equal(clean(compile(this.title)), clean(`
+			function f (a, b, c) {
+				b = 1.0;
+				c = 2.0;
+				f.__return__ = a + 1.0;
+				f.__out__ = [b, c];
+				return f.__return__;
+			};
+			function main () {
+				var x = 0.1;
+				var y = 0;
+				var z = 0;
+				x = (f(x, y, z), [y, z] = f.__out__, f.__return__);
+			};
+		`))
+	});
+
+	// recursive calling 
+	test(`float f1(float a, out float b) { b = 1.0; return a + 1.0; }
+		float f2(float a, out float b) { return f1(a, b) + 1.0; }
+		void main() { float x = 0.1; float y; x = f2(x, y); }`, function () {
+		var compile = GLSL();
+		assert.equal(clean(compile(this.title)), clean(`
+			function f1 (a, b) {
+				b = 1.0;
+				f1.__return__ = a + 1.0;
+				f1.__out__ = [b];
+				return f1.__return__;
+			};
+			function f2 (a, b) {
+				f2.__return__ = (f1(a, b), [b] = f1.__out__, f1.__return__) + 1.0;
+				f2.__out__ = [b];
+				return f2.__return__;
+			};
+			function main () {
+				var x = 0.1;
+				var y = 0;
+				x = (f2(x, y), [y] = f2.__out__, f2.__return__);
+			};
+		`))
+	});
+})
 
 
 test('Real cases', function () {
