@@ -61,7 +61,8 @@
     "webgl",
     "gpu"
   ],
-  "author": "Deema Yvanow <dfcreative@gmail.com>",
+  "author": "Dmitry Yv <df.creative@gmail.com>",
+  "contributors": ["Xiaoji Chen (http://pessimistress.github.io/)"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/stackgl/glsl-transpiler/issues"
