@@ -304,11 +304,15 @@ test('Episodes', function () {
 
 test('Argument qualifiers', function() {
 
-	// clone inputs
-	test('void f(float a, vec3 b, mat4 c) { b.x = 1.0; }', function () {
+	test('Clone inputs', function () {
 		var compile = GLSL();
 
-		assert.equal(clean(compile(this.title)), clean(`
+		var source = `
+			void f(float a, vec3 b, mat4 c) {
+				b.x = 1.0;
+			}`;
+
+		assert.equal(clean(compile(source)), clean(`
 			function f (a, b, c) {
 				b = b.slice();
 				c = c.slice();
@@ -317,11 +321,15 @@ test('Argument qualifiers', function() {
 		`))
 	});
 
-	// output w/o return statement
-	test('void f(float a, out float b) { b = 1.0; }', function () {
+	test('Output without return statements', function () {
 		var compile = GLSL();
 
-		assert.equal(clean(compile(this.title)), clean(`
+		var source = `
+			void f(float a, out float b) {
+				b = 1.0;
+			}`;
+
+		assert.equal(clean(compile(source)), clean(`
 			function f (a, b) {
 				b = 1.0;
 				f.__out__ = [b];
@@ -329,11 +337,19 @@ test('Argument qualifiers', function() {
 		`))
 	});
 
-	// output w/ return statement
-	test('void f(float a, out float b) { if (a < 0.0) { b = -1.0; return; } b = 1.0; }', function () {
+	test('Output with return statements', function () {
 		var compile = GLSL();
 
-		assert.equal(clean(compile(this.title)), clean(`
+		var source = `
+			void f(float a, out float b) {
+				if (a < 0.0) {
+					b = -1.0;
+					return;
+				}
+				b = 1.0;
+			}`;
+
+		assert.equal(clean(compile(source)), clean(`
 			function f (a, b) {
 				if (a < 0.0) {
 					b = -1.0;
@@ -346,11 +362,18 @@ test('Argument qualifiers', function() {
 		`))
 	});
 
-	// multiple outputs
-	test('float f(out float a, out vec2 b, inout vec2 c) { a = 0.1; b = vec2(2.0); c = b; return 0.0; }', function () {
+	test('Multiple outputs', function () {
 		var compile = GLSL();
 
-		assert.equal(clean(compile(this.title)), clean(`
+		var source = `
+			float f(out float a, out vec2 b, inout vec2 c) {
+				a = 0.1;
+				b = vec2(2.0);
+				c = b;
+				return 0.0;
+			}`;
+
+		assert.equal(clean(compile(source)), clean(`
 			function f (a, b, c) {
 				c = c.slice();
 				a = 0.1;
@@ -363,11 +386,23 @@ test('Argument qualifiers', function() {
 		`))
 	});
 
-	// calling 
-	test(`float f(float a, out float b, out float c) { b = 1.0; c = 2.0; return a + 1.0; }
-		void main() { float x = 0.1; float y; float z; x = f(x, y, z); }`, function () {
+	test('Calling function with output arguments', function () {
 		var compile = GLSL();
-		assert.equal(clean(compile(this.title)), clean(`
+
+		var source = `
+			float f(float a, out float b, out float c) {
+				b = 1.0;
+				c = 2.0;
+				return a + 1.0;
+			}
+			float x = 0.1;
+			float y;
+			float z;
+			x = f(x, y, z);
+			gl_Position = vec4(x, y, z, 1.0);
+		`;
+
+		assert.equal(clean(compile(source)), clean(`
 			function f (a, b, c) {
 				b = 1.0;
 				c = 2.0;
@@ -375,21 +410,35 @@ test('Argument qualifiers', function() {
 				f.__out__ = [b, c];
 				return f.__return__;
 			};
-			function main () {
-				var x = 0.1;
-				var y = 0;
-				var z = 0;
-				x = (f(x, y, z), [y, z] = f.__out__, f.__return__);
-			};
+			var x = 0.1;
+			var y = 0;
+			var z = 0;
+			x = (f(x, y, z), [y, z] = f.__out__, f.__return__);
+			gl_Position = [x, y, z, 1];
 		`))
+
+		assert.deepEqual(eval(source, {debug: false}), [1.1, 1, 2, 1]);
 	});
 
 	// recursive calling 
-	test(`float f1(float a, out float b) { b = 1.0; return a + 1.0; }
-		float f2(float a, out float b) { return f1(a, b) + 1.0; }
-		void main() { float x = 0.1; float y; x = f2(x, y); }`, function () {
+	test('Calling nested functions with output arguments', function () {
 		var compile = GLSL();
-		assert.equal(clean(compile(this.title)), clean(`
+
+		var source = `
+			float f1(float a, out float b) {
+				b = 1.0;
+				return a + 1.0;
+			}
+			float f2(float a, out float b) {
+				return f1(a, b) + 1.0;
+			}
+			float x = 0.1;
+			float y;
+			x = f2(x, y);
+			gl_Position = vec4(x, y, 0.0, 1.0);
+		`;
+
+		assert.equal(clean(compile(source)), clean(`
 			function f1 (a, b) {
 				b = 1.0;
 				f1.__return__ = a + 1.0;
@@ -401,12 +450,13 @@ test('Argument qualifiers', function() {
 				f2.__out__ = [b];
 				return f2.__return__;
 			};
-			function main () {
-				var x = 0.1;
-				var y = 0;
-				x = (f2(x, y), [y] = f2.__out__, f2.__return__);
-			};
+			var x = 0.1;
+			var y = 0;
+			x = (f2(x, y), [y] = f2.__out__, f2.__return__);
+			gl_Position = [x, y, 0, 1];
 		`))
+
+		assert.deepEqual(eval(source, {debug: false}), [2.1, 1, 0, 1]);
 	});
 })
 
