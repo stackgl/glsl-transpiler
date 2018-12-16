@@ -466,30 +466,67 @@ test(`float x = vec2(1, 2).xy;`, function (t) {
 	`))
 	t.end()
 })
-test('vec2', function (t) {
-	t.deepEqual(eval('vec2(1, 2).x;'), 1);
-	t.deepEqual(eval('vec2(1, 2).xy;'), [1,2]);
-	t.deepEqual(eval('vec2(1, 2).yy;'), [2,2]);
-	t.end()
-})
-test('vec3', function (t) {
-	t.deepEqual(eval('vec3(1, 2, 3).x;'), 1);
-	t.deepEqual(eval('vec3(1, 2, 3).xy;'), [1,2]);
-	t.deepEqual(eval('vec3(1, 2, 3).xyz;'), [1,2,3]);
-	t.deepEqual(eval('vec3(1, 2, 3).zzz;'), [3,3,3]);
-	t.end()
-})
-test('vec4', function (t) {
-	t.deepEqual(eval('vec4(1, 2, 3, 4).x;'), 1);
-	t.deepEqual(eval('vec4(1, 2, 3, 4).xy;'), [1,2]);
-	t.deepEqual(eval('vec4(1, 2, 3, 4).xyz;'), [1,2,3]);
-	t.deepEqual(eval('vec4(1, 2, 3, 4).xyzw;'), [1,2,3,4]);
-	t.deepEqual(eval('vec4(1, 2, 3, 4).wwww;'), [4,4,4,4]);
-	t.deepEqual(eval('vec4(1, 2, 3, 4).wzyx;'), [4,3,2,1]);
-	t.end()
-})
 
+test('float x = 1.0; float y = -x;', function (t) {
+	var compile = GLSL();
 
+	t.equal(clean(compile(t.name)), clean(`
+		var x = 1.0;
+		var y = -x;
+	`))
+	t.end()
+})
+test('vec3 x = vec3(1.0); vec3 y = -x;', function (t) {
+	var compile = GLSL();
+
+	t.equal(clean(compile(t.name)), clean(`
+		var x = [1, 1, 1];
+		var y = [-x[0], -x[1], -x[2]];
+	`))
+	t.end()
+})
+test('vec3 x = vec3(1.0); vec3 y = 0. - x;', function (t) {
+	var compile = GLSL();
+
+	t.equal(clean(compile(t.name)), clean(`
+		var x = [1, 1, 1];
+		var y = [-x[0], -x[1], -x[2]];
+	`))
+	t.end()
+})
+test('float s = 0.; --s;', function (t) {
+	var compile = GLSL();
+
+	t.equal(clean(compile(t.name)),
+	clean`
+		var s = 0.;
+		--s;
+	`)
+
+	t.end()
+})
+test('float s = 0.; s--;', function (t) {
+	var compile = GLSL();
+
+	t.equal(clean(compile(t.name)),
+	clean`
+		var s = 0.;
+		s--;
+	`)
+
+	t.end()
+})
+test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
+	t.equal(clean(compile(t.name)),
+	clean`
+		function f () {
+			return [3., 3., 3.];
+		};
+		var x = f().map(function (_) {return this - _;}, null);
+	`)
+
+	t.end()
+})
 
 // 	`
 // 	vec2 pos;

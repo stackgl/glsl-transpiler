@@ -5,15 +5,17 @@
   "main": "index.js",
   "dependencies": {
     "array-flatten": "^2.0.0",
+    "float-regex": "^1.0.0",
     "glsl-parser": "^2.0.1",
     "glsl-tokenizer": "^2.1.5",
     "inherits": "^2.0.1",
+    "pick-by-alias": "^1.2.0",
     "prepr": "^1.1.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
     "almost-equal": "^1.1.0",
-    "cln": "^1.0.0",
+    "cln": "^1.1.0",
     "gl-matrix": "^2.3.2",
     "glslify": "^5.0.2",
     "glslify-promise": "^1.0.2",

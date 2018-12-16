@@ -140,6 +140,30 @@ test('vec4(vec2, vec2)', function (t) {
 	t.end()
 })
 
+test('vec2 swizzles', function (t) {
+	t.deepEqual(eval('vec2(1, 2).x;'), 1);
+	t.deepEqual(eval('vec2(1, 2).xy;'), [1,2]);
+	t.deepEqual(eval('vec2(1, 2).yy;'), [2,2]);
+	t.end()
+})
+test('vec3 swizzles', function (t) {
+	t.deepEqual(eval('vec3(1, 2, 3).x;'), 1);
+	t.deepEqual(eval('vec3(1, 2, 3).xy;'), [1,2]);
+	t.deepEqual(eval('vec3(1, 2, 3).xyz;'), [1,2,3]);
+	t.deepEqual(eval('vec3(1, 2, 3).zzz;'), [3,3,3]);
+	t.end()
+})
+test('vec4 swizzles', function (t) {
+	t.deepEqual(eval('vec4(1, 2, 3, 4).x;'), 1);
+	t.deepEqual(eval('vec4(1, 2, 3, 4).xy;'), [1,2]);
+	t.deepEqual(eval('vec4(1, 2, 3, 4).xyz;'), [1,2,3]);
+	t.deepEqual(eval('vec4(1, 2, 3, 4).xyzw;'), [1,2,3,4]);
+	t.deepEqual(eval('vec4(1, 2, 3, 4).wwww;'), [4,4,4,4]);
+	t.deepEqual(eval('vec4(1, 2, 3, 4).wzyx;'), [4,3,2,1]);
+	t.end()
+})
+
+
 
 
 
