@@ -2,7 +2,7 @@
  * Eval piece of glsl code
  */
 
-var GLSL = require('../');
+var GLSL = require('../../');
 
 module.exports = function eval (str, opt, data) {
 	var strLines;
