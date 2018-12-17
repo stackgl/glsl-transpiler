@@ -522,8 +522,10 @@ test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
 		function f () {
 			return [3., 3., 3.];
 		};
-		var x = f().map(function (_) {return this - _;}, null);
+		var x = f().map(function (_) {return -_;});
 	`)
+	console.log()
+	t.deepEqual(eval(t.name + ';x;'), [-3,-3,-3])
 
 	t.end()
 })
