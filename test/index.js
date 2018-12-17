@@ -60,6 +60,18 @@ test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function (
 	);
 	t.end()
 })
+test('vec2 uv = vec2(1.); uv += mix(uv, uv, 0.);', function (t) {
+	t.deepEqual(eval(t.name), [2, 2]);
+	t.end()
+})
+test('vec2 uv = vec2(0., 0.5); uv *= smoothstep(0., 1., uv);', function (t) {
+	t.deepEqual(eval(t.name), [0, 0.25]);
+	t.end()
+})
+test('float x = 0.5; vec2 uv = vec2(0., 0.5); uv *= smoothstep(0., 1., x);', function (t) {
+	t.deepEqual(eval(t.name), [0, 0.25]);
+	t.end()
+})
 test('vec2 position; position *= 1.0 + vec2();', function (t) {
 	t.equal(
 		clean(compile(t.name)),
