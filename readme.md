@@ -128,3 +128,4 @@ fs.createReadStream('./source.glsl')
 * [js2glsl](https://github.com/jdavidberger/js2glsl) — transform js subset to glsl.<br/>
 * [glsl-simulator](https://github.com/burg/glsl-simulator) — OpenGL1.0 simulation in js.<br/>
 * [turbo/js](https://github.com/turbo/js) — webgl-based computation
+* [shaderdsl](https://github.com/adobe-webplatform/shaderdsl)
