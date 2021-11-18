@@ -129,3 +129,4 @@ fs.createReadStream('./source.glsl')
 * [glsl-simulator](https://github.com/burg/glsl-simulator) — OpenGL1.0 simulation in js.<br/>
 * [turbo/js](https://github.com/turbo/js) — webgl-based computation
 * [shaderdsl](https://github.com/adobe-webplatform/shaderdsl)
+* [wgsl_reflect](https://github.com/brendan-duncan/wgsl_reflect)
