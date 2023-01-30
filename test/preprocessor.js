@@ -1,12 +1,6 @@
 var test = require('tape')
 var GLSL = require('../');
 var compile = GLSL.compile;
-var parse = require('glsl-parser/direct');
-var tokenize = require('glsl-tokenizer/string');
-var glmat = require('gl-matrix');
-var almost = require('almost-equal');
-var eval = require('./util/eval');
-var ndarray = require('ndarray');
 var clean = require('cln')
 
 test('Transform macro to commented', function (t) {
