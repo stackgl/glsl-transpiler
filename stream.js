@@ -6,7 +6,7 @@
 
 import tokenize from 'glsl-tokenizer/string.js'
 import parse from './lib/parse.cjs'
-import GLSL from './lib/index.cjs'
+import GLSL from './lib/index.js'
 import {Transform} from 'stream'
 import inherits from 'inherits'
 

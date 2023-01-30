@@ -4,7 +4,7 @@
  * @module  glsl-transpiler
  */
 
-import GLSL from './lib/index.cjs';
+import GLSL from './lib/index.js';
 
 
 //static bindings
