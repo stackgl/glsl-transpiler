@@ -5,7 +5,6 @@
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "array-flatten": "^2.0.0",
     "glsl-parser": "^2.0.1",
     "glsl-tokenizer": "^2.1.5",
     "inherits": "^2.0.1",
