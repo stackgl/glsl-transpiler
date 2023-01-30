@@ -7,9 +7,9 @@ Transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimize
 [![npm install glsl-transpiler](https://nodei.co/npm/glsl-transpiler.png?mini=true)](https://npmjs.org/package/glsl-transpiler/)
 
 ```js
-var Compiler = require('glsl-transpiler')
+import GLSL from 'glsl-transpiler'
 
-var compile = Compiler({
+var compile = GLSL({
 	uniform: function (name) {
 		return `uniforms.${name}`
 	},
@@ -58,23 +58,22 @@ function main () {
 To apply compilation to glsl AST or string, require `glsl-transpiler`:
 
 ```js
-var GLSL = require('glsl-transpiler')
+import GLSL from 'glsl-transpiler'
 
-var source = glslify('./source.glsl')
-var compile = GLSL(options?)
+let compile = GLSL(options)
 
 //compile source code
-var result = compile(source)
-
+let result = compile('...source.glsl')
 
 //get collected info
-var compiler = compile.compiler
-compiler.attributes
-compiler.uniforms
-compiler.varyings
-compiler.structs
-compiler.functions
-compiler.scopes
+let {
+	attributes,
+	uniforms,
+	varyings,
+	structs,
+	functions,
+	scopes
+} = compile.compiler
 
 
 //clean collected info
@@ -85,16 +84,16 @@ compiler.reset()
 
 Property | Default | Description
 ---|:---:|---
-`optimize` | `true` | Enable expressions optimizations, eg. `TODO`
-`preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function `function (srcString) { return resultString; }` to set own preprocessing.
-`uniform` | `false` | A function replacing each uniform declaration. Eg: `function (name, node) { return 'uniforms["' + name + '"]' }` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
+`optimize` | `true` | Enable expressions optimizations.
+`preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function `(srcString) => resultString;` to set own preprocessing.
+`uniform` | `false` | A function replacing each uniform declaration. Eg: `(name, node) => ``uniforms["${name}"]`` ` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
 `attribute` | `false` | Same as `uniform`, but for attribute declarations.
 `varying` | `false` | Same as `uniform`, but for varying declarations.
 `version` | `'100 es'` | GLSL shader version, one of `'300 es'` or `'100 es'`.
-`comments` | `false` | TODO: preserve comments in source code.
-`sourceMap` | `false` | TODO: include source map for the transpiled code.
 `includes` | `true` | Append stdlib includes for the result. Can be bool or an object with defined stdlib functions to include, eg. `{normalize: false, min: false}`.
 `debug` | `false` | Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime.
+<!-- `comments` | `false` | TODO: preserve comments in source code.
+`sourceMap` | `false` | TODO: include source map for the transpiled code. -->
 
 Note that `texture2D` function expects whether ndarray instance or defined `width` and `height` parameters on passed array.
 
@@ -104,9 +103,9 @@ Note that `texture2D` function expects whether ndarray instance or defined `widt
 _glsl-transpiler_ can also be used as a stream. For each node from the [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) it will return compiled js chunk:
 
 ```js
-var compile = require('glsl-transpiler/stream')
-var parse = require('glsl-parser/stream')
-var tokenize = require('glsl-tokenizer/stream')
+import compile from 'glsl-transpiler/stream.js'
+import parse from 'glsl-parser/stream.js'
+import tokenize from 'glsl-tokenizer/stream.js'
 
 fs.createReadStream('./source.glsl')
 .pipe(tokenize())
