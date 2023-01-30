@@ -3,7 +3,7 @@ import evaluate from './util/eval.js'
 import almost from './util/almost.js'
 
 // math
-import stdlib from '../lib/stdlib.cjs'
+import stdlib from '../lib/stdlib.js'
 var mat4 = stdlib.mat4;
 var vec4 = stdlib.vec4;
 var pi2 = Math.PI * 2;
