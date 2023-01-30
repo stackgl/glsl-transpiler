@@ -1,7 +1,7 @@
 /**
  * Transform glsl to js.
  *
- * @module  glsl-js
+ * @module  glsl-transpiler
  */
 
 import GLSL from './lib/index.cjs';

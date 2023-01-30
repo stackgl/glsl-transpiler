@@ -54,7 +54,7 @@
     "gl",
     "glsl",
     "glsl.js",
-    "glsl-js",
+    "glsl-transpiler",
     "transpiler",
     "stackgl",
     "js",
