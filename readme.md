@@ -86,7 +86,7 @@ Property | Default | Description
 ---|:---:|---
 `optimize` | `true` | Enable expressions optimizations.
 `preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function `(srcString) => resultString;` to set own preprocessing.
-`uniform` | `false` | A function replacing each uniform declaration. Eg: `(name, node) => ``uniforms["${name}"]`` ` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
+`uniform` | `false` | A function replacing each uniform declaration. Eg: ``(name, node) => `uniforms["${name}"]`;`` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
 `attribute` | `false` | Same as `uniform`, but for attribute declarations.
 `varying` | `false` | Same as `uniform`, but for varying declarations.
 `version` | `'100 es'` | GLSL shader version, one of `'300 es'` or `'100 es'`.
