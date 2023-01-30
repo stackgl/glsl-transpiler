@@ -1,9 +1,9 @@
 //ref https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf
-var test = require('tape')
-var GLSL = require('../');
-var almost = require('./util/almost');
-var evaluate= require('./util/eval');
-var clean = require('cln')
+import test from 'tape'
+import GLSL from '../index.js'
+import almost from './util/almost.js'
+import evaluate from './util/eval.js'
+import clean from 'cln'
 
 // constructors
 

@@ -1,6 +1,6 @@
 var test = require('tst');
 var inherits = require('inherits');
-var lib = require('../lib/stdlib');
+var lib = require('../lib/stdlib.cjs');
 var glMat = require('gl-matrix');
 var ndarray = require('ndarray');
 

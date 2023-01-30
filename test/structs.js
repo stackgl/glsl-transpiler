@@ -1,8 +1,7 @@
-var GLSL = require('../')
-var compile = GLSL.compile
-var test = require('tape')
-var evaluate= require('./util/eval')
-var clean = require('cln')
+import GLSL from '../index.js'
+import test from 'tape'
+import evaluate from './util/eval.js'
+import clean from 'cln'
 
 var compile = GLSL({})
 

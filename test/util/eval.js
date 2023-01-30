@@ -2,9 +2,9 @@
  * Eval piece of glsl code
  */
 
-var GLSL = require('../../');
+import GLSL from '../../index.js';
 
-module.exports = function evaluate (str, opt, data) {
+export default function evaluate (str, opt, data) {
 	var strLines;
 
 	opt = opt || {};

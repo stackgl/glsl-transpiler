@@ -1,10 +1,18 @@
-var GLSL = require('../')
-var compile = GLSL.compile
-var test = require('tape')
-var evaluate= require('./util/eval')
-var clean = require('cln')
-var glsl = require('glslify')
+import GLSL from '../index.js'
+import test from 'tape'
+import evaluate from './util/eval.js'
+import clean from 'cln'
+import glsl from 'glslify'
 
+import './functions.js'
+import './math.js'
+import './primitives.js'
+import './vectors.js'
+import './matrices.js'
+import './builtins.js'
+import './preprocessor.js'
+import './api.js'
+import './structs.js'
 
 var compile = GLSL({})
 
@@ -605,12 +613,3 @@ test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
 // indexing (arrays only) [ ]
 
 
-require('./functions')
-require('./math')
-require('./primitives')
-require('./vectors')
-require('./matrices')
-require('./builtins')
-require('./preprocessor')
-require('./api')
-require('./structs')

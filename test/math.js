@@ -1,9 +1,9 @@
-var test = require('tape')
-var evaluate= require('./util/eval')
-var almost = require('./util/almost')
+import test from 'tape'
+import evaluate from './util/eval.js'
+import almost from './util/almost.js'
 
 // math
-var stdlib = require('../lib/stdlib')
+import stdlib from '../lib/stdlib.cjs'
 var mat4 = stdlib.mat4;
 var vec4 = stdlib.vec4;
 var pi2 = Math.PI * 2;

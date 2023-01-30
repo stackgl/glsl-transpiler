@@ -1,18 +1,17 @@
-'use strict'
 /**
  * Transform glsl to js.
  *
  * @module  glsl-js
  */
 
-var GLSL = require('./lib');
+import GLSL from './lib/index.cjs';
+
 
 //static bindings
-GLSL.compile =
-GLSL.string = function (str, opt) {
+export function compile (str, opt) {
 	return GLSL(opt).compile(str);
 };
 
-GLSL.stream = require('./stream');
+export * from './stream.cjs';
 
-module.exports = GLSL;
+export default GLSL

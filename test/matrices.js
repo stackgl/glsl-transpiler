@@ -1,5 +1,5 @@
-var test = require('tape')
-var evaluate= require('./util/eval');
+import test  from  'tape'
+import evaluate from  './util/eval.js'
 
 // constructors
 

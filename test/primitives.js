@@ -1,8 +1,7 @@
-var GLSL = require('../')
-var compile = GLSL.compile
-var test = require('tape')
-var evaluate= require('./util/eval')
-var clean = require('cln')
+import GLSL from '../index.js'
+import test from 'tape'
+import evaluate from './util/eval.js'
+import clean from 'cln'
 
 
 var compile = GLSL({})
@@ -92,7 +91,6 @@ test('bool(double)', function (t) {
 	t.equal(!!evaluate('+bool(123.4e100);'), true);
 	t.end()
 });
-var test= require('tape')
 
 // converts a signed integer value to a float
 test('float(int)', function (t) {

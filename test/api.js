@@ -1,16 +1,14 @@
 
-var GLSL = require('../')
-var compile = GLSL.compile
-var TokenStream = require('glsl-tokenizer/stream')
-var ParseStream = require('glsl-parser/stream')
-var CompileStream = require('../stream')
-var test = require('tape')
-var StringStream = require('stream-array')
-var Sink = require('stream').Writable
-var clean = require('cln')
+import GLSL from '../index.js'
+import TokenStream from 'glsl-tokenizer/stream.js'
+import ParseStream from 'glsl-parser/stream.js'
+import CompileStream from '../stream.cjs'
+import test from 'tape'
+import StringStream from 'stream-array'
+import { Writable } from 'stream'
+import clean from 'cln'
 
 var compile = GLSL({})
-
 
 //examplary source, containing all possible tokens
 var source = `
@@ -158,7 +156,7 @@ test('Stream', function (t) {
 	})
 
 	//to release data
-	.pipe(Sink({
+	.pipe(Writable({
 		objectMode: true,
 		write: function (data, enc, cb) {
 			res += data + '\n';

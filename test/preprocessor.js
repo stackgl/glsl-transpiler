@@ -1,7 +1,6 @@
-var test = require('tape')
-var GLSL = require('../');
-var compile = GLSL.compile;
-var clean = require('cln')
+import test from 'tape'
+import {compile} from '../index.js'
+import clean from 'cln'
 
 test('Transform macro to commented', function (t) {
 	t.equal(clean(compile(`

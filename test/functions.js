@@ -1,9 +1,7 @@
-var test = require('tape')
-var GLSL = require('../')
-var compile = GLSL.compile
-var test = require('tape')
-var evaluate= require('./util/eval')
-var clean = require('cln')
+import test from 'tape'
+import GLSL, {compile} from '../index.js'
+import evaluate from './util/eval.js'
+import clean from 'cln'
 
 
 test.skip('Arguments', function (t) {
