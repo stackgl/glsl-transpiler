@@ -1,18 +1,17 @@
-'use strict'
 /**
  * Convert stream of AST nodes to strings.
  *
  * @module
  */
 
-var tokenize = require('glsl-tokenizer/string');
-var parse = require('./lib/parse.cjs');
-var GLSL = require('./lib/index.cjs');
-var Transform = require('stream').Transform;
-var inherits = require('inherits');
+import tokenize from 'glsl-tokenizer/string.js'
+import parse from './lib/parse.cjs'
+import GLSL from './lib/index.cjs'
+import {Transform} from 'stream'
+import inherits from 'inherits'
 
-function GlslJsStream (options) {
-	if (!(this instanceof GlslJsStream)) return new GlslJsStream(options);
+function GlslTranspilerStream (options) {
+	if (!(this instanceof GlslTranspilerStream)) return new GlslTranspilerStream(options);
 
 	Transform.call(this, {
 		objectMode: true
@@ -32,13 +31,13 @@ function GlslJsStream (options) {
 	this.compiler = GLSL(options).compiler;
 };
 
-inherits(GlslJsStream, Transform);
+inherits(GlslTranspilerStream, Transform);
 
 
 // glsl-parser streams data for each token from the glsl-tokenizer,
 // it generates lots of duplicated ASTs, which does not make any sense in the output.
 // So the satisfactory behaviour here is to render each statement in turn.
-GlslJsStream.prototype._transform = function (chunk, enc, cb) {
+GlslTranspilerStream.prototype._transform = function (chunk, enc, cb) {
 	//if string passed - tokenize and parse it
 	if (typeof chunk === 'string') {
 		//FIXME: there is a problem of invalid input chunks; gotta wait till some sensible thing is accumulated and then parse.
@@ -76,4 +75,4 @@ GlslJsStream.prototype._transform = function (chunk, enc, cb) {
 	}
 };
 
-module.exports = GlslJsStream;
+export default GlslTranspilerStream;

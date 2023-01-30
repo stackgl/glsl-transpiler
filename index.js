@@ -12,6 +12,6 @@ export function compile (str, opt) {
 	return GLSL(opt).compile(str);
 };
 
-export * from './stream.cjs';
+export * from './stream.js';
 
 export default GLSL
