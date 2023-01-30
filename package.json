@@ -10,7 +10,8 @@
     "glsl-tokenizer": "^2.1.5",
     "inherits": "^2.0.1",
     "pick-by-alias": "^1.2.0",
-    "prepr": "^1.1.2"
+    "prepr": "^1.2.5",
+    "subscript": "^7.3.1"
   },
   "devDependencies": {
     "almost-equal": "^1.1.0",

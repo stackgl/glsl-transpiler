@@ -4,7 +4,7 @@
 
 var GLSL = require('../../');
 
-module.exports = function eval (str, opt, data) {
+module.exports = function evaluate (str, opt, data) {
 	var strLines;
 
 	opt = opt || {};

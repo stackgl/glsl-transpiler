@@ -1,7 +1,7 @@
 var GLSL = require('../')
 var compile = GLSL.compile
 var test = require('tape')
-var eval = require('./util/eval')
+var evaluate= require('./util/eval')
 var clean = require('cln')
 var glsl = require('glslify')
 
@@ -22,7 +22,7 @@ test('vec2 c() {return vec2();}; void a() {vec4 b = vec4(c(), 0, 0);}', function
 	t.end()
 })
 test('vec3 x; x += 1;', function (t) {
-	t.deepEqual(eval(t.name, {debug: false}), [1, 1, 1]);
+	t.deepEqual(evaluate(t.name, {debug: false}), [1, 1, 1]);
 	t.end()
 })
 test('console.log(123);', function (t) {
@@ -54,15 +54,15 @@ test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function (
 	t.end()
 })
 test('vec2 uv = vec2(1.); uv += mix(uv, uv, 0.);', function (t) {
-	t.deepEqual(eval(t.name), [2, 2]);
+	t.deepEqual(evaluate(t.name), [2, 2]);
 	t.end()
 })
 test('vec2 uv = vec2(0., 0.5); uv *= smoothstep(0., 1., uv);', function (t) {
-	t.deepEqual(eval(t.name), [0, 0.25]);
+	t.deepEqual(evaluate(t.name), [0, 0.25]);
 	t.end()
 })
 test('float x = 0.5; vec2 uv = vec2(0., 0.5); uv *= smoothstep(0., 1., x);', function (t) {
-	t.deepEqual(eval(t.name), [0, 0.25]);
+	t.deepEqual(evaluate(t.name), [0, 0.25]);
 	t.end()
 })
 test('vec2 position; position *= 1.0 + vec2();', function (t) {
@@ -172,7 +172,7 @@ test('vec4 v = vec4(1, 2, 3, 4); v.wy *= v.zx;', function (t) {
 	//	return idx == null ? gl_position[i] : this[idx];
 	//}, gl_Position.wy * gl_Position.zx)
 	t.deepEqual(
-		eval(t.name),
+		evaluate(t.name),
 		[1, 2, 3, 12]
 	);
 	t.end()
@@ -206,7 +206,7 @@ test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1);', function (t) {
 	t.end()
 })
 test('int f(float x) {return 1;}; int f(double x) {return 2;}; double x; f(x);', function (t) {
-	t.equal(eval(t.name, {debug:false}), 2);
+	t.equal(evaluate(t.name, {debug:false}), 2);
 	t.end()
 })
 test('main, then again main', function (t) {
@@ -347,7 +347,7 @@ test('texture2D', function (t) {
 	data.width = 2;
 	data.height = 2;
 
-	t.deepEqual(eval(`
+	t.deepEqual(evaluate(`
 		uniform sampler2D t;
 		texture2D(t, vec2(0.2, 0.8));
 	`, {
@@ -530,7 +530,7 @@ test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
 		var x = f().map(function (_) {return -_;});
 	`)
 	console.log()
-	t.deepEqual(eval(t.name + ';x;'), [-3,-3,-3])
+	t.deepEqual(evaluate(t.name + ';x;'), [-3,-3,-3])
 
 	t.end()
 })

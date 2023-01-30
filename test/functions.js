@@ -2,7 +2,7 @@ var test = require('tape')
 var GLSL = require('../')
 var compile = GLSL.compile
 var test = require('tape')
-var eval = require('./util/eval')
+var evaluate= require('./util/eval')
 var clean = require('cln')
 
 
@@ -64,7 +64,7 @@ test('Override', function (t) {
 	t.end()
 })
 test('Arguments matching', function (t) {
-	t.deepEqual(eval(`
+	t.deepEqual(evaluate(`
 		float f (float x) {
 			return 1.0;
 		}
@@ -231,7 +231,7 @@ test('Calling function with output arguments', function (t) {
 		gl_Position = [x, y, z, 1];
 	`))
 
-	t.deepEqual(eval(source, {debug: false}), [1.1, 1, 2, 1]);
+	t.deepEqual(evaluate(source, {debug: false}), [1.1, 1, 2, 1]);
 	t.end()
 })
 
@@ -271,6 +271,6 @@ test('Calling nested functions with output arguments', function (t) {
 		gl_Position = [x, y, 0, 1];
 	`))
 
-	t.deepEqual(eval(source, {debug: false}), [2.1, 1, 0, 1]);
+	t.deepEqual(evaluate(source, {debug: false}), [2.1, 1, 0, 1]);
 	t.end()
 })

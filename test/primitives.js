@@ -1,7 +1,7 @@
 var GLSL = require('../')
 var compile = GLSL.compile
 var test = require('tape')
-var eval = require('./util/eval')
+var evaluate= require('./util/eval')
 var clean = require('cln')
 
 
@@ -11,136 +11,136 @@ var compile = GLSL({})
 
 // recognise input array
 test('float(1)', function (t) {
-	t.equal(eval('+float(1);'), 1);
+	t.equal(evaluate('+float(1);'), 1);
 	t.end()
 })
 
 // converts an unsigned integer to a signed integer
 test('int(uint)', function (t) {
-	t.equal(eval('+int(1243);'), 1243);
+	t.equal(evaluate('+int(1243);'), 1243);
 	t.end()
 })
 
 // converts a Boolean value to an int
 test('int(bool)', function (t) {
-	t.equal(eval('+int(true);'), 1);
-	t.equal(eval('+int(false);'), 0);
+	t.equal(evaluate('+int(true);'), 1);
+	t.equal(evaluate('+int(false);'), 0);
 	t.end()
 })
 
 // converts a float value to an int
 test('int(float)', function (t) {
-	t.equal(eval('+int(123.4);'), 123);
+	t.equal(evaluate('+int(123.4);'), 123);
 	t.end()
 })
 
 // converts a double value to a signed integer
 test('int(double)', function (t) {
-	t.equal(eval('+int(10e5);'), 10e5);
+	t.equal(evaluate('+int(10e5);'), 10e5);
 	t.end()
 })
 
 // converts a signed integer value to an unsigned integer
 test('uint(int)', function (t) {
-	t.equal(eval('+uint(123);'), 123);
+	t.equal(evaluate('+uint(123);'), 123);
 	t.end()
 })
 
 // converts a Boolean value to an unsigned integer
 test('uint(bool)', function (t) {
-	t.equal(eval('+uint(true);'), 1);
+	t.equal(evaluate('+uint(true);'), 1);
 	t.end()
 })
 
 // converts a float value to an unsigned integer
 test('uint(float)', function (t) {
-	t.equal(eval('+uint(123.4);'), 123);
+	t.equal(evaluate('+uint(123.4);'), 123);
 	t.end()
 })
 
 // converts a double value to an unsigned integer
 test('uint(double)', function (t) {
-	t.equal(eval('+int(123.4e3);'), 123400);
+	t.equal(evaluate('+int(123.4e3);'), 123400);
 	t.end()
 })
 
 // converts a signed integer value to a Boolean
 test('bool(int)', function (t) {
-	t.equal(!!eval('+bool(123);'), true);
-	t.equal(!!eval('+bool(0);'), false);
-	t.equal(eval('bool x = true; x;'), true);
-	t.equal(eval('bool x = false; x;'), false);
-	t.equal(eval('bool x = bool(true); x;'), true);
-	t.equal(eval('bool x = bool(false); x;'), false);
+	t.equal(!!evaluate('+bool(123);'), true);
+	t.equal(!!evaluate('+bool(0);'), false);
+	t.equal(evaluate('bool x = true; x;'), true);
+	t.equal(evaluate('bool x = false; x;'), false);
+	t.equal(evaluate('bool x = bool(true); x;'), true);
+	t.equal(evaluate('bool x = bool(false); x;'), false);
 	t.end()
 })
 
 // converts an unsigned integer value to a Boolean value
 test('bool(uint)', function (t) {
-	t.equal(!!eval('+bool(123);'), true);
+	t.equal(!!evaluate('+bool(123);'), true);
 	t.end()
 })
 
 // converts a float value to a Boolean
 test('bool(float)', function (t) {
-	t.equal(!!eval('+bool(123.4);'), true);
+	t.equal(!!evaluate('+bool(123.4);'), true);
 	t.end()
 })
 
 // converts a double value to a Boolean
 test('bool(double)', function (t) {
-	t.equal(!!eval('+bool(123.4e100);'), true);
+	t.equal(!!evaluate('+bool(123.4e100);'), true);
 	t.end()
 });
 var test= require('tape')
 
 // converts a signed integer value to a float
 test('float(int)', function (t) {
-	t.equal(eval('+float(123);'), 123);
+	t.equal(evaluate('+float(123);'), 123);
 	t.end()
 })
 
 // converts an unsigned integer value to a float value
 test('float(uint)', function (t) {
-	t.equal(eval('+float(34);'), 34);
+	t.equal(evaluate('+float(34);'), 34);
 	t.end()
 })
 
 // converts a Boolean value to a float
 test('float(bool)', function (t) {
-	t.equal(eval('+float(true);', {debug: false}), 1);
-	t.equal(eval('+float(false);'), 0);
+	t.equal(evaluate('+float(true);', {debug: false}), 1);
+	t.equal(evaluate('+float(false);'), 0);
 	t.end()
 })
 
 // converts a double value to a float
 test('float(double)', function (t) {
-	t.equal(eval('+float(double(10e15));'), 10e15);
+	t.equal(evaluate('+float(double(10e15));'), 10e15);
 	t.end()
 })
 
 // converts a signed integer value to a double
 test('double(int)', function (t) {
-	t.equal(eval('+double(34);'), 34);
+	t.equal(evaluate('+double(34);'), 34);
 	t.end()
 })
 
 // converts an unsigned integer value to a double
 test('double(uint)', function (t) {
-	t.equal(eval('+double(uint(34));'), 34);
+	t.equal(evaluate('+double(uint(34));'), 34);
 	t.end()
 })
 
 // converts a Boolean value to a double
 test('double(bool)', function (t) {
-	t.equal(eval('+double(true);'), 1);
-	t.equal(eval('+double(false);'), 0);
+	t.equal(evaluate('+double(true);'), 1);
+	t.equal(evaluate('+double(false);'), 0);
 	t.end()
 })
 
 // converts a float value to a double
 test('double(float)', function (t) {
-	t.equal(eval('+double(34.45);'), 34.45);
+	t.equal(evaluate('+double(34.45);'), 34.45);
 	t.end()
 })
 

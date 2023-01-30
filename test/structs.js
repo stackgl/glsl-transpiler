@@ -1,7 +1,7 @@
 var GLSL = require('../')
 var compile = GLSL.compile
 var test = require('tape')
-var eval = require('./util/eval')
+var evaluate= require('./util/eval')
 var clean = require('cln')
 
 var compile = GLSL({})
@@ -23,7 +23,7 @@ test('Nested', function (t) {
 	lightVar;
 	`;
 
-	t.deepEqual(eval(src, {debug: false}), {
+	t.deepEqual(evaluate(src, {debug: false}), {
 		intensity: 3.0,
 		range: 5.0,
 		position: [1.0, 2.0, 3.0],

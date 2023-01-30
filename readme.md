@@ -121,7 +121,7 @@ fs.createReadStream('./source.glsl')
 
 ## Related
 
-* [nogl-shader-output](https://github.com/dy/nogl-shader-output) — eval fragment shader on rectangular vertex input, gl-less.<br/>
+* [nogl-shader-output](https://github.com/dy/nogl-shader-output) — evaluatefragment shader on rectangular vertex input, gl-less.<br/>
 * [glsl-parser](http://stack.gl/packages/#stackgl/glsl-parser) — build glsl AST.<br/>
 * [glsl-tokenizer](http://stack.gl/packages/#stackgl/glsl-tokenizer) — detect glsl tokens.<br/>
 * [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.<br/>
