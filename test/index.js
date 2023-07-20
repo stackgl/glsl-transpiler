@@ -546,10 +546,11 @@ test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
 test('uvec2 n = uvec2(1);', function (t) {
 	var compile = GLSL({version: '300 es'})
 	t.equal(clean(compile(t.name)),
-	clean`function int (val) {
+	clean`function uint (val) {
 		return val|0;
 	}
 	var n = [1, 1].map(uint);`)
+	t.deepEqual(evaluate(t.name + ';n;', {version: '300 es'}), [1,1])
 
 	t.end()
 })
