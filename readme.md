@@ -60,7 +60,31 @@ To apply compilation to glsl AST or string, require `glsl-transpiler`:
 ```js
 import GLSL from 'glsl-transpiler'
 
-let compile = GLSL(options)
+let compile = GLSL({
+	// Enable expressions optimizations.
+	optimize: true,
+
+	// Apply preprocessing. Pass custom preprocessor function `(srcString) => resultString;` to set own preprocessing.
+	preprocess: true,
+
+	// A function replacing each uniform declaration. Eg: ``(name, node) => `uniforms["${name}"]`;`` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
+	uniform: false,
+
+	// Same as `uniform`, but for attribute declarations.
+	attribute: false,
+
+	// Same as `uniform`, but for varying declarations.
+	varying: false,
+
+	// GLSL shader version, one of `'300 es'` or `'100 es'`.
+	version: '100 es',
+
+	// Append stdlib includes for the result. Can be bool or an object with defined stdlib functions to include, eg. `{normalize: false, min: false}`.
+	includes: true,
+
+	// Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime.
+	debug: false
+})
 
 //compile source code
 let result = compile('...source.glsl')
@@ -79,21 +103,6 @@ let {
 //clean collected info
 compiler.reset()
 ```
-
-#### options
-
-Property | Default | Description
----|:---:|---
-`optimize` | `true` | Enable expressions optimizations.
-`preprocess` | `true` | Apply preprocessing. Pass custom preprocessor function `(srcString) => resultString;` to set own preprocessing.
-`uniform` | `false` | A function replacing each uniform declaration. Eg: ``(name, node) => `uniforms["${name}"]`;`` will render each uniform declaration as `var <name> = uniforms["<name>"]`.
-`attribute` | `false` | Same as `uniform`, but for attribute declarations.
-`varying` | `false` | Same as `uniform`, but for varying declarations.
-`version` | `'100 es'` | GLSL shader version, one of `'300 es'` or `'100 es'`.
-`includes` | `true` | Append stdlib includes for the result. Can be bool or an object with defined stdlib functions to include, eg. `{normalize: false, min: false}`.
-`debug` | `false` | Enable debugging facilities: `print(anything)` will log to console a string of transpiled code with it’s type separated by colon, `show(anything)` will print the rendered descriptor of passed fragment of code. Note also that you can safely use `console.log(value)` to debug shader runtime.
-<!-- `comments` | `false` | TODO: preserve comments in source code.
-`sourceMap` | `false` | TODO: include source map for the transpiled code. -->
 
 Note that `texture2D` function expects whether ndarray instance or defined `width` and `height` parameters on passed array.
 
@@ -128,7 +137,7 @@ fs.createReadStream('./source.glsl')
 * [nogl-shader-output](https://github.com/dy/nogl-shader-output) — evaluate fragment shader on rectangular vertex input, gl-less.<br/>
 * [GLSLRun](https://github.com/iY0Yi/GLSLRun) – debug shader via adding `print()` function.
 
-## Similar 
+## Similar
 
 * [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.<br/>
 * [js2glsl](https://github.com/jdavidberger/js2glsl) — transform js subset to glsl.<br/>
