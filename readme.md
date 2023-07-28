@@ -142,6 +142,7 @@ fs.createReadStream('./source.glsl')
 * [glsl.js](https://npmjs.org/package/glsl) — an alternative glsl to asm.js compiler by [@devongovett](https://github.com/devongovett), built with [jison](https://npmjs.org/package/jison) instead of glsl-parser. Project is abandoned :(.<br/>
 * [js2glsl](https://github.com/jdavidberger/js2glsl) — transform js subset to glsl.<br/>
 * [glsl-simulator](https://github.com/burg/glsl-simulator) — OpenGL1.0 simulation in js.<br/>
-* [turbo/js](https://github.com/turbo/js) — webgl-based computation
+* [turbo/js](https://github.com/turbo/js) — webgl-based computation.
 * [shaderdsl](https://github.com/adobe-webplatform/shaderdsl)
 * [wgsl_reflect](https://github.com/brendan-duncan/wgsl_reflect)
+* [glm-js](https://github.com/humbletim/glm-js)
