@@ -1,4 +1,4 @@
-# glsl-transpiler [![Build Status](https://travis-ci.org/stackgl/glsl-transpiler.svg?branch=master)](https://travis-ci.org/stackgl/glsl-transpiler)
+# glsl-transpiler [![test](https://github.com/stackgl/glsl-transpiler/actions/workflows/test.yml/badge.svg)](https://github.com/stackgl/glsl-transpiler/actions/workflows/test.yml)
 
 Transforms [glsl](https://www.opengl.org/documentation/glsl/) source to optimized js code. It converts vectors and matrices to arrays, expands swizzles, applies expressions optimizations and provides stdlib for environment compatibility.
 
