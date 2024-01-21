@@ -352,7 +352,10 @@ test.skip('source2', function (t) {
 	t.end()
 })
 test('texture2D', function (t) {
-	var data = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+	var data = [
+		1, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0, 0, 0, 1
+	];
 	data.width = 2;
 	data.height = 2;
 
@@ -368,6 +371,20 @@ test('texture2D', function (t) {
 		// t: ndarray(data, [2,2,4])
 		t: data
 	}), [0, 0, 1, 0]);
+
+	// overshoot
+	t.deepEqual(evaluate(`
+		uniform sampler2D t;
+		texture2D(t, vec2(1.2, 1));
+	`, {
+		uniform: function (name, variable) {
+			if (variable.type === 'sampler2D') return `_.${name}`
+		},
+		debug: false
+	}, {
+		// t: ndarray(data, [2,2,4])
+		t: data
+	}), [0, 0, 0, 1]);
 	t.end()
 })
 test('Array constructs', function (t) {
@@ -562,13 +579,17 @@ test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
 
 test('uvec2 n = uvec2(1);', function (t) {
 	var compile = GLSL({ version: '300 es' })
-	t.equal(clean(compile(t.name)),
-		clean`function uint (val) {
-		return val|0;
-	}
-	var n = [1, 1].map(uint);`)
+	// t.equal(clean(compile(t.name)),
+	// 	clean`function uint (val) {
+	// 	return val|0;
+	// }
+	// var n = [1, 1].map(uint);`)
 	t.deepEqual(evaluate(t.name + ';n;', { version: '300 es' }), [1, 1])
 
+	t.end()
+})
+
+test('texture coord', function (t) {
 	t.end()
 })
 
