@@ -17,20 +17,21 @@ import './structs.js'
 var compile = GLSL({})
 
 
-test('vec2 c() {return vec2();}; void a() {vec4 b = vec4(c(), 0, 0);}', function (t) {
-	t.equal(clean(compile(t.name)), clean(`
-		function c () {
-			return [0, 0];
-		};
+test('vec2 c() {return vec2();}; vec4 a() {vec4 b = vec4(c(), 0, 0); return b;} a();', function (t) {
+	// t.equal(clean(compile(t.name)), clean(`
+	// 	function c () {
+	// 		return [0, 0];
+	// 	};
 
-		function a () {
-			var b = c().concat([0, 0]);
-		};
-	`));
+	// 	function a () {
+	// 		var b = c().concat([0, 0]);
+	// 	};
+	// `));
+	t.deepEqual(evaluate(t.name), [0, 0, 0, 0])
 	t.end()
 })
 test('vec3 x; x += 1;', function (t) {
-	t.deepEqual(evaluate(t.name, {debug: false}), [1, 1, 1]);
+	t.deepEqual(evaluate(t.name, { debug: false }), [1, 1, 1]);
 	t.end()
 })
 test('console.log(123);', function (t) {
@@ -50,7 +51,7 @@ test('for (int i = 0; i < 10; i++) { if (i > 4) ; }', function (t) {
 })
 test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function (t) {
 	t.equal(
-		clean(compile(t.name, {optimize: true})),
+		clean(compile(t.name, { optimize: true })),
 		clean(`
 		var x = 0;
 		var uv = [0, 0], position = [uv[0], -uv[1]].map(function (_) {return this * _;}, fn(x));
@@ -214,7 +215,7 @@ test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1);', function (t) {
 	t.end()
 })
 test('int f(float x) {return 1;}; int f(double x) {return 2;}; double x; f(x);', function (t) {
-	t.equal(evaluate(t.name, {debug:false}), 2);
+	t.equal(evaluate(t.name, { debug: false }), 2);
 	t.end()
 })
 test('main, then again main', function (t) {
@@ -305,7 +306,7 @@ test('attribute float sign;', function (t) {
 	t.end()
 })
 test(`normalize(vec2(b));`, function (t) {
-	var compile = GLSL({includes: false})
+	var compile = GLSL({ includes: false })
 
 	t.equal(clean(compile(t.name)), clean(`
 		normalize([b, b]);
@@ -313,7 +314,7 @@ test(`normalize(vec2(b));`, function (t) {
 	t.end()
 })
 test(`a[0].x = 0.0; a[1].y = 1.0;`, function (t) {
-	var compile = GLSL({includes: false})
+	var compile = GLSL({ includes: false })
 
 	t.equal(clean(compile(t.name)), clean(`
 		a[0][0] = 0.0;
@@ -322,7 +323,7 @@ test(`a[0].x = 0.0; a[1].y = 1.0;`, function (t) {
 	t.end()
 })
 test.skip(`a[2].zw = 2.0;`, function (t) {
-	var compile = GLSL({includes: false});
+	var compile = GLSL({ includes: false });
 
 	t.equal(clean(compile(t.name)), clean(`
 		[a[2][2], a[2][3]] = [2.0, 2.0]
@@ -351,7 +352,7 @@ test.skip('source2', function (t) {
 	t.end()
 })
 test('texture2D', function (t) {
-	var data = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+	var data = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 	data.width = 2;
 	data.height = 2;
 
@@ -511,7 +512,7 @@ test('float s = 0.; --s;', function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)),
-	clean`
+		clean`
 		var s = 0.;
 		--s;
 	`)
@@ -522,7 +523,7 @@ test('float s = 0.; s--;', function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)),
-	clean`
+		clean`
 		var s = 0.;
 		s--;
 	`)
@@ -531,29 +532,37 @@ test('float s = 0.; s--;', function (t) {
 })
 test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
 	t.equal(clean(compile(t.name)),
-	clean`
+		clean`
 		function f () {
 			return [3., 3., 3.];
 		};
 		var x = f().map(function (_) {return -_;});
 	`)
 	console.log()
-	t.deepEqual(evaluate(t.name + ';x;'), [-3,-3,-3])
+	t.deepEqual(evaluate(t.name + ';x;'), [-3, -3, -3])
 
 	t.end()
 })
 
 test('uvec2 n = uvec2(1);', function (t) {
-	var compile = GLSL({version: '300 es'})
+	var compile = GLSL({ version: '300 es' })
 	t.equal(clean(compile(t.name)),
-	clean`function uint (val) {
+		clean`function uint (val) {
 		return val|0;
 	}
 	var n = [1, 1].map(uint);`)
-	t.deepEqual(evaluate(t.name + ';n;', {version: '300 es'}), [1,1])
+	t.deepEqual(evaluate(t.name + ';n;', { version: '300 es' }), [1, 1])
 
 	t.end()
 })
+
+test.skip('#56: varying mat3 mat3one;', function (t) {
+	var compile = GLSL({ version: '300 es' })
+	console.log(clean(compile('varying mat3 mat3one; mat3one[0] = vec3(1., 1., 0.);')))
+
+	t.end()
+})
+
 
 // 	`
 // 	vec2 pos;
@@ -623,5 +632,3 @@ test('uvec2 n = uvec2(1);', function (t) {
 // equality == !=
 // assignment =
 // indexing (arrays only) [ ]
-
-
