@@ -54,18 +54,18 @@ var source = `
 	`;
 
 var result = `
-	var uv = [0, 0], xy = [1, 1];
-	var color = [0, 0, 0, 0];
-	var fColor = [0, 0, 0, 0], twoColors = [[0, 0, 0, 0], [0, 0, 0, 0]];
-	var uScreenSize = [1, 1];
+	var uv = new Float32Array([0, 0]), xy = new Float32Array([1, 1]);
+	var color = new Float32Array([0, 0, 0, 0]);
+	var fColor = new Float32Array([0, 0, 0, 0]), twoColors = [new Float32Array([0, 0, 0, 0]), new Float32Array([0, 0, 0, 0])];
+	var uScreenSize = new Float32Array([1, 1]);
 	var coeff = 1.0, coeff2 = coeff + 1.0, a = [0, 0], b = [a, a, a];
 
 	function main () {
 		fColor = color;
-		var position = [coeff * uv[0], coeff * -uv[1]];
+		var position = new Float32Array([coeff * uv[0], coeff * -uv[1]]);
 		position[0] *= uScreenSize[1] / uScreenSize[0];
-		xy = [xy[0] * uv[1], xy[1] * uv[0]];
-		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
+		xy = new Float32Array([xy[0] * uv[1], xy[1] * uv[0]]);
+		gl_Position = new Float32Array([position[1] / 2.0, position[0] / 2.0, 0, 1]);
 		gl_FragColor[0] = gl_FragCoord[0] / 4;
 		return;
 	};
@@ -101,10 +101,10 @@ var shortResult = `
 
 	function main () {
 		fColor = color;
-		var position = [coeff * uv[0], coeff * -uv[1]];
+		var position = new Float32Array([coeff * uv[0], coeff * -uv[1]]);
 		position[0] *= uScreenSize[1] / uScreenSize[0];
-		xy = [xy[0] * uv[1], xy[1] * uv[0]];
-		gl_Position = [position[1] / 2.0, position[0] / 2.0, 0, 1];
+		xy = new Float32Array([xy[0] * uv[1], xy[1] * uv[0]]);
+		gl_Position = new Float32Array([position[1] / 2.0, position[0] / 2.0, 0, 1]);
 		gl_FragColor[0] = gl_FragCoord[0] / 4;
 		return;
 	};
@@ -143,33 +143,33 @@ test('Direct', function (t) {
 test('Stream', function (t) {
 	var res = '';
 
-	StringStream(source.split('\n').map(function(v){return v + '\n'}))
-	.pipe(TokenStream())
-	// .on('data', function (chunk) {
-	// 	console.log(chunk);
-	// })
-	.pipe(ParseStream())
-	.pipe(CompileStream())
-	.on('end', function() {
-		t.equal(clean(res), clean(result))
-		t.end();
-	})
+	StringStream(source.split('\n').map(function (v) { return v + '\n' }))
+		.pipe(TokenStream())
+		// .on('data', function (chunk) {
+		// 	console.log(chunk);
+		// })
+		.pipe(ParseStream())
+		.pipe(CompileStream())
+		.on('end', function () {
+			t.equal(clean(res), clean(result))
+			t.end();
+		})
 
-	//to release data
-	.pipe(Writable({
-		objectMode: true,
-		write: function (data, enc, cb) {
-			res += data + '\n';
-			cb();
-		}
-	}))
+		//to release data
+		.pipe(Writable({
+			objectMode: true,
+			write: function (data, enc, cb) {
+				res += data + '\n';
+				cb();
+			}
+		}))
 });
 
 test('Detect attributes, uniforms, varying', function (t) {
 	var compiler = new GLSL({
-		attribute: function (name) { return `attributes['${name}']`;},
-		uniform: function (name) { return `uniforms['${name}']`;},
-		varying: function (name) { return `varying['${name}']`;}
+		attribute: function (name) { return `attributes['${name}']`; },
+		uniform: function (name) { return `uniforms['${name}']`; },
+		varying: function (name) { return `varying['${name}']`; }
 	}).compiler;
 
 	var result = compiler.compile(source);
