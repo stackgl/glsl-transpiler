@@ -432,6 +432,22 @@ test('Calculated access', function (t) {
 	`));
 	t.end()
 })
+test.skip('Persistent state', function (t) {
+	// FIXME: #57
+	var compile = GLSL({
+		uniform: function (name) {
+			return `uniforms.${name}`
+		},
+		attribute: function (name) {
+			return `attributes.${name}`
+		},
+		version: '300 es'
+	})
+	const a = compile(`vec2 getPosition(float index, float length); getPosition(0, 1);`);
+	const b = compile(`vec2 getPosition(float index, float length); getPosition(0, 1);`);
+	console.log(a, b)
+	t.end()
+})
 test(`p.z;`, function (t) {
 	var compile = GLSL();
 
@@ -556,10 +572,12 @@ test('uvec2 n = uvec2(1);', function (t) {
 	t.end()
 })
 
-test.skip('#56: varying mat3 mat3one;', function (t) {
+// #56
+// FIXME: prepr doesn't handle `/* #56 */`
+test.skip('varying mat3 m; m[0] = vec3(1., 1., 0.); m;', function (t) {
 	var compile = GLSL({ version: '300 es' })
-	console.log(clean(compile('varying mat3 mat3one; mat3one[0] = vec3(1., 1., 0.);')))
-
+	// console.log(clean(compile(t.name)))
+	t.equal(evaluate(t.name), [1, 1, 0, 0, 0, 0, 0, 0, 0])
 	t.end()
 })
 
