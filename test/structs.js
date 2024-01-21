@@ -22,7 +22,7 @@ test('Nested', function (t) {
 	lightVar;
 	`;
 
-	t.deepEqual(evaluate(src, {debug: false}), {
+	t.deepEqual(evaluate(src, { debug: false }), {
 		intensity: 3.0,
 		range: 5.0,
 		position: [1.0, 2.0, 3.0],
@@ -43,7 +43,7 @@ test('Anonymous', function (t) {
 
 	t.equal(clean(compile(src)), clean(`
 		var x = {
-			direction: [0, 0, 0]
+			direction: new Float32Array([0, 0, 0])
 		};`));
 
 	t.end()

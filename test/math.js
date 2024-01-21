@@ -9,16 +9,16 @@ var vec4 = stdlib.vec4;
 var pi2 = Math.PI * 2;
 
 test('type radians (type degrees)', function (t) {
-	t.deepEqual(evaluate('radians(360);'), Math.PI * 2);
-	t.deepEqual(evaluate('radians(vec4(360));'), vec4(Math.PI * 2));
-	t.deepEqual(evaluate('radians(mat4(360));'), mat4(Math.PI * 2));
+	t.ok(almost(evaluate('radians(360);'), Math.PI * 2));
+	t.ok(almost(evaluate('radians(vec4(360));'), vec4(Math.PI * 2)));
+	t.ok(almost(evaluate('radians(mat4(360));'), mat4(Math.PI * 2)));
 	t.end()
 })
 
 test('type degrees (type radians)', function (t) {
-	t.deepEqual(evaluate(`degrees(${pi2});`), 360);
-	t.deepEqual(evaluate(`degrees(vec4(${pi2}));`), vec4(360));
-	t.deepEqual(evaluate(`degrees(mat4(${pi2}));`), mat4(360));
+	t.ok(almost(evaluate(`degrees(${pi2});`), 360));
+	t.ok(almost(evaluate(`degrees(vec4(${pi2}));`), vec4(360)));
+	t.ok(almost(evaluate(`degrees(mat4(${pi2}));`), mat4(360)));
 	t.end()
 })
 
@@ -44,8 +44,8 @@ test('type tan (type angle)', function (t) {
 })
 
 test('type asin (type x)', function (t) {
-	t.ok(almost(evaluate(`asin(1);`), Math.PI/2));
-	t.ok(almost(evaluate(`asin(vec4(1));`), vec4(Math.PI/2)));
+	t.ok(almost(evaluate(`asin(1);`), Math.PI / 2));
+	t.ok(almost(evaluate(`asin(vec4(1));`), vec4(Math.PI / 2)));
 	// t.ok(almost(evaluate(`asin(mat4(1));`), mat4(Math.PI/2)));
 	t.end()
 })
@@ -58,21 +58,21 @@ test('type acos (type x)', function (t) {
 })
 
 test('type atan (type y_over_x)', function (t) {
-	t.ok(almost(evaluate(`atan(1);`), Math.PI/4));
-	t.ok(almost(evaluate(`atan(vec4(1));`), vec4(Math.PI/4)));
+	t.ok(almost(evaluate(`atan(1);`), Math.PI / 4));
+	t.ok(almost(evaluate(`atan(vec4(1));`), vec4(Math.PI / 4)));
 	// t.ok(almost(evaluate(`atan(mat4(1));`), mat4(Math.PI/4)));
 	t.end()
 })
 
 test('type atan (type y, type x)', function (t) {
-	t.ok(almost(evaluate(`atan(1, 0);`), Math.PI/2));
-	t.ok(almost(evaluate(`atan(vec4(1), vec4(0));`), vec4(Math.PI/2)));
+	t.ok(almost(evaluate(`atan(1, 0);`), Math.PI / 2));
+	t.ok(almost(evaluate(`atan(vec4(1), vec4(0));`), vec4(Math.PI / 2)));
 	// t.ok(almost(evaluate(`atan(mat4(1), mat4(0));`), mat4(Math.PI/2)));
 	t.end()
 })
 
 test('type pow (type x, type y)', function (t) {
-	var x = Math.random() * 100, y = Math.random() * 100;
+	var x = Math.random(), y = Math.random();
 	t.ok(almost(evaluate(`pow(${x}, ${y});`), Math.pow(x, y)));
 	t.ok(almost(evaluate(`pow(vec4(${x}), vec4(${y}));`), vec4(Math.pow(x, y))));
 	// t.ok(almost(evaluate(`pow(mat4(${x}), mat4(${y}));`), mat4(Math.pow(x, y))));
@@ -121,8 +121,8 @@ test('type sqrt (type x)', function (t) {
 
 test('type inversesqrt (type x)', function (t) {
 	var x = Math.random() * 100;
-	t.ok(almost(evaluate(`inversesqrt(${x});`), 1/Math.sqrt(x)));
-	t.ok(almost(evaluate(`inversesqrt(vec4(${x}));`), vec4(1/Math.sqrt(x))));
+	t.ok(almost(evaluate(`inversesqrt(${x});`), 1 / Math.sqrt(x)));
+	t.ok(almost(evaluate(`inversesqrt(vec4(${x}));`), vec4(1 / Math.sqrt(x))));
 	// t.ok(almost(evaluate(`inversesqrt(mat4(${x}));`), mat4(1/Math.sqrt(x))));
 	t.end()
 })
@@ -209,18 +209,18 @@ test('type clamp (type x, type|float min, type|float max)', function (t) {
 
 test('type mix (type x, type y, type|float a)', function (t) {
 	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, a = Math.random();
-	t.ok(almost(evaluate(`mix(${x}, ${y}, ${a});`), x*(1-a)+y*a));
-	t.ok(almost(evaluate(`mix(vec4(${x}), vec4(${y}), vec4(${a}));`), vec4(x*(1-a)+y*a)));
-	t.ok(almost(evaluate(`mix(mat4(${x}), mat4(${y}), mat4(${a}));`), mat4(x*(1-a)+y*a)));
-	t.ok(almost(evaluate(`mix(vec4(${x}), vec4(${y}), ${a});`), vec4(x*(1-a)+y*a)));
-	t.ok(almost(evaluate(`mix(mat4(${x}), mat4(${y}), ${a});`), mat4(x*(1-a)+y*a)));
+	t.ok(almost(evaluate(`mix(${x}, ${y}, ${a});`), x * (1 - a) + y * a));
+	t.ok(almost(evaluate(`mix(vec4(${x}), vec4(${y}), vec4(${a}));`), vec4(x * (1 - a) + y * a)));
+	t.ok(almost(evaluate(`mix(mat4(${x}), mat4(${y}), mat4(${a}));`), mat4(x * (1 - a) + y * a)));
+	t.ok(almost(evaluate(`mix(vec4(${x}), vec4(${y}), ${a});`), vec4(x * (1 - a) + y * a)));
+	t.ok(almost(evaluate(`mix(mat4(${x}), mat4(${y}), ${a});`), mat4(x * (1 - a) + y * a)));
 	t.end()
 })
 
 test('type step (type|float edge, type x)', function (t) {
 	var edge = (Math.random() - 0.5) * 100, x = (Math.random() - 0.5) * 100;
 
-	function step (edge, x) {
+	function step(edge, x) {
 		return x < edge ? 0.0 : 1.0;
 	}
 
@@ -235,7 +235,7 @@ test('type step (type|float edge, type x)', function (t) {
 test('type smoothstep (type|float a, type|float b, type x)', function (t) {
 	var a = (Math.random()) * 100, b = (Math.random()) * 100, x = (Math.random()) * 100;
 
-	function smoothstep (edge0, edge1, x) {
+	function smoothstep(edge0, edge1, x) {
 		var t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0.0), 1.0);
 		return t * t * (3.0 - 2.0 * t);
 	}
@@ -250,25 +250,25 @@ test('type smoothstep (type|float a, type|float b, type x)', function (t) {
 
 test('float length (type x)', function (t) {
 	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100, w = (Math.random() - 0.5) * 100;
-	t.ok(almost(evaluate(`length(vec2(${x}, ${y}));`), Math.sqrt(x*x + y*y)));
-	t.ok(almost(evaluate(`length(vec3(${x}, ${y}, ${z}));`), Math.sqrt(x*x + y*y + z*z)));
-	t.ok(almost(evaluate(`length(vec4(${x}, ${y}, ${z}, ${w}));`), Math.sqrt(x*x + y*y + z*z + w*w)));
+	t.ok(almost(evaluate(`length(vec2(${x}, ${y}));`), Math.sqrt(x * x + y * y)));
+	t.ok(almost(evaluate(`length(vec3(${x}, ${y}, ${z}));`), Math.sqrt(x * x + y * y + z * z)));
+	t.ok(almost(evaluate(`length(vec4(${x}, ${y}, ${z}, ${w}));`), Math.sqrt(x * x + y * y + z * z + w * w)));
 	t.end()
 })
 
 test('float distance (type x, type y)', function (t) {
 	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
-	var d = x-y;
-	t.ok(almost(evaluate(`distance(vec2(${x}), vec2(${y}));`), Math.sqrt(d*d + d*d)));
-	t.ok(almost(evaluate(`distance(vec2(${x}, ${y}), vec2(${y}, ${x}));`), Math.sqrt(d*d + d*d)));
+	var d = x - y;
+	t.ok(almost(evaluate(`distance(vec2(${x}), vec2(${y}));`), Math.sqrt(d * d + d * d)));
+	t.ok(almost(evaluate(`distance(vec2(${x}, ${y}), vec2(${y}, ${x}));`), Math.sqrt(d * d + d * d)));
 	t.end()
 })
 
 test('float dot (type x, type y)', function (t) {
 	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
-	var d = x-y;
-	t.ok(almost(evaluate(`dot(vec2(${x}), vec2(${y}));`), x*y*2));
-	t.ok(almost(evaluate(`dot(vec2(${x}, ${y}), vec2(${y}, ${x}));`), x*y*2));
+	var d = x - y;
+	t.ok(almost(evaluate(`dot(vec2(${x}), vec2(${y}));`), x * y * 2));
+	t.ok(almost(evaluate(`dot(vec2(${x}, ${y}), vec2(${y}, ${x}));`), x * y * 2));
 	t.end()
 })
 

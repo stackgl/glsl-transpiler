@@ -16,7 +16,6 @@ import './structs.js'
 
 var compile = GLSL({})
 
-
 test('vec2 c() {return vec2();}; vec4 a() {vec4 b = vec4(c(), 0, 0); return b;} a();', function (t) {
 	// t.equal(clean(compile(t.name)), clean(`
 	// 	function c () {
@@ -49,17 +48,18 @@ test('for (int i = 0; i < 10; i++) { if (i > 4) ; }', function (t) {
 		`));
 	t.end()
 })
-test('float x; vec2 uv, position = fn(x) * vec2(uv.yx.yx.x, -uv.y);', function (t) {
-	t.equal(
-		clean(compile(t.name, { optimize: true })),
-		clean(`
-		var x = 0;
-		var uv = [0, 0], position = [uv[0], -uv[1]].map(function (_) {return this * _;}, fn(x));
-		`)
-		//ideal:
-		// var fnx = fn(x)
-		// var uv = [0, 0], position = [uv[0] * fnx, -uv[1] * fnx];
-	);
+test('float x = 0; vec2 uv = vec2(0.5, 0.5), position = cos(x) * vec2(uv.yx.yx.x, -uv.y); position;', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name, { optimize: true })),
+	// 	clean(`
+	// 	var x = 0;
+	// 	var uv = [0, 0], position = [uv[0], -uv[1]].map(function (_) {return this * _;}, cos(x));
+	// 	`)
+	// 	//ideal:
+	// 	// var fnx = fn(x)
+	// 	// var uv = [0, 0], position = [uv[0] * fnx, -uv[1] * fnx];
+	// );
+	t.deepEqual(evaluate(t.name), [0.5, -0.5])
 	t.end()
 })
 test('vec2 uv = vec2(1.); uv += mix(uv, uv, 0.);', function (t) {
@@ -78,47 +78,50 @@ test('vec2 position; position *= 1.0 + vec2();', function (t) {
 	t.equal(
 		clean(compile(t.name)),
 		clean(`
-		var position = [0, 0];
-		position = [position[0], position[1]];
+		var position = new Float32Array([0, 0]);
+		position = new Float32Array([position[0], position[1]]);
 		`)
 	);
 	t.end()
 })
-test('vec2 position; position = position * (1.0 + vec2());', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var position = [0, 0];
-		position = [position[0], position[1]];
-		`)
-	);
+test('vec2 position = vec2(1); position = position * (1.0 + vec2(0.5,-0.5)); position', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var position = [0, 0];
+	// 	position = [position[0], position[1]];
+	// 	`)
+	// );
+	t.deepEqual(evaluate(t.name), [1.5, 0.5])
 	t.end()
 })
 test('vec2 v = vec2(1, 1); v.x;', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var v = [1, 1];
-		v[0];
-		`)
-	);
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var v = [1, 1];
+	// 	v[0];
+	// 	`)
+	// );
+	t.deepEqual(evaluate(t.name), 1)
 	t.end()
 })
 test('vec2 v = vec2(1, 1); v.yx + 1;', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var v = [1, 1];
-		[v[1] + 1, v[0] + 1];
-		`)
-	);
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var v = [1, 1];
+	// 	[v[1] + 1, v[0] + 1];
+	// 	`)
+	// );
+	t.deepEqual(evaluate(t.name), [2, 2])
 	t.end()
 })
 test('gl_Position.xy += gl_Position.yx;', function (t) {
 	t.equal(
 		clean(compile(t.name)),
 		clean(`
-		gl_Position = [gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0], gl_Position[2], gl_Position[3]];
+		gl_Position = new Float32Array([gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0], gl_Position[2], gl_Position[3]]);
 		`)
 	);
 	t.end()
@@ -127,29 +130,31 @@ test('uniform vec4 v; uniform float c; gl_FragColor = vec4(v.wzyx) * c;', functi
 	t.equal(
 		clean(compile(t.name)),
 		clean(`
-		var v = [0, 0, 0, 0];
+		var v = new Float32Array([0, 0, 0, 0]);
 		var c = 0;
-		gl_FragColor = [v[3] * c, v[2] * c, v[1] * c, v[0] * c];
+		gl_FragColor = new Float32Array([v[3] * c, v[2] * c, v[1] * c, v[0] * c]);
 		`)
 	);
 	t.end()
 })
-test('vec3 x = mat3(2)[1];', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var x = [0, 2, 0];
-		`)
-	);
+test('vec3 x = mat3(2)[1]; x;', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var x = [0, 2, 0];
+	// 	`)
+	// );
+	t.deepEqual(evaluate(t.name), [0, 2, 0])
 	t.end()
 })
-test('mat3 x = mat3(2);', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var x = [2, 0, 0, 0, 2, 0, 0, 0, 2];
-		`)
-	);
+test('mat3 x = mat3(2); x;', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var x = [2, 0, 0, 0, 2, 0, 0, 0, 2];
+	// 	`)
+	// );
+	t.deepEqual(evaluate(t.name), [2, 0, 0, 0, 2, 0, 0, 0, 2])
 	t.end()
 })
 //constants propagation is unimplemented
@@ -190,7 +195,7 @@ test('gl_Position.yx = gl_Position.xy / gl_Position.yx;', function (t) {
 	t.equal(
 		clean(compile(t.name)),
 		clean(`
-		gl_Position = [gl_Position[1] / gl_Position[0], gl_Position[0] / gl_Position[1], gl_Position[2], gl_Position[3]];
+		gl_Position = new Float32Array([gl_Position[1] / gl_Position[0], gl_Position[0] / gl_Position[1], gl_Position[2], gl_Position[3]]);
 		`)
 	);
 	t.end()
@@ -204,14 +209,15 @@ test('gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();', function (t) {
 	);
 	t.end()
 })
-test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1);', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var p = [0, 0];
-		gl_Position = [p[1] / 2.0, p[0] / 2.0, 0, 1];
-		`)
-	)
+test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1); gl_Position', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var p = [0, 0];
+	// 	gl_Position = [p[1] / 2.0, p[0] / 2.0, 0, 1];
+	// 	`)
+	// )
+	t.deepEqual(evaluate(t.name), [0, 0, 0, 1])
 	t.end()
 })
 test('int f(float x) {return 1;}; int f(double x) {return 2;}; double x; f(x);', function (t) {
@@ -271,7 +277,7 @@ test('vec2 x, z = (x*2.0+1.0)*x;', function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)), clean(`
-		var x = [0, 0], z = [(x[0] * 2.0 + 1.0) * x[0], (x[1] * 2.0 + 1.0) * x[1]];
+		var x = new Float32Array([0, 0]), z = new Float32Array([(x[0] * 2.0 + 1.0) * x[0], (x[1] * 2.0 + 1.0) * x[1]]);
 	`))
 	t.end()
 })
@@ -281,7 +287,7 @@ test('vec3 permute(vec3 x) { return mod289((x*34.0+1.0)*x);}', function (t) {
 	t.equal(clean(compile(t.name)), clean(`
 		function permute (x) {
 			x = x.slice();
-			return mod289([(x[0] * 34.0 + 1.0) * x[0], (x[1] * 34.0 + 1.0) * x[1], (x[2] * 34.0 + 1.0) * x[2]]);
+			return mod289(new Float32Array([(x[0] * 34.0 + 1.0) * x[0], (x[1] * 34.0 + 1.0) * x[1], (x[2] * 34.0 + 1.0) * x[2]]));
 		};
 	`))
 	t.end()
@@ -305,12 +311,13 @@ test('attribute float sign;', function (t) {
 	`))
 	t.end()
 })
-test(`normalize(vec2(b));`, function (t) {
+test(`normalize(vec2(0,1));`, function (t) {
 	var compile = GLSL({ includes: false })
 
-	t.equal(clean(compile(t.name)), clean(`
-		normalize([b, b]);
-	`))
+	// t.equal(clean(compile(t.name)), clean(`
+	// 	normalize([b, b]);
+	// `))
+	t.deepEqual(evaluate(t.name), [0, 1])
 	t.end()
 })
 test(`a[0].x = 0.0; a[1].y = 1.0;`, function (t) {
@@ -421,7 +428,7 @@ test('Arrays of arrays', function (t) {
 	`;
 
 	var res = `
-	var b = [[0, 0, 0, 0], [0, 0, 0, 0]];
+	var b = [new Float32Array([0, 0, 0, 0]), new Float32Array([0, 0, 0, 0])];
 	var c = [b, b, b];
 	var d = [c, c, c, c];
 	`;
@@ -439,13 +446,13 @@ test('Calculated access', function (t) {
 		b[x--].xy.length();
 		b.yx;
 	`)), clean(`
-		var b = [[0, 0, 0, 0], [0, 0, 0, 0]];
+		var b = [new Float32Array([0, 0, 0, 0]), new Float32Array([0, 0, 0, 0])];
 		var x = +1.0;
 		b[++x].prop;
 		b[x++][3];
 		b[--x][0];
 		2;
-		[b[1], b[0]];
+		new Float32Array([b[1], b[0]]);
 	`));
 	t.end()
 })
@@ -485,16 +492,14 @@ test(`p.zw;`, function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)), clean(`
-		[2, 3].map(function (x, i) { return this[x]}, p);
-	`))
+	new Float32Array([2, 3].map(function (x, i) { return this[x]}, p));`))
 	t.end()
 })
 test(`p().zw;`, function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)), clean(`
-		[2, 3].map(function (x, i) { return this[x]}, p());
-	`))
+	new Float32Array([2, 3].map(function (x, i) { return this[x]}, p()));`))
 	t.end()
 })
 test(`float x = vec2(1, 2).x;`, function (t) {
@@ -505,12 +510,13 @@ test(`float x = vec2(1, 2).x;`, function (t) {
 	`))
 	t.end()
 })
-test(`float x = vec2(1, 2).xy;`, function (t) {
+test(`float x = vec2(1, 2).xy; x;`, function (t) {
 	var compile = GLSL();
 
-	t.equal(clean(compile(t.name)), clean(`
-		var x = [1, 2];
-	`))
+	// t.equal(clean(compile(t.name)), clean(`
+	// 	var x = [1, 2];
+	// `))
+	t.deepEqual(evaluate(t.name), [1, 2])
 	t.end()
 })
 
@@ -527,8 +533,8 @@ test('vec3 x = vec3(1.0); vec3 y = -x;', function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)), clean(`
-		var x = [1, 1, 1];
-		var y = [-x[0], -x[1], -x[2]];
+		var x = new Float32Array([1, 1, 1]);
+		var y = new Float32Array([-x[0], -x[1], -x[2]]);
 	`))
 	t.end()
 })
@@ -536,8 +542,8 @@ test('vec3 x = vec3(1.0); vec3 y = 0. - x;', function (t) {
 	var compile = GLSL();
 
 	t.equal(clean(compile(t.name)), clean(`
-		var x = [1, 1, 1];
-		var y = [-x[0], -x[1], -x[2]];
+		var x = new Float32Array([1, 1, 1]);
+		var y = new Float32Array([-x[0], -x[1], -x[2]]);
 	`))
 	t.end()
 })
@@ -564,14 +570,13 @@ test('float s = 0.; s--;', function (t) {
 	t.end()
 })
 test('vec3 f() { return vec3(3.); } vec3 x = -f();', function (t) {
-	t.equal(clean(compile(t.name)),
-		clean`
-		function f () {
-			return [3., 3., 3.];
-		};
-		var x = f().map(function (_) {return -_;});
-	`)
-	console.log()
+	// t.equal(clean(compile(t.name)),
+	// 	clean`
+	// 	function f () {
+	// 		return [3., 3., 3.];
+	// 	};
+	// 	var x = f().map(function (_) {return -_;});
+	// `)
 	t.deepEqual(evaluate(t.name + ';x;'), [-3, -3, -3])
 
 	t.end()

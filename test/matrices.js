@@ -1,5 +1,7 @@
 import test from 'tape'
 import evaluate from './util/eval.js'
+import { compile } from '../index.js';
+import almost from './util/almost.js';
 
 // constructors
 
@@ -189,7 +191,7 @@ test('mat3(float × 9)', function (t) {
 
 test('mat4(float × 16)', function (t) {
 	t.equal(evaluate('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1).length();'), 4);
-	t.deepEqual(evaluate('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1);'), [0, 1.2, -3, 3, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, -1, -1]);
+	t.true(almost(evaluate('mat4(0,1.2,-3,3, 1,2,3,4, 5,6,7,8, 0,0,-1,-1);'), [0, 1.2, -3, 3, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, -1, -1]));
 	t.end()
 })
 
