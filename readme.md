@@ -38,14 +38,14 @@ compile(`
 `
 var uv = attributes.uv
 var color = attributes.color
-var fColor = [0, 0, 0, 0]
+var fColor = new Float32Array([0, 0, 0, 0])
 var uScreenSize = uniforms.uScreenSize
 
 function main () {
 	fColor = color
-	var position = [uv[0], -uv[1]]
+	var position = new Float32Array([uv[0], -uv[1]])
 	position[0] *= uScreenSize[1] / uScreenSize[0]
-	gl_Position = [position[0], position[1], 0, 1]
+	gl_Position = new Float32Array([position[0], position[1], 0, 1])
 }
 `
 ```
