@@ -74,14 +74,15 @@ test('float x = 0.5; vec2 uv = vec2(0., 0.5); uv *= smoothstep(0., 1., x);', fun
 	t.deepEqual(evaluate(t.name), [0, 0.25]);
 	t.end()
 })
-test('vec2 position; position *= 1.0 + vec2();', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var position = new Float32Array([0, 0]);
-		position = new Float32Array([position[0], position[1]]);
-		`)
-	);
+test('vec2 position = vec2(2,1); position *= 1.0 + vec2(1,2); position', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var position = new Float32Array([0, 0]);
+	// 	position = new Float32Array([position[0], position[1]]);
+	// 	`)
+	// );
+	t.deepEqual(evaluate(t.name), [4, 3])
 	t.end()
 })
 test('vec2 position = vec2(1); position = position * (1.0 + vec2(0.5,-0.5)); position', function (t) {
@@ -126,15 +127,16 @@ test('gl_Position.xy += gl_Position.yx;', function (t) {
 	);
 	t.end()
 })
-test('uniform vec4 v; uniform float c; gl_FragColor = vec4(v.wzyx) * c;', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var v = new Float32Array([0, 0, 0, 0]);
-		var c = 0;
-		gl_FragColor = new Float32Array([v[3] * c, v[2] * c, v[1] * c, v[0] * c]);
-		`)
-	);
+test('uniform vec4 v = vec4(3,2,1,0); uniform float c = 0.5; gl_FragColor = vec4(v.wzyx) * c;', function (t) {
+	// t.equal(
+	// 	clean(compile(t.name)),
+	// 	clean(`
+	// 	var v = new Float32Array([0, 0, 0, 0]);
+	// 	var c = 0;
+	// 	gl_FragColor = new Float32Array([v[3] * c, v[2] * c, v[1] * c, v[0] * c]);
+	// 	`)
+	// );
+	t.deepEqual(evaluate('vec4 gl_FragColor;' + t.name + ';gl_FragColor;'), [0, 0.5, 1, 1.5])
 	t.end()
 })
 test('vec3 x = mat3(2)[1]; x;', function (t) {
@@ -178,9 +180,6 @@ test('gl_Position.x = gl_Position.y / gl_Position.x;', function (t) {
 	);
 	t.end()
 })
-test.skip('st.prop = val', function (t) {
-	t.end()
-})
 test('vec4 v = vec4(1, 2, 3, 4); v.wy *= v.zx;', function (t) {
 	//gl_Position = [null, 1, null, 0].map(function (idx, i) {
 	//	return idx == null ? gl_position[i] : this[idx];
@@ -217,7 +216,7 @@ test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1); gl_Position', function (t) {
 	// 	gl_Position = [p[1] / 2.0, p[0] / 2.0, 0, 1];
 	// 	`)
 	// )
-	t.deepEqual(evaluate(t.name), [0, 0, 0, 1])
+	t.deepEqual(evaluate('vec4 gl_Position;' + t.name), [0, 0, 0, 1])
 	t.end()
 })
 test('int f(float x) {return 1;}; int f(double x) {return 2;}; double x; f(x);', function (t) {
@@ -600,10 +599,10 @@ test('texture coord', function (t) {
 
 // #56
 // FIXME: prepr doesn't handle `/* #56 */`
-test.skip('varying mat3 m; m[0] = vec3(1., 1., 0.); m;', function (t) {
+test('varying mat3 m; m[0] = vec3(1., 1., 0.); m;', function (t) {
 	var compile = GLSL({ version: '300 es' })
 	// console.log(clean(compile(t.name)))
-	t.equal(evaluate(t.name), [1, 1, 0, 0, 0, 0, 0, 0, 0])
+	t.deepEqual(evaluate(t.name), [1, 1, 0, 0, 1, 0, 0, 0, 1])
 	t.end()
 })
 

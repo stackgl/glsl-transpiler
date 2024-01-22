@@ -190,8 +190,8 @@ test('Multiple outputs', function (t) {
 		function f (a, b, c) {
 			c = c.slice();
 			a = 0.1;
-			b = new Float32Array([2.0, 2.0]);
-			c = b;
+			(b[0] = 2, b[1] = 2, b);
+			(c[0] = b[0], c[1] = b[1], c);
 			f.__return__ = 0.0;
 			f.__out__ = [a, b, c];
 			return f.__return__;
@@ -230,7 +230,7 @@ test('Calling function with output arguments', function (t) {
 	// 	gl_Position = new Float32Array([x, y, z, 1]);
 	// `))
 
-	t.ok(almost(evaluate(source, { debug: false }), [1.1, 1, 2, 1]));
+	t.ok(almost(evaluate('vec4 gl_Position;' + source, { debug: false }), [1.1, 1, 2, 1]));
 	t.end()
 })
 
@@ -270,6 +270,6 @@ test('Calling nested functions with output arguments', function (t) {
 	// 	gl_Position = [x, y, 0, 1];
 	// `))
 
-	t.ok(almost(evaluate(source, { debug: false }), [2.1, 1, 0, 1]));
+	t.ok(almost(evaluate('vec4 gl_Position;' + source, { debug: false }), [2.1, 1, 0, 1]));
 	t.end()
 })
