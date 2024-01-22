@@ -593,10 +593,6 @@ test('uvec2 n = uvec2(1);', function (t) {
 	t.end()
 })
 
-test('texture coord', function (t) {
-	t.end()
-})
-
 // #56
 // FIXME: prepr doesn't handle `/* #56 */`
 test('varying mat3 m; m[0] = vec3(1., 1., 0.); m;', function (t) {
@@ -605,7 +601,12 @@ test('varying mat3 m; m[0] = vec3(1., 1., 0.); m;', function (t) {
 	t.deepEqual(evaluate(t.name), [1, 1, 0, 0, 1, 0, 0, 0, 1])
 	t.end()
 })
-
+test.skip('varying mat3 m[3]; m[1][0] = vec3(1., 1., 0.); m;', function (t) {
+	var compile = GLSL({ version: '300 es' })
+	console.log(clean(compile(t.name)))
+	// t.deepEqual(evaluate(t.name), [1, 1, 0, 0, 1, 0, 0, 0, 1])
+	t.end()
+})
 
 // 	`
 // 	vec2 pos;
