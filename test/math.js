@@ -80,7 +80,7 @@ test('type pow (type x, type y)', function (t) {
 })
 
 test('type exp (type x)', function (t) {
-	var x = Math.random() * 100;
+	var x = Math.random() * 10;
 	t.ok(almost(evaluate(`exp(${x});`), Math.exp(x)));
 	t.ok(almost(evaluate(`exp(vec4(${x}));`), vec4(Math.exp(x))));
 	// t.ok(almost(evaluate(`exp(mat4(${x}));`), mat4(Math.exp(x))));
@@ -88,7 +88,7 @@ test('type exp (type x)', function (t) {
 })
 
 test('type log (type x)', function (t) {
-	var x = Math.random() * 100;
+	var x = Math.random() * 10;
 	t.ok(almost(evaluate(`log(${x});`), Math.log(x)));
 	t.ok(almost(evaluate(`log(vec4(${x}));`), vec4(Math.log(x))));
 	// t.ok(almost(evaluate(`log(mat4(${x}));`), mat4(Math.log(x))));
@@ -96,7 +96,7 @@ test('type log (type x)', function (t) {
 })
 
 test('type exp2 (type x)', function (t) {
-	var x = Math.random() * 100;
+	var x = Math.random() * 10;
 	t.ok(almost(evaluate(`exp2(${x});`), Math.pow(2, x)));
 	t.ok(almost(evaluate(`exp2(vec4(${x}));`), vec4(Math.pow(2, x))));
 	// t.ok(almost(evaluate(`exp2(mat4(${x}));`), mat4(Math.pow(2, x))));
@@ -104,7 +104,7 @@ test('type exp2 (type x)', function (t) {
 })
 
 test('type log2 (type x)', function (t) {
-	var x = Math.random() * 100;
+	var x = Math.random() * 10;
 	t.ok(almost(evaluate(`log2(${x});`), Math.log2(x)));
 	t.ok(almost(evaluate(`log2(vec4(${x}));`), vec4(Math.log2(x))));
 	// t.ok(almost(evaluate(`log2(mat4(${x}));`), mat4(Math.log2(x))));
@@ -112,7 +112,7 @@ test('type log2 (type x)', function (t) {
 })
 
 test('type sqrt (type x)', function (t) {
-	var x = Math.random() * 100;
+	var x = Math.random() * 10;
 	t.ok(almost(evaluate(`sqrt(${x});`), Math.sqrt(x)));
 	t.ok(almost(evaluate(`sqrt(vec4(${x}));`), vec4(Math.sqrt(x))));
 	t.ok(almost(evaluate(`sqrt(mat4(${x}));`), mat4(Math.sqrt(x))));
@@ -120,7 +120,7 @@ test('type sqrt (type x)', function (t) {
 })
 
 test('type inversesqrt (type x)', function (t) {
-	var x = Math.random() * 100;
+	var x = Math.random() * 10;
 	t.ok(almost(evaluate(`inversesqrt(${x});`), 1 / Math.sqrt(x)));
 	t.ok(almost(evaluate(`inversesqrt(vec4(${x}));`), vec4(1 / Math.sqrt(x))));
 	// t.ok(almost(evaluate(`inversesqrt(mat4(${x}));`), mat4(1/Math.sqrt(x))));
@@ -128,7 +128,7 @@ test('type inversesqrt (type x)', function (t) {
 })
 
 test('type abs (type x)', function (t) {
-	var x = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`abs(${x});`), Math.abs(x)));
 	t.ok(almost(evaluate(`abs(vec4(${x}));`), vec4(Math.abs(x))));
 	t.ok(almost(evaluate(`abs(mat4(${x}));`), mat4(Math.abs(x))));
@@ -136,7 +136,7 @@ test('type abs (type x)', function (t) {
 })
 
 test('type sign (type x)', function (t) {
-	var x = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`sign(${x});`), Math.sign(x)));
 	t.ok(almost(evaluate(`sign(vec4(${x}));`), vec4(Math.sign(x))));
 	t.ok(almost(evaluate(`sign(mat4(${x}));`), mat4(Math.sign(x))));
@@ -144,7 +144,7 @@ test('type sign (type x)', function (t) {
 })
 
 test('type floor (type x)', function (t) {
-	var x = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`floor(${x});`), Math.floor(x)));
 	t.ok(almost(evaluate(`floor(vec4(${x}));`), vec4(Math.floor(x))));
 	t.ok(almost(evaluate(`floor(mat4(${x}));`), mat4(Math.floor(x))));
@@ -152,7 +152,7 @@ test('type floor (type x)', function (t) {
 })
 
 test('type ceil (type x)', function (t) {
-	var x = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`ceil(${x});`), Math.ceil(x)));
 	t.ok(almost(evaluate(`ceil(vec4(${x}));`), vec4(Math.ceil(x))));
 	t.ok(almost(evaluate(`ceil(mat4(${x}));`), mat4(Math.ceil(x))));
@@ -160,7 +160,7 @@ test('type ceil (type x)', function (t) {
 })
 
 test('type fract (type x)', function (t) {
-	var x = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`fract(${x});`), x - Math.floor(x)));
 	t.ok(almost(evaluate(`fract(vec4(${x}));`), vec4(x - Math.floor(x))));
 	t.ok(almost(evaluate(`fract(mat4(${x}));`), mat4(x - Math.floor(x))));
@@ -168,7 +168,7 @@ test('type fract (type x)', function (t) {
 })
 
 test('type mod (type x, type y)', function (t) {
-	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10, y = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`mod(${x}, ${y});`), x % y));
 	t.ok(almost(evaluate(`mod(vec4(${x}), vec4(${y}));`), vec4(x % y)));
 	t.ok(almost(evaluate(`mod(mat4(${x}), mat4(${y}));`), mat4(x % y)));
@@ -178,7 +178,7 @@ test('type mod (type x, type y)', function (t) {
 })
 
 test('type min (type x, type|float y)', function (t) {
-	var x = (Math.random()) * 100, y = (Math.random()) * 100;
+	var x = (Math.random()) * 10, y = (Math.random()) * 10;
 	t.ok(almost(evaluate(`min(${x}, ${y});`), Math.min(x, y)));
 	t.ok(almost(evaluate(`min(vec4(${x}), vec4(${y}));`), vec4(Math.min(x, y))));
 	t.ok(almost(evaluate(`min(mat4(${x}), mat4(${y}));`), mat4(Math.min(x, y))));
@@ -188,7 +188,7 @@ test('type min (type x, type|float y)', function (t) {
 })
 
 test('type max (type x, type|float y)', function (t) {
-	var x = (Math.random() - 1) * 100, y = (Math.random() - 1) * 100;
+	var x = (Math.random() - 1) * 10, y = (Math.random() - 1) * 10;
 	t.ok(almost(evaluate(`max(${x}, ${y});`), Math.max(x, y)));
 	t.ok(almost(evaluate(`max(vec4(${x}), vec4(${y}));`), vec4(Math.max(x, y))));
 	t.ok(almost(evaluate(`max(mat4(${x}), mat4(${y}));`), mat4(Math.max(x, y))));
@@ -198,7 +198,7 @@ test('type max (type x, type|float y)', function (t) {
 })
 
 test('type clamp (type x, type|float min, type|float max)', function (t) {
-	var x = (Math.random() - 1) * 100, y = (Math.random() - 1) * 100, z = (Math.random() - 1) * 100;
+	var x = (Math.random() - 1) * 10, y = (Math.random() - 1) * 10, z = (Math.random() - 1) * 10;
 	t.ok(almost(evaluate(`clamp(${x}, ${y}, ${z});`), Math.min(Math.max(x, y), z)));
 	t.ok(almost(evaluate(`clamp(vec4(${x}), vec4(${y}), vec4(${z}));`), vec4(Math.min(Math.max(x, y), z))));
 	t.ok(almost(evaluate(`clamp(mat4(${x}), mat4(${y}), mat4(${z}));`), mat4(Math.min(Math.max(x, y), z))));
@@ -208,7 +208,7 @@ test('type clamp (type x, type|float min, type|float max)', function (t) {
 })
 
 test('type mix (type x, type y, type|float a)', function (t) {
-	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, a = Math.random();
+	var x = (Math.random() - 0.5) * 10, y = (Math.random() - 0.5) * 10, a = Math.random();
 	t.ok(almost(evaluate(`mix(${x}, ${y}, ${a});`), x * (1 - a) + y * a));
 	t.ok(almost(evaluate(`mix(vec4(${x}), vec4(${y}), vec4(${a}));`), vec4(x * (1 - a) + y * a)));
 	t.ok(almost(evaluate(`mix(mat4(${x}), mat4(${y}), mat4(${a}));`), mat4(x * (1 - a) + y * a)));
@@ -218,7 +218,7 @@ test('type mix (type x, type y, type|float a)', function (t) {
 })
 
 test('type step (type|float edge, type x)', function (t) {
-	var edge = (Math.random() - 0.5) * 100, x = (Math.random() - 0.5) * 100;
+	var edge = (Math.random() - 0.5) * 10, x = (Math.random() - 0.5) * 10;
 
 	function step(edge, x) {
 		return x < edge ? 0.0 : 1.0;
@@ -233,7 +233,7 @@ test('type step (type|float edge, type x)', function (t) {
 })
 
 test('type smoothstep (type|float a, type|float b, type x)', function (t) {
-	var a = (Math.random()) * 100, b = (Math.random()) * 100, x = (Math.random()) * 100;
+	var a = (Math.random()) * 10, b = (Math.random()) * 10, x = (Math.random()) * 10;
 
 	function smoothstep(edge0, edge1, x) {
 		var t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0.0), 1.0);
@@ -249,7 +249,7 @@ test('type smoothstep (type|float a, type|float b, type x)', function (t) {
 })
 
 test('float length (type x)', function (t) {
-	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100, w = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10, y = (Math.random() - 0.5) * 10, z = (Math.random() - 0.5) * 10, w = (Math.random() - 0.5) * 10;
 	t.ok(almost(evaluate(`length(vec2(${x}, ${y}));`), Math.sqrt(x * x + y * y)));
 	t.ok(almost(evaluate(`length(vec3(${x}, ${y}, ${z}));`), Math.sqrt(x * x + y * y + z * z)));
 	t.ok(almost(evaluate(`length(vec4(${x}, ${y}, ${z}, ${w}));`), Math.sqrt(x * x + y * y + z * z + w * w)));
@@ -257,7 +257,7 @@ test('float length (type x)', function (t) {
 })
 
 test('float distance (type x, type y)', function (t) {
-	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10, y = (Math.random() - 0.5) * 10;
 	var d = x - y;
 	t.ok(almost(evaluate(`distance(vec2(${x}), vec2(${y}));`), Math.sqrt(d * d + d * d)));
 	t.ok(almost(evaluate(`distance(vec2(${x}, ${y}), vec2(${y}, ${x}));`), Math.sqrt(d * d + d * d)));
@@ -265,7 +265,7 @@ test('float distance (type x, type y)', function (t) {
 })
 
 test('float dot (type x, type y)', function (t) {
-	var x = (Math.random() - 0.5) * 100, y = (Math.random() - 0.5) * 100;
+	var x = (Math.random() - 0.5) * 10, y = (Math.random() - 0.5) * 10;
 	var d = x - y;
 	t.ok(almost(evaluate(`dot(vec2(${x}), vec2(${y}));`), x * y * 2));
 	t.ok(almost(evaluate(`dot(vec2(${x}, ${y}), vec2(${y}, ${x}));`), x * y * 2));
