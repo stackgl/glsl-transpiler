@@ -6,7 +6,7 @@ import CompileStream from '../stream.js'
 import test from 'tape'
 import StringStream from 'stream-array'
 import { Writable } from 'stream'
-import clean from 'cln'
+import clean from './util/clean.js'
 
 var compile = GLSL({})
 

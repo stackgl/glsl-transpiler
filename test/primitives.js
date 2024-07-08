@@ -1,7 +1,7 @@
 import GLSL from '../index.js'
 import test from 'tape'
 import evaluate from './util/eval.js'
-import clean from 'cln'
+import clean from './util/clean.js'
 
 
 var compile = GLSL({})
@@ -106,7 +106,7 @@ test('float(uint)', function (t) {
 
 // converts a Boolean value to a float
 test('float(bool)', function (t) {
-	t.equal(evaluate('+float(true);', {debug: false}), 1);
+	t.equal(evaluate('+float(true);', { debug: false }), 1);
 	t.equal(evaluate('+float(false);'), 0);
 	t.end()
 })
@@ -143,7 +143,7 @@ test('double(float)', function (t) {
 })
 
 
-test('should allow valid int initializations', function(t) {
+test('should allow valid int initializations', function (t) {
 	t.equal(
 		clean(compile('void main() { int test = 1; }')),
 		clean('function main () {\nvar test = 1;\n};'));
@@ -162,7 +162,7 @@ test('should allow valid int initializations', function(t) {
 	t.end()
 })
 
-test('should allow valid float initializations', function(t) {
+test('should allow valid float initializations', function (t) {
 	t.equal(
 		clean(compile('void main() { float test = 1.0; }')),
 		clean('function main () {\nvar test = 1.0;\n};'));
@@ -193,7 +193,7 @@ test('should allow valid float initializations', function(t) {
 	t.end()
 })
 
-test('should allow valid bool initializations', function(t) {
+test('should allow valid bool initializations', function (t) {
 	t.equal(
 		clean(compile('void main() { bool test = true; }')),
 		clean('function main () {\nvar test = true;\n};'));
@@ -206,50 +206,50 @@ test('should allow valid bool initializations', function(t) {
 	t.end()
 })
 
-test.skip('should throw on invalid int initializations', function(t) {
-	t.throws('void main() { int test = 1.0; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = .04; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 0.50; }',   /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 55.23; }',  /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 5e3; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 5.5e3; }',  /Left and right arguments are of differing types/);
+test.skip('should throw on invalid int initializations', function (t) {
+	t.throws('void main() { int test = 1.0; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = .04; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = 0.50; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = 55.23; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = 5e3; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = 5.5e3; }', /Left and right arguments are of differing types/);
 	t.throws('void main() { int test = 5.5e-3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = .5e3; }',   /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = true; }',   /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = false; }',  /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = .5e3; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = true; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { int test = false; }', /Left and right arguments are of differing types/);
 	t.end()
 })
 
 
-test.skip('should throw on invalid float initializations', function(t) {
-	t.throws('void main() { float test = 1; }',     /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = 55; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = 0x23; }',  /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = 023; }',   /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = true; }',  /Left and right arguments are of differing types/);
+test.skip('should throw on invalid float initializations', function (t) {
+	t.throws('void main() { float test = 1; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { float test = 55; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { float test = 0x23; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { float test = 023; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { float test = true; }', /Left and right arguments are of differing types/);
 	t.throws('void main() { float test = false; }', /Left and right arguments are of differing types/);
 	t.end()
 })
 
-test.skip('should throw on invalid bool initializations', function(t) {
-	t.throws('void main() { bool test = 1; }',      /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 55; }',     /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 0x23; }',   /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 023; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 1.0; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = .04; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 0.50; }',   /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 55.23; }',  /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 5e3; }',    /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 5.5e3; }',  /Left and right arguments are of differing types/);
+test.skip('should throw on invalid bool initializations', function (t) {
+	t.throws('void main() { bool test = 1; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 55; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 0x23; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 023; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 1.0; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = .04; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 0.50; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 55.23; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 5e3; }', /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = 5.5e3; }', /Left and right arguments are of differing types/);
 	t.throws('void main() { bool test = 5.5e-3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = .5e3; }',   /Left and right arguments are of differing types/);
+	t.throws('void main() { bool test = .5e3; }', /Left and right arguments are of differing types/);
 	t.end()
 })
 
 
 
-test('should default ints to 0', function(t) {
+test('should default ints to 0', function (t) {
 	t.equal(
 		clean(compile('void main() { int test; }')),
 		clean('function main () {\nvar test = 0;\n};'));
@@ -259,23 +259,22 @@ test('should default ints to 0', function(t) {
 	t.end()
 })
 
-test('should default floats to 0.0', function(t) {
+test('should default floats to 0.0', function (t) {
 	t.equal(
 		clean(compile('void main() { float test; }')),
 		clean('function main () {\nvar test = 0;\n};'));
 	t.equal(
 		clean(compile('void main() { float test, foo; }')),
-	clean('function main () {\nvar test = 0, foo = 0;\n};'));
+		clean('function main () {\nvar test = 0, foo = 0;\n};'));
 	t.end()
 })
 
-test('should default bools to 0 (false)', function(t) {
+test('should default bools to 0 (false)', function (t) {
 	t.equal(
 		clean(compile('void main() { bool test; }')),
 		clean('function main () {\nvar test = false;\n};'));
 	t.equal(
 		clean(compile('void main() { bool test, foo; }')),
-	clean('function main () {\nvar test = false, foo = false;\n};'));
+		clean('function main () {\nvar test = false, foo = false;\n};'));
 	t.end()
 })
-

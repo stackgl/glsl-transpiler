@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "almost-equal": "^1.1.0",
-    "cln": "^1.1.0",
     "gl-matrix": "^2.3.2",
     "glslify": "^7.1.1",
     "glslify-promise": "^1.0.2",

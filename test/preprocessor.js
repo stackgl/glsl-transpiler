@@ -1,6 +1,6 @@
 import test from 'tape'
-import {compile} from '../index.js'
-import clean from 'cln'
+import { compile } from '../index.js'
+import clean from './util/clean.js'
 
 test('Transform macro to commented', function (t) {
 	t.equal(clean(compile(`

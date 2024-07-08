@@ -3,7 +3,7 @@ import test from 'tape'
 import GLSL, { compile } from '../index.js'
 import almost from './util/almost.js'
 import evaluate from './util/eval.js'
-import clean from 'cln'
+import clean from './util/clean.js'
 
 // constructors
 

@@ -1,7 +1,7 @@
 import GLSL from '../index.js'
 import test from 'tape'
 import evaluate from './util/eval.js'
-import clean from 'cln'
+import clean from './util/clean.js'
 
 var compile = GLSL({})
 
