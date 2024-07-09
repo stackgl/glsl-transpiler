@@ -28,6 +28,9 @@ var source = `
 		xy.xy *= uv.yx;
 		gl_Position = vec4(position.yx / 2.0, 0, 1);
 		gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();
+
+		bool foo = true;
+		bool bar = !foo == false && ~foo || foo;
 		return;
 	}
 
@@ -67,6 +70,8 @@ var result = `
 		xy = new Float32Array([xy[0] * uv[1], xy[1] * uv[0]]);
 		(gl_Position[0] = position[1] / 2.0, gl_Position[1] = position[0] / 2.0, gl_Position[2] = 0, gl_Position[3] = 1, gl_Position);
 		gl_FragColor[0] = gl_FragCoord[0] / 4;
+		var foo = true;
+		var bar = (!foo == false) && (~foo || foo);
 		return;
 	};
 
