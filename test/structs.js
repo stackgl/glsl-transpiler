@@ -49,15 +49,7 @@ test('Anonymous', function (t) {
 	t.end()
 });
 
-// FIXME
-test.skip('Quantifier', function (t) {
-	t.equal(
-		clean(compile(`struct Samples { sampler2D data[2]; };`)),
-		clean(`
-		var Samples = {
-			direction: [0, 0, 0]
-		};`)
-	);
-
+test('Struct array fields', function (t) {
+	t.equal(evaluate('struct S { float a[2]; }; S s; s.a[1]=7.; s.a[1];'), 7)
 	t.end()
 })

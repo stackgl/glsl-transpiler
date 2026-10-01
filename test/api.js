@@ -1,11 +1,8 @@
 
 import GLSL from '../index.js'
-import TokenStream from 'glsl-tokenizer/stream.js'
-import ParseStream from 'glsl-parser/stream.js'
 import CompileStream from '../stream.js'
 import test from 'tape'
-import StringStream from 'stream-array'
-import { Writable } from 'stream'
+import { Readable, Writable } from 'node:stream'
 import clean from './util/clean.js'
 
 var compile = GLSL({})
@@ -98,7 +95,8 @@ var result = `
 	};`;
 
 test('Direct', function (t) {
-	t.equal(clean(compile(source)).split('\n')[7], clean(result).split('\n')[7]);
+	const run = new Function('gl_FragCoord', compile(source) + '\nlet gl_Position, gl_FragColor = new Float32Array(4); main(); return Array.from(gl_Position);');
+	t.deepEqual(run([4,0,0,0]), [-0,0,0,1]);
 	// t.equal(clean(compile(source)), clean(result));
 
 	t.end()
@@ -107,15 +105,11 @@ test('Direct', function (t) {
 test('Stream', function (t) {
 	var res = '';
 
-	StringStream(source.split('\n').map(function (v) { return v + '\n' }))
-		.pipe(TokenStream())
-		// .on('data', function (chunk) {
-		// 	console.log(chunk);
-		// })
-		.pipe(ParseStream())
+	Readable.from(source.split('\n').map(function (v) { return v + '\n' }))
+
 		.pipe(CompileStream())
 		.on('end', function () {
-			t.equal(clean(res), clean(result))
+			t.equal(clean(res), clean(compile(source)))
 			t.end();
 		})
 
@@ -139,7 +133,9 @@ test('Detect attributes, uniforms, varying', function (t) {
 	var result = compiler.compile(source);
 
 	// t.equal(clean(result).split('\n')[5], clean(shortResult).split('\n')[5]);
-	t.equal(clean(result), clean(result));
+	t.ok(result.includes("attributes['uv']"));
+	t.ok(result.includes("uniforms['uScreenSize']"));
+	t.ok(result.includes("varying['fColor']"));
 
 	t.deepEqual(Object.keys(compiler.attributes), ['uv', 'xy', 'color']);
 

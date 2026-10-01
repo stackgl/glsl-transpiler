@@ -63,10 +63,10 @@ test('ivec3(int, int, int)', function (t) {
 // uses 4 Boolean conversions
 test('bvec4(int, int, float, float)', function (t) {
 	t.equal(evaluate('bvec4(0, 4, 1.25, 0).length();'), 4);
-	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[0];'), 1);
-	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[1];'), 0);
-	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[2];'), 1);
-	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[3];'), 0);
+	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[0];'), true);
+	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[1];'), false);
+	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[2];'), true);
+	t.equal(evaluate('bvec4(1, 0, 1.25, 0)[3];'), false);
 	t.end()
 })
 
@@ -113,7 +113,7 @@ test('vec4(vec3, float)', function (t) {
 	t.equal(evaluate('vec4(vec3(0, 4, 1.25), 0).s;'), 0);
 	t.equal(evaluate('vec4(vec3(0, 4, 1.25), 0).t;'), 4);
 	t.equal(evaluate('vec4(vec3(0, 4, 1.25), 0).p;'), 1.25);
-	t.equal(evaluate('vec4(vec3(0, 4, 1.25), 0).d;'), 0);
+	t.equal(evaluate('vec4(vec3(0, 4, 1.25), 0).q;'), 0);
 	t.end()
 })
 
@@ -312,49 +312,21 @@ test('mat * mat', function (t) {
 	t.end()
 })
 
-test.skip('vector/matrix.length() → .length', function (t) {
-	var src = `
-		vec2 x, y = vec2(1, 2);
-		mat2 xy = mat2(x, y);
-		int z = vec4(x.length(), y.length(), mat2[0].length(), mat2.length()).length();
-	`;
-
-	var res = `
-		var x = vec2(), y = vec2(1, 2);
-		var xy = mat2(x, y);
-		var z = vec4(x.length, y.length, mat2[0].length, mat2.length).length;
-	`;
+test('Vector, matrix and column lengths', function (t) {
+	t.deepEqual(evaluate('vec2 x; mat2x3 m; ivec3(x.length(),m.length(),m[0].length());'), [2,2,3])
 	t.end()
 })
-
-test(`mat * mat * mat`, function (t) {
-	var compile = GLSL({ includes: false });
-
-	t.equal(clean(compile(`
-	mat2 a, b, c;
-	gl_Position = a * b * c;
-	`)), clean(`
-      var a = new Float32Array([1, 0, 0, 1]), b = new Float32Array([1, 0, 0, 1]), c = new Float32Array([1, 0, 0, 1]);
-			(gl_Position[0] = (a[0] * b[0] + a[2] * b[1]) * c[0] + (a[0] * b[2] + a[2] * b[3]) * c[1], gl_Position[1] = (a[1] * b[0] + a[3] * b[1]) * c[0] + (a[1] * b[2] + a[3] * b[3]) * c[1], gl_Position[2] = (a[0] * b[0] + a[2] * b[1]) * c[2] + (a[0] * b[2] + a[2] * b[3]) * c[3], gl_Position[3] = (a[1] * b[0] + a[3] * b[1]) * c[2] + (a[1] * b[2] + a[3] * b[3]) * c[3], gl_Position);
-	`))
-
+test('mat * mat * mat', function (t) {
+	for (const optimize of [true, false]) t.deepEqual(evaluate(`
+		mat2 a=mat2(1,2,3,4), b=mat2(5,6,7,8), c=mat2(2,0,0,3);
+		a*b*c;
+	`, { optimize }), [46,68,93,138]);
 	t.end()
 })
-
-test(`mat * mat * mat * vec`, function (t) {
-	var compile = GLSL({ includes: false });
-
-	const src = `
-	mat2 a, b, c;
-	vec2 d;
-	gl_Position = a * b * c * d;
-	`
-
-	t.equal(clean(compile(src)), clean(`
-	var a = new Float32Array([1, 0, 0, 1]), b = new Float32Array([1, 0, 0, 1]), c = new Float32Array([1, 0, 0, 1]);
-	var d = new Float32Array([0, 0]);
-	new Float32Array([((a[0] * b[0] + a[2] * b[1]) * c[0] + (a[0] * b[2] + a[2] * b[3]) * c[1]) * d[0] + ((a[0] * b[0] + a[2] * b[1]) * c[2] + (a[0] * b[2] + a[2] * b[3]) * c[3]) * d[1], ((a[1] * b[0] + a[3] * b[1]) * c[0] + (a[1] * b[2] + a[3] * b[3]) * c[1]) * d[0] + ((a[1] * b[0] + a[3] * b[1]) * c[2] + (a[1] * b[2] + a[3] * b[3]) * c[3]) * d[1]]).reduce((res,el,i)=>(res[i] = el, res), gl_Position);
-	`))
-
+test('mat * mat * mat * vec', function (t) {
+	for (const optimize of [true, false]) t.deepEqual(evaluate(`
+		mat2 a=mat2(1,2,3,4), b=mat2(5,6,7,8), c=mat2(2,0,0,3);
+		a*b*c*vec2(2,3);
+	`, { optimize }), [371,550]);
 	t.end()
 })

@@ -1,35 +1,31 @@
-* What code is better: implicit (+) or explicit (-)? E. g. create unfolded object for each structure instance or provide type constructor?
-	* + implicit is able to be unfolded - closurecompiler or ast-eval
-	* - implicit is sometimes senseless like var a = bool();
-		* + same time it may provide different implementation of bool.
-	* + implicit way avoids unfolding matrices multiplication: `mat2d['*'](a, b)`
-	* - explicit is easier to read
-	* - explicit corresponds to swizzles
-	* - implicit may be slower in simple cases like `var a = false`
-		* + but times faster in multiple use like `var a = mat4(3)`
-	* - in some cases implicits are N times slower: `xy.xy *= uv.yx;`. Expanding to explicit almost take no time to calculate `xy[0] *= uv[0]; xy[1] *= uv[1];`, and also concise. But dealing with types is cumbersome: `vec2.mult(vec2.xy(xy), vec2.yx(uv), xy);`
-		* + at the same way, explicits are over-calculative, eg `a.xy *= b.x / b.y` — for each component of `a` we calculate `b.x/b.y`, and if it is a call for some troublesome method, it will be called up to 16 times (`mat4 = meth()`). Whereas with implicit call it will calculate `b.x/b.y` once and do assignment.
-			* - still opened version is loads of time (3 times) faster.
-	* + From the other POV, who on earth cares about the beauty of compiled code?
-	* ✔ The good compromise is found in extending objects returned from types with swizzles etc. Takes more time on object constructs, but resulting code is pretty: `m = m.mult(n);`
-		* Unfortunately, we have to extend native arrays prototype to keep execution fast enough.
-* Why on earth we need to wrap floats/ints/bools? Need we?
-	* + things like `vec4 a = 2.0 * vec4()`
-		* - but they are better unwrapper as `var a = vec4().mult(1.0)` rather than `var a = float(1.0).mult(vec4())`
-	* + implicit types are difficult to guess: `int a = 1, b = 2, c; c = a + b;` - which plus operator should we use?
-		* - not that difficult, actually. Result of assignment is always typed. Same as each operand. We just have to track map of variables
-	* - we have to mind swizzle types as well then: `a.x = b.y`
-	* ✔ No wrapping, it is faster and easier to read.
+# Implementation and test map
 
-* How to speed up code?
-	* + Expand swizzles. Anyways you have to do multiplications manually in methods.
-	* + Do not use vector types. FloatArrays are proved being 10 times faster, so fast that js shaders code is only 10 times slower than gl shaders one.
-	* + `xy.xy *= uv.yx;` via fns is `$(xy, 'xy', mult($(xy, 'xy'), $(xy, 'yx')));` — not really faster than swizzle getters.
-		* The optimal way: `{let xyxy = vec2.mult(xy, vec2(uv[1], uv[0])); xy = vec2(xyxy[0], xyxy[1])}`. Deswizzling is slow, as any kind of function call, like getter etc, the optimal way is straight literal access.
-	* + Use plain arrays instead of Float32Arrays to construct vectors - that saves time on creating.
-	* + Unwrap multiplication operations eg m1 * m2 → m1[0] * m2[0]; m1[1] * m2[1]; ...
-	* + Using function calls is not that bad, 2% loose. Some things are impossible without functions, like `fn(x) * vec4()`.
-		* We can polyfill methods for each type of operation like `floatMultVec3`, but that would force us passing lib as a param, which is the same slow as using gl-matrix.
-		* We cannot really provide functions init code in a shader call, so we basically need to.
-			* We possibly could’ve modified fake-gl processFragment so that it does not take lib as a param... But that seems to be difficult due to need to provide clean context for each call.
-		* So there is nothing but to pass gl-matrix as a lib and provide transforms so to use it’s methods. Because polyfilling the same isn’t faster really, but prone to difficulties and errors.
+The compiler has three stages: preprocess source, parse with Subscript, and lower typed expressions and statements to JavaScript.
+
+`lib/parse.js` configures Subscript's Pratt parser for GLSL precedence and adds statement/declaration parsing. It saves and restores the shared operator registry so other Subscript dialects can coexist. Comments are whitespace; preprocessor line continuations are joined before macro expansion. Parsing errors include a location in the preprocessed source.
+
+`lib/index.js` owns compilation state, scopes, function signatures, bindings, and AST transforms. A new compilation clears symbols, cached descriptors, and collected helpers. Function signatures are registered before bodies so prototypes and forward calls have types. Captured lvalues evaluate once and use names containing `$`, which cannot collide with GLSL identifiers.
+
+`lib/types.js` shares constructor implementations across vector types and matrix dimensions. `lib/operators.js` handles typed arithmetic and matrix multiplication. `lib/descriptor.js` carries component expressions, dimensions, and whether expansion is safe. Expressions with side effects cannot be duplicated by optimization.
+
+`lib/stdlib.js`, `lib/stdlib300.js`, and `lib/texture.js` provide runtime helpers. Functions must be self-contained or declare `.include` dependencies, because the compiler serializes only the helpers a shader needs. Texture and derivative hooks establish the boundary with the host renderer.
+
+| Area | Tests |
+| --- | --- |
+| GLSL syntax, precedence, comments, macro versions, errors, parser isolation | `test/parser.js`, `test/preprocessor.js` |
+| Shader input/output metadata, layouts, uniform blocks, built-in inputs | `test/parser.js`, `test/builtins.js` |
+| Source streams, chunk boundaries, failures, compile reuse | `test/parser.js`, `test/api.js` |
+| Scalars, signed/unsigned conversions, bitwise operations, overflow | `test/primitives.js`, `test/webgl2.js` |
+| Vector constructors, swizzles, comparisons, value copies | `test/vectors.js`, `test/webgl2.js` |
+| All matrix shapes, indexing, column writes, products, conversion | `test/matrices.js`, `test/webgl2.js` |
+| Structures, array fields, arrays of matrices, array lengths | `test/structs.js`, `test/webgl2.js` |
+| Overloads, prototypes, value parameters, output lvalues | `test/functions.js`, `test/parser.js`, `test/webgl2.js` |
+| Math, rounding, NaN/infinity, bit reinterpretation, packing | `test/math.js`, `test/webgl2.js` |
+| Texture families, mip levels, integer samplers, cubes, shadows, host hooks | `test/textures.js` |
+| Branches, loops, declaration conditions, switch, discard | `test/parser.js`, `test/webgl2.js`, `test/textures.js` |
+| Single evaluation, safe generated names, scope and state isolation | `test/webgl2.js`, `test/parser.js` |
+| Historical grammar stress fixture and executable sound shader | `test/index.js`, `test/fixture/` |
+
+`npm run test:coverage` runs the full suite while counting each AST transform. This is a reachability check, not proof that every overload or every branch is correct. Numerical tests separately exercise emitted code. The grammar stress fixture deliberately includes semantically invalid GLSL and is tested for translation only; the sound shader is executed.
+
+The v3 skipped examples were audited: valid cases now execute, stale output snapshots became behavior tests, and empty scaffolds or invalid validation assertions were removed. Strict GLSL semantic validation, shader linking, GPU precision matching, and WebGL rendering remain outside this library's contract. The sampler's nearest/clamp policy is a reference implementation, not an implementation of every WebGL texture state.

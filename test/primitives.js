@@ -206,46 +206,6 @@ test('should allow valid bool initializations', function (t) {
 	t.end()
 })
 
-test.skip('should throw on invalid int initializations', function (t) {
-	t.throws('void main() { int test = 1.0; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = .04; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 0.50; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 55.23; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 5e3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 5.5e3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = 5.5e-3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = .5e3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = true; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { int test = false; }', /Left and right arguments are of differing types/);
-	t.end()
-})
-
-
-test.skip('should throw on invalid float initializations', function (t) {
-	t.throws('void main() { float test = 1; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = 55; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = 0x23; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = 023; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = true; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { float test = false; }', /Left and right arguments are of differing types/);
-	t.end()
-})
-
-test.skip('should throw on invalid bool initializations', function (t) {
-	t.throws('void main() { bool test = 1; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 55; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 0x23; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 023; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 1.0; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = .04; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 0.50; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 55.23; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 5e3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 5.5e3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = 5.5e-3; }', /Left and right arguments are of differing types/);
-	t.throws('void main() { bool test = .5e3; }', /Left and right arguments are of differing types/);
-	t.end()
-})
 
 
 

@@ -2,8 +2,11 @@ import GLSL from '../index.js'
 import test from 'tape'
 import evaluate from './util/eval.js'
 import clean from './util/clean.js'
-import glsl from 'glslify'
+import { readFileSync } from 'node:fs'
 
+import './textures.js'
+import './parser.js'
+import './webgl2.js'
 import './functions.js'
 import './math.js'
 import './primitives.js'
@@ -39,13 +42,8 @@ test('console.log(123);', function (t) {
 	`));
 	t.end()
 })
-test('for (int i = 0; i < 10; i++) { if (i > 4) ; }', function (t) {
-	t.equal(clean(compile(t.name)), clean(`
-		for (var i = 0; i < 10; i++) {
-			if (i > 4) {
-			};
-		};
-		`));
+test('empty conditional loop body', function (t) {
+	t.equal(evaluate('int n=0; for(int i=0;i<10;i++){ if(i>4); n++; } n;'), 10)
 	t.end()
 })
 test('float x = 0; vec2 uv = vec2(0.5, 0.5), position = cos(x) * vec2(uv.yx.yx.x, -uv.y); position;', function (t) {
@@ -119,12 +117,7 @@ test('vec2 v = vec2(1, 1); v.yx + 1;', function (t) {
 	t.end()
 })
 test('gl_Position.xy += gl_Position.yx;', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		gl_Position = new Float32Array([gl_Position[0] + gl_Position[1], gl_Position[1] + gl_Position[0], gl_Position[2], gl_Position[3]]);
-		`)
-	);
+	for (const optimize of [true, false]) t.deepEqual(evaluate('vec4 gl_Position=vec4(1,2,3,4);' + t.name + 'gl_Position;', {optimize}), [3,3,3,4])
 	t.end()
 })
 test('uniform vec4 v = vec4(3,2,1,0); uniform float c = 0.5; gl_FragColor = vec4(v.wzyx) * c;', function (t) {
@@ -159,16 +152,8 @@ test('mat3 x = mat3(2); x;', function (t) {
 	t.deepEqual(evaluate(t.name), [2, 0, 0, 0, 2, 0, 0, 0, 2])
 	t.end()
 })
-//constants propagation is unimplemented
-test.skip('vec4 v; float c; gl_FragColor = vec4(v.wzyx) * c;', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		var v = [0, 0, 0, 0];
-		var c = 0;
-		gl_FragColor = [0, 0, 0, 0];
-		`)
-	);
+test('Default vector and scalar values', function (t) {
+	t.deepEqual(evaluate('vec4 v; float c; vec4 color=vec4(v.wzyx)*c; color;'), [0,0,0,0])
 	t.end()
 })
 test('gl_Position.x = gl_Position.y / gl_Position.x;', function (t) {
@@ -181,31 +166,16 @@ test('gl_Position.x = gl_Position.y / gl_Position.x;', function (t) {
 	t.end()
 })
 test('vec4 v = vec4(1, 2, 3, 4); v.wy *= v.zx;', function (t) {
-	//gl_Position = [null, 1, null, 0].map(function (idx, i) {
-	//	return idx == null ? gl_position[i] : this[idx];
-	//}, gl_Position.wy * gl_Position.zx)
-	t.deepEqual(
-		evaluate(t.name),
-		[1, 2, 3, 12]
-	);
+	t.deepEqual(evaluate(t.name + 'v;'), [1,2,3,12])
+	t.deepEqual(evaluate('vec4 v=vec4(1,2,3,4); vec2 x=(v.wy *= v.zx); x;'), [12,2])
 	t.end()
 })
 test('gl_Position.yx = gl_Position.xy / gl_Position.yx;', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		gl_Position = new Float32Array([gl_Position[1] / gl_Position[0], gl_Position[0] / gl_Position[1], gl_Position[2], gl_Position[3]]);
-		`)
-	);
+	for (const optimize of [true, false]) t.deepEqual(evaluate('vec4 gl_Position=vec4(1,2,3,4);' + t.name + 'gl_Position;', {optimize}), [2,0.5,3,4])
 	t.end()
 })
 test('gl_FragColor[0] = gl_FragCoord[0] / gl_Position.length();', function (t) {
-	t.equal(
-		clean(compile(t.name)),
-		clean(`
-		gl_FragColor[0] = gl_FragCoord[0] / 4;
-		`)
-	);
+	t.deepEqual(evaluate('vec4 gl_FragColor; vec4 gl_FragCoord=vec4(8);' + t.name + 'gl_FragColor;'), [2,0,0,0])
 	t.end()
 })
 test('vec2 p; gl_Position = vec4(p.yx / 2.0, 0, 1); gl_Position', function (t) {
@@ -319,21 +289,12 @@ test(`normalize(vec2(0,1));`, function (t) {
 	t.deepEqual(evaluate(t.name), [0, 1])
 	t.end()
 })
-test(`a[0].x = 0.0; a[1].y = 1.0;`, function (t) {
-	var compile = GLSL({ includes: false })
-
-	t.equal(clean(compile(t.name)), clean(`
-		a[0][0] = 0.0;
-		a[1][1] = 1.0;
-	`))
+test('a[0].x = 0.0; a[1].y = 1.0;', function (t) {
+	t.deepEqual(evaluate('vec2 a[2];' + t.name + 'a;'), [[0,0],[0,1]])
 	t.end()
 })
-test.skip(`a[2].zw = 2.0;`, function (t) {
-	var compile = GLSL({ includes: false });
-
-	t.equal(clean(compile(t.name)), clean(`
-		[a[2][2], a[2][3]] = [2.0, 2.0]
-	`))
+test('Nested writable swizzles', function (t) {
+	t.deepEqual(evaluate('vec4 a[3]; a[2].zw=vec2(2.); a[2];'), [0,0,2,2])
 	t.end()
 })
 test(`const float E = 2.7182817459106445e+0;`, function (t) {
@@ -344,17 +305,24 @@ test(`const float E = 2.7182817459106445e+0;`, function (t) {
 	`))
 	t.end()
 })
-//FIXME: make parser handle things properly
-test.skip('source1', function (t) {
-	var str = glsl('./fixture/source1.glsl');
-
-	compile(str);
+test('Parser stress fixture', function (t) {
+	// This historical fixture deliberately contains semantically invalid GLSL.
+	const source = readFileSync(new URL('./fixture/source1.glsl', import.meta.url), 'utf8')
+	t.doesNotThrow(() => compile(source))
+	t.equal(compile.compiler.tree.type, 'stmtlist')
 	t.end()
 })
-test.skip('source2', function (t) {
-	var str = glsl('./fixture/source2.glsl');
-
-	compile(str);
+test('Sound shader fixture', function (t) {
+	const source = readFileSync(new URL('./fixture/source2.glsl', import.meta.url), 'utf8')
+	for (const optimize of [true, false]) {
+		const js = GLSL({optimize})(source)
+		const sound = new Function(js + '\nreturn mainSound;')()
+		for (const time of [0,1,3,15,59]) {
+			const sample = sound(time)
+			t.equal(sample.length, 2)
+			t.ok(Array.from(sample).every(Number.isFinite), `finite sample at ${time}`)
+		}
+	}
 	t.end()
 })
 test('texture2D', function (t) {
@@ -415,24 +383,10 @@ test('Array constructs', function (t) {
 	t.equal(clean(compile(src)), clean(res));
 	t.end()
 })
-test('Arrays of arrays', function (t) {
-	var src = `
-	vec4 b[2];
-	vec4 c[3][2] = vec4[3](b, b, b);
-	vec4 d[4][3][2] = vec4[4](c, c, c, c);
-	// vec4[3][2](b, b, b); // constructor
-	// vec4[][2](b, b, b); // constructor, valid, size deduced
-	// vec4[3][](b, b, b); // constructor, valid, size deduced
-	// vec4[][](b, b, b); // constructor, valid, both sizes deduced
-	`;
-
-	var res = `
-	var b = [new Float32Array([0, 0, 0, 0]), new Float32Array([0, 0, 0, 0])];
-	var c = [b, b, b];
-	var d = [c, c, c, c];
-	`;
-
-	t.equal(clean(compile(src)), clean(res));
+test('Arrays of arrays copy values', function (t) {
+	t.equal(evaluate(`vec4 b[2]; vec4 c[3][2] = vec4[3](b,b,b);
+		vec4 d[4][3][2] = vec4[4](c,c,c,c);
+		d[0][0][0].x=9.; d[1][0][0].x;`), 0)
 	t.end()
 })
 test('Calculated access', function (t) {
@@ -455,20 +409,10 @@ test('Calculated access', function (t) {
 	`));
 	t.end()
 })
-test.skip('Persistent state', function (t) {
-	// FIXME: #57
-	var compile = GLSL({
-		uniform: function (name) {
-			return `uniforms.${name}`
-		},
-		attribute: function (name) {
-			return `attributes.${name}`
-		},
-		version: '300 es'
-	})
-	const a = compile(`vec2 getPosition(float index, float length); getPosition(0, 1);`);
-	const b = compile(`vec2 getPosition(float index, float length); getPosition(0, 1);`);
-	console.log(a, b)
+test('Repeated forward declarations', function (t) {
+	const compile = GLSL({version:'300 es'})
+	const source = 'vec2 getPosition(float index, float length); getPosition(0.,1.);'
+	t.equal(compile(source), compile(source))
 	t.end()
 })
 test(`p.z;`, function (t) {
@@ -594,20 +538,16 @@ test('uvec2 n = uvec2(1);', function (t) {
 })
 
 // #56
-// FIXME: prepr doesn't handle `/* #56 */`
 test('varying mat3 m; m[0] = vec3(1., 1., 0.); m;', function (t) {
 	var compile = GLSL({ version: '300 es' })
 	// console.log(clean(compile(t.name)))
 	t.deepEqual(evaluate(t.name), [1, 1, 0, 0, 1, 0, 0, 0, 1])
 	t.end()
 })
-test.skip('varying mat3 m[3]; m[1][0] = vec3(1., 1., 0.); m;', function (t) {
-	var compile = GLSL({ version: '300 es' })
-	console.log(clean(compile(t.name)))
-	// t.deepEqual(evaluate(t.name), [1, 1, 0, 0, 1, 0, 0, 0, 1])
+test('Array of matrices writes through columns', function (t) {
+	t.deepEqual(evaluate('mat3 m[3]; m[1][0]=vec3(1.,1.,0.); m[1];'), [1,1,0,0,1,0,0,0,1])
 	t.end()
 })
-
 // #61
 test('foo=2.1;~~foo;', function (t) {
 	var compile = GLSL({ version: '300 es' })

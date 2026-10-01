@@ -5,33 +5,7 @@ import clean from './util/clean.js'
 import almost from './util/almost.js'
 
 
-test.skip('Arguments', function (t) {
-	var src = `
-		vec4 f(in vec4 x, out vec4 y); // (A)
-		vec4 f(in vec4 x, out uvec4 y); // (B) okay, different argument type
-		vec4 f(in ivec4 x, out dvec4 y); // (C) okay, different argument type
-		int f(in vec4 x, out vec4 y); // error, only return type differs
-		vec4 f(in vec4 x, in vec4 y); // error, only qualifier differs
-		vec4 f(const in vec4 x, out vec4 y); // error, only qualifier differs
 
-		f(vec4, vec4); // exact match of vec4 f(in vec4 x, out vec4 y)
-		f(vec4, uvec4); // exact match of vec4 f(in vec4 x, out uvec4 y)
-		f(vec4, ivec4); // matched to vec4 f(in vec4 x, out vec4 y)
-		// (C) not relevant, can't convert vec4 to
-		// ivec4. (A) better than (B) for 2nd
-		// argument (rule 3), same on first argument.
-		f(ivec4, vec4); // NOT matched. All three match by implicit
-		// conversion. (C) is better than (A) and (B)
-		// on the first argument. (A) is better than
-		// (B) and (C).
-	`;
-
-	var res = `
-	`;
-
-	t.equal(clean(compile(src)), clean(res));
-	t.end()
-})
 test('Override', function (t) {
 	//as far functions are hoisted, we can not care really much about
 	var src = `
@@ -111,11 +85,6 @@ test('Arguments matching', function (t) {
 	`, { debug: false }), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 	t.end()
 })
-test('should generate asm.js boilerplate', function (t) {
-	// compare(compile('void main() {}'), BOILERPLATE);
-	t.end()
-})
-
 // argument qualifiers
 test('Clone inputs', function (t) {
 	var compile = GLSL();
@@ -190,8 +159,8 @@ test('Multiple outputs', function (t) {
 		function f (a, b, c) {
 			c = c.slice();
 			a = 0.1;
-			(b[0] = 2, b[1] = 2, b);
-			(c[0] = b[0], c[1] = b[1], c);
+			b = new Float32Array([2, 2]);
+			c = (b).slice();
 			f.__return__ = 0.0;
 			f.__out__ = [a, b, c];
 			return f.__return__;

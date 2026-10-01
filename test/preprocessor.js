@@ -22,7 +22,7 @@ test('Object macros', function (t) {
 		int z = QUATRE;
 	`)), clean(`
 		var x = 4;
-		var y = FOUR;
+		var y = (FOUR)|0;
 		var z = 16;
 	`));
 	t.end()
@@ -36,9 +36,9 @@ test('Function macros', function (t) {
 		#undef lang_init
 		int z = lang_init();
 	`)), clean(`
-		var x = c_init();
-		var y = lang_init;
-		var z = lang_init();
+		var x = (c_init())|0;
+		var y = (lang_init)|0;
+		var z = (lang_init())|0;
 	`));
 	t.end()
 });

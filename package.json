@@ -1,12 +1,10 @@
 {
   "name": "glsl-transpiler",
-  "version": "3.0.3",
+  "version": "4.0.0",
   "description": "Transpile GLSL to JS",
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "glsl-parser": "^2.0.1",
-    "glsl-tokenizer": "^2.1.5",
     "inherits": "^2.0.1",
     "pick-by-alias": "^1.2.0",
     "prepr": "^1.2.5",
@@ -14,33 +12,21 @@
   },
   "devDependencies": {
     "almost-equal": "^1.1.0",
-    "gl-matrix": "^2.3.2",
-    "glslify": "^7.1.1",
-    "glslify-promise": "^1.0.2",
-    "is-browser": "^2.0.1",
-    "ndarray": "^1.0.18",
-    "stream-array": "^1.1.1",
-    "string-to-stream": "^1.0.1",
-    "tape": "^4.9.1",
-    "to-float32": "^1.0.1"
-  },
-  "browserify": {
-    "transform": [
-      "glslify"
-    ]
+    "tape": "^4.9.1"
   },
   "files": [
     "index.js",
     "stream.js",
-    "lib"
+    "lib",
+    "process.md"
   ],
   "directories": {
     "lib": "./lib"
   },
   "scripts": {
     "test": "node test/index.js",
-    "test:browser": "budo test/index.js",
-    "benchmark": "node test/benchmark.js"
+    "benchmark": "node test/benchmark.js",
+    "test:coverage": "node test/coverage.js"
   },
   "repository": {
     "type": "git",
@@ -69,5 +55,8 @@
   "bugs": {
     "url": "https://github.com/stackgl/glsl-transpiler/issues"
   },
-  "homepage": "https://github.com/stackgl/glsl-transpiler#readme"
+  "homepage": "https://github.com/stackgl/glsl-transpiler#readme",
+  "engines": {
+    "node": ">=18"
+  }
 }
